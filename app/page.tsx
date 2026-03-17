@@ -1246,6 +1246,28 @@ setFakeTransparencyDetected(fakeTransparency.detected);
     ? '⚠ MAY PRINT POORLY'
     : '✅ READY FOR PRINT'}
 </div>
+<div
+  style={{
+    marginTop: 20,
+    padding: 16,
+    borderRadius: 12,
+    background: '#020617',
+    border: '1px solid #334155',
+  }}
+>
+  <div style={{ fontWeight: 700, marginBottom: 6 }}>Scan Summary</div>
+
+  <div>Score: {printScore}%</div>
+
+  <div style={{ marginTop: 6 }}>
+    Status:{' '}
+    {hasTransparency === false
+      ? '❌ PRINT WILL FAIL'
+      : printScore < 60
+      ? '⚠ MAY PRINT POORLY'
+      : '✅ READY FOR PRINT'}
+  </div>
+</div>
   </div>
 </div>
 
