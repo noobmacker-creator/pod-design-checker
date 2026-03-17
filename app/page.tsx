@@ -1239,6 +1239,13 @@ setFakeTransparencyDetected(fakeTransparency.detected);
     ? '#f59e0b'
     : '#ef4444' }}>
   {printScore}%
+  <div style={{ marginTop: 10, fontWeight: 700 }}>
+  {hasTransparency === false
+    ? '❌ PRINT WILL FAIL'
+    : printScore < 60
+    ? '⚠ MAY PRINT POORLY'
+    : '✅ READY FOR PRINT'}
+</div>
   </div>
 </div>
 
