@@ -1221,7 +1221,12 @@ setFakeTransparencyDetected(fakeTransparency.detected);
   }}
 >
   <div style={{ fontSize: 14, color: '#94a3b8' }}>READY FOR PRINT</div>
-  <div style={{ fontSize: 36, fontWeight: 800, color: '#38bdf8' }}>
+  <div style={{ fontSize: 36, fontWeight: 800, color:
+  printScore >= 80
+    ? '#22c55e'
+    : printScore >= 50
+    ? '#f59e0b'
+    : '#ef4444' }}>
   {printScore}%
   </div>
 </div>
