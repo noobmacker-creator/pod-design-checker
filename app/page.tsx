@@ -345,7 +345,7 @@ function getDesignCanvasSize(effectiveBounds: Bounds | null, img: HTMLImageEleme
 
 export default function Page() {
   
-  const printScore = 100;
+  
 
   const [file, setFile] = useState<File | null>(null);
   const [fileUrl, setFileUrl] = useState('');
@@ -362,6 +362,17 @@ export default function Page() {
   const [coverage, setCoverage] = useState(0);
   const [specks, setSpecks] = useState(0);
   const [thinLinePercent, setThinLinePercent] = useState(0);
+  let printScore = 100;
+
+if (imgW !== CANVAS_W || imgH !== CANVAS_H) printScore -= 25;
+if (hasTransparency === false) printScore -= 20;
+
+if (specks > 0) printScore -= 10;
+
+if (thinLinePercent >= 18) printScore -= 15;
+else if (thinLinePercent >= 8) printScore -= 8;
+
+if (printScore < 0) printScore = 0;
  const [fakeTransparencyDetected, setFakeTransparencyDetected] = useState(false); 
   const [viewMode, setViewMode] = useState<ViewMode>('pod');
   const [previewSize, setPreviewSize] = useState<PreviewSize>(0.25);
