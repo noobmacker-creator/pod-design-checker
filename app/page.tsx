@@ -344,6 +344,9 @@ function getDesignCanvasSize(effectiveBounds: Bounds | null, img: HTMLImageEleme
 }
 
 export default function Page() {
+  
+  const printScore = 100;
+
   const [file, setFile] = useState<File | null>(null);
   const [fileUrl, setFileUrl] = useState('');
   const [img, setImg] = useState<HTMLImageElement | null>(null);
@@ -1207,6 +1210,21 @@ setFakeTransparencyDetected(fakeTransparency.detected);
             }}
           >
             <h2 style={{ marginTop: 0, marginBottom: 16, fontSize: 24 }}>Scan Results</h2>
+            <div
+  style={{
+    marginBottom: 16,
+    padding: 16,
+    borderRadius: 14,
+    background: '#020617',
+    border: '2px solid #38bdf8',
+    textAlign: 'center',
+  }}
+>
+  <div style={{ fontSize: 14, color: '#94a3b8' }}>READY FOR PRINT</div>
+  <div style={{ fontSize: 36, fontWeight: 800, color: '#38bdf8' }}>
+  {printScore}%
+  </div>
+</div>
 
             {!img && (
               <div
