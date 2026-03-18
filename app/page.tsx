@@ -1284,6 +1284,8 @@ setFakeTransparencyDetected(fakeTransparency.detected);
 </div>
   <div>
   Issues Found:{' '}
+  <div>Thin lines: {thinLinePercent.toFixed(1)}%</div>
+<div>Specks: {specks}</div>
   {[
     imgW !== CANVAS_W || imgH !== CANVAS_H,
     hasTransparency === false,
