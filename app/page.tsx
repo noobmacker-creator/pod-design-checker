@@ -1267,7 +1267,13 @@ setFakeTransparencyDetected(fakeTransparency.detected);
     ? 'Wrong size'
     : 'No major issues'}
 </div>
-
+<div>
+  Confidence: {printScore >= 80
+    ? 'High'
+    : printScore >= 50
+    ? 'Medium'
+    : 'Low'}
+</div>
   <div>Score: {printScore}%</div>
   <div
   style={{
