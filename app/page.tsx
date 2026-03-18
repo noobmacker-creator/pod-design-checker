@@ -1258,6 +1258,30 @@ setFakeTransparencyDetected(fakeTransparency.detected);
   <div style={{ fontWeight: 700, marginBottom: 6 }}>Scan Summary</div>
 
   <div>Score: {printScore}%</div>
+  <div
+  style={{
+    marginTop: 10,
+    height: 10,
+    width: '100%',
+    background: '#1e293b',
+    borderRadius: 999,
+    overflow: 'hidden',
+  }}
+>
+  <div
+    style={{
+      height: '100%',
+      width: `${printScore}%`,
+      background:
+        hasTransparency === false
+          ? '#ef4444'
+          : printScore < 60
+          ? '#f59e0b'
+          : '#22c55e',
+      transition: 'width 0.3s ease',
+    }}
+  />
+</div>
   <div>
   Issues Found:{' '}
   {[
