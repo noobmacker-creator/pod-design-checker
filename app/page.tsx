@@ -1256,6 +1256,17 @@ setFakeTransparencyDetected(fakeTransparency.detected);
   }}
 >
   <div style={{ fontWeight: 700, marginBottom: 6 }}>Scan Summary</div>
+  <div>
+  Main Issue: {!hasTransparency
+    ? 'No transparency'
+    : thinLinePercent >= 18
+    ? 'Too many thin lines'
+    : specks > 0
+    ? 'Specks detected'
+    : imgW !== CANVAS_W || imgH !== CANVAS_H
+    ? 'Wrong size'
+    : 'No major issues'}
+</div>
 
   <div>Score: {printScore}%</div>
   <div
