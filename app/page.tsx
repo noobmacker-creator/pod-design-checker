@@ -1299,8 +1299,8 @@ setFakeTransparencyDetected(fakeTransparency.detected);
   >
 {!img
   ? 'UPLOAD A DESIGN TO BEGIN'
-  : hasTransparency === false
-  ? '❌ NOT READY FOR PRINT'
+  : hasTransparency === false ? '❌ NOT READY FOR PRINT'
+  
   : printScore < 60
   ? '⚠ NEEDS FIXES'
   : '✅ READY FOR PRINT'}
