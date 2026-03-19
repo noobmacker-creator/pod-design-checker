@@ -1284,7 +1284,7 @@ setFakeTransparencyDetected(fakeTransparency.detected);
     ? 'Medium'
     : 'Low'}
 </div>
-  <div>Score: {printScore}%</div>
+<div style={{ marginBottom: 6 }}>Score: {printScore}%</div>
   <div
   style={{
     marginTop: 10,
@@ -1321,7 +1321,7 @@ setFakeTransparencyDetected(fakeTransparency.detected);
   ].filter(Boolean).length}
 </div>
 
-  <div style={{ marginTop: 6 }}>
+<div style={{ marginBottom: 6 }}>
     Status:{' '}
     {hasTransparency === false
       ? '❌ PRINT WILL FAIL'
