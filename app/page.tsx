@@ -1256,6 +1256,9 @@ setFakeTransparencyDetected(fakeTransparency.detected);
   }}
 >
   <div style={{ fontWeight: 700, marginBottom: 6 }}>Scan Summary</div>
+  <div style={{ color: '#94a3b8', fontSize: 14, marginBottom: 8 }}>
+  Quick POD readiness overview
+</div>
   <div>
   Main Issue: {!hasTransparency
     ? '❌ No transparency'
