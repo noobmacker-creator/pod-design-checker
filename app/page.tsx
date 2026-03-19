@@ -1298,7 +1298,7 @@ setFakeTransparencyDetected(fakeTransparency.detected);
     }}
   >
 {!img
-  ? 'Upload a design to begin'
+  ? 'UPLOAD A DESIGN TO BEGIN'
   : hasTransparency === false
   ? '❌ NOT READY FOR PRINT'
   : printScore < 60
@@ -1317,7 +1317,9 @@ setFakeTransparencyDetected(fakeTransparency.detected);
   Quick POD readiness overview
 </div>
 <div style={{ marginBottom: 6 }}>
-  Main Issue: {!hasTransparency
+  Main Issue: {!img
+    ? '—'
+    : !hasTransparency
     ? '❌ No transparency'
     : thinLinePercent >= 18
     ? '⚠ Too many thin lines'
@@ -1328,7 +1330,9 @@ setFakeTransparencyDetected(fakeTransparency.detected);
     : '✅ No major issues'}
 </div>
 <div>
-  Confidence: {printScore >= 80
+  Confidence: {!img
+    ? '—'
+    : printScore >= 80
     ? 'High'
     : printScore >= 50
     ? 'Medium'
