@@ -795,6 +795,18 @@ function detectWhiteBackground(imageData: ImageData) {
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
+    const overlayColor =
+  checks.some((item) => item.status === 'fail')
+    ? '#ef4444'
+    : checks.some((item) => item.status === 'warn')
+    ? '#f59e0b'
+    : '#22c55e';
+    const overlayColor =
+  checks.some((item) => item.status === 'fail')
+    ? '#ef4444'
+    : checks.some((item) => item.status === 'warn')
+    ? '#f59e0b'
+    : '#22c55e';
 
     if (viewMode === 'pod') {
       canvas.width = CANVAS_W;
@@ -811,7 +823,7 @@ function detectWhiteBackground(imageData: ImageData) {
       ctx.drawImage(img, drawX, drawY, drawW, drawH);
 
       if (effectiveBounds) {
-        drawBoundsOverlay(ctx, effectiveBounds.x, effectiveBounds.y, effectiveBounds.w, effectiveBounds.h);
+        drawBoundsOverlay(ctx, effectiveBounds.x, effectiveBounds.y, effectiveBounds.w, effectiveBounds.h, overlayColor);
       }
     }
 
@@ -847,7 +859,7 @@ function detectWhiteBackground(imageData: ImageData) {
         const drawY = transform.offsetY + shiftY;
 
         ctx.drawImage(img, drawX, drawY, drawW, drawH);
-        drawBoundsOverlay(ctx, targetX, targetY, effectiveBounds.w, effectiveBounds.h);
+        drawBoundsOverlay(ctx, targetX, targetY, effectiveBounds.w, effectiveBounds.h, overlayColor);
       } else {
         const drawX = (canvas.width - drawW) / 2;
         const drawY = (canvas.height - drawH) / 2;
