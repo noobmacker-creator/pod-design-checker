@@ -1363,8 +1363,9 @@ setFakeTransparencyDetected(fakeTransparency.detected);
     }}
   />
 </div>
+
 <div style={{ marginBottom: 6 }}>
-  Issues Found: {!img ? '—' : 0}
+  Issues Found: {!img ? '—' : checks.filter((item) => item.status === 'fail' || item.status === 'warn').length}
 </div>
 
 <div>Thin lines: {!img ? '—' : `${thinLinePercent.toFixed(1)}%`}</div>
