@@ -1364,16 +1364,11 @@ setFakeTransparencyDetected(fakeTransparency.detected);
   />
 </div>
 <div style={{ marginBottom: 6 }}>
-  Issues Found:{' '}
-  <div>Thin lines: {thinLinePercent.toFixed(1)}%</div>
-<div>Specks: {specks}</div>
-  {[
-    imgW !== CANVAS_W || imgH !== CANVAS_H,
-    hasTransparency === false,
-    specks > 0,
-    thinLinePercent >= 18,
-  ].filter(Boolean).length}
+  Issues Found: {!img ? '—' : 0}
 </div>
+
+<div>Thin lines: {!img ? '—' : `${thinLinePercent.toFixed(1)}%`}</div>
+<div>Specks: {!img ? '—' : specks}</div>
 
 <div style={{ marginBottom: 6 }}>
     Status:{' '}
