@@ -1266,7 +1266,7 @@ setFakeTransparencyDetected(fakeTransparency.detected);
   <div style={{ color: '#94a3b8', fontSize: 14, marginBottom: 8 }}>
   Quick POD readiness overview
 </div>
-  <div>
+<div style={{ marginBottom: 6 }}>
   Main Issue: {!hasTransparency
     ? '❌ No transparency'
     : thinLinePercent >= 18
