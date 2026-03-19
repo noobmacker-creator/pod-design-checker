@@ -574,7 +574,8 @@ setFakeTransparencyDetected(fakeTransparency.detected);
           ? `Correct size: ${imgW} × ${imgH}`
           : largeEnough
           ? `Larger than recommended. Consider resizing canvas to ${CANVAS_W} × ${CANVAS_H}.`
-          : `Incorrect size. Recommended: ${CANVAS_W} × ${CANVAS_H}`,
+          : `Incorrect size. Recommended: ${CANVAS_W} × ${CANVAS_H}
+Fix: Click "Fix Canvas" to correct the size before printing.`,
       },
       {
         label: 'Aspect Ratio',
