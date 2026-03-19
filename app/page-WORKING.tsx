@@ -958,7 +958,7 @@ ctx.fillRect(0, 0, 300, 300);
 
   useEffect(() => {
     drawPreview();
-  }, [img, transform, effectiveBounds, viewMode, designCanvasSize]);
+  }, [img, transform, effectiveBounds, viewMode, designCanvasSize]); 
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const selected = e.target.files?.[0];
