@@ -762,8 +762,9 @@ function detectWhiteBackground(imageData: ImageData) {
     bx: number,
     by: number,
     bw: number,
-    bh: number
-  ) {
+    bh: number,
+    ctx.strokeStyle = color;
+  ){
     ctx.strokeStyle = '#22c55e';
     ctx.lineWidth = 3;
     ctx.setLineDash([10, 8]);
