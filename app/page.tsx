@@ -1403,40 +1403,149 @@ setFakeTransparencyDetected(fakeTransparency.detected);
               </div>
             )}
 
-            {checks.map((item, index) => (
-              <div
-                key={`${item.label}-${index}`}
-                style={{
-                  marginBottom: 12,
-                  borderRadius: 14,
-                  padding: 14,
-                  background:
-                    item.status === 'fail'
-                      ? 'linear-gradient(180deg, rgba(127,29,29,0.55), rgba(15,23,42,0.92))'
-                      : item.status === 'warn'
-                      ? 'linear-gradient(180deg, rgba(154,52,18,0.45), rgba(15,23,42,0.92))'
-                      : item.status === 'pass'
-                      ? 'linear-gradient(180deg, rgba(20,83,45,0.45), rgba(15,23,42,0.92))'
-                      : '#0f172a',
-                  border: `1px solid ${statusColor(item.status)}66`,
-                }}
-              >
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 8,
-                    fontWeight: 700,
-                    marginBottom: 6,
-                    color: statusColor(item.status),
-                  }}
-                >
-                  <span>{statusIcon(item.status)}</span>
-                  <span>{item.label}</span>
-                </div>
-                <div style={{ color: '#e5e7eb', lineHeight: 1.5 }}>{item.message}</div>
-              </div>
-            ))}
+{checks.filter((item) => item.status === 'fail').length > 0 && (
+  <div style={{ marginBottom: 16 }}>
+    <div
+      style={{
+        marginBottom: 10,
+        padding: '10px 14px',
+        borderRadius: 10,
+        background: '#7f1d1d',
+        color: '#fff',
+        fontWeight: 800,
+      }}
+    >
+      Critical Issues
+    </div>
+
+    {checks
+      .filter((item) => item.status === 'fail')
+      .map((item, index) => (
+        <div
+          key={`${item.label}-fail-${index}`}
+          style={{
+            marginBottom: 12,
+            borderRadius: 14,
+            padding: 14,
+            background: 'linear-gradient(180deg, rgba(127,29,29,0.55), rgba(15,23,42,0.92))',
+            border: `1px solid ${statusColor(item.status)}66`,
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              fontWeight: 700,
+              marginBottom: 6,
+              color: statusColor(item.status),
+            }}
+          >
+            <span>{statusIcon(item.status)}</span>
+            <span>{item.label}</span>
+          </div>
+          <div style={{ color: '#e5e7eb', lineHeight: 1.5 }}>{item.message}</div>
+        </div>
+      ))}
+  </div>
+)}
+
+{checks.filter((item) => item.status === 'warn').length > 0 && (
+  <div style={{ marginBottom: 16 }}>
+    <div
+      style={{
+        marginBottom: 10,
+        padding: '10px 14px',
+        borderRadius: 10,
+        background: '#78350f',
+        color: '#fff',
+        fontWeight: 800,
+      }}
+    >
+      Warnings
+    </div>
+
+    {checks
+      .filter((item) => item.status === 'warn')
+      .map((item, index) => (
+        <div
+          key={`${item.label}-warn-${index}`}
+          style={{
+            marginBottom: 12,
+            borderRadius: 14,
+            padding: 14,
+            background: 'linear-gradient(180deg, rgba(154,52,18,0.45), rgba(15,23,42,0.92))',
+            border: `1px solid ${statusColor(item.status)}66`,
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              fontWeight: 700,
+              marginBottom: 6,
+              color: statusColor(item.status),
+            }}
+          >
+            <span>{statusIcon(item.status)}</span>
+            <span>{item.label}</span>
+          </div>
+          <div style={{ color: '#e5e7eb', lineHeight: 1.5 }}>{item.message}</div>
+        </div>
+      ))}
+  </div>
+)}
+
+{checks.filter((item) => item.status === 'pass' || item.status === 'info').length > 0 && (
+  <div style={{ marginBottom: 16 }}>
+    <div
+      style={{
+        marginBottom: 10,
+        padding: '10px 14px',
+        borderRadius: 10,
+        background: '#14532d',
+        color: '#fff',
+        fontWeight: 800,
+      }}
+    >
+      Passed Checks
+    </div>
+
+    {checks
+      .filter((item) => item.status === 'pass' || item.status === 'info')
+      .map((item, index) => (
+        <div
+          key={`${item.label}-pass-${index}`}
+          style={{
+            marginBottom: 12,
+            borderRadius: 14,
+            padding: 14,
+            background:
+              item.status === 'pass'
+                ? 'linear-gradient(180deg, rgba(20,83,45,0.45), rgba(15,23,42,0.92))'
+                : '#0f172a',
+            border: `1px solid ${statusColor(item.status)}66`,
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              fontWeight: 700,
+              marginBottom: 6,
+              color: statusColor(item.status),
+            }}
+          >
+            <span>{statusIcon(item.status)}</span>
+            <span>{item.label}</span>
+          </div>
+          <div style={{ color: '#e5e7eb', lineHeight: 1.5 }}>{item.message}</div>
+        </div>
+      ))}
+  </div>
+)}
 
             {img && effectiveBounds && (
               <div
