@@ -1444,7 +1444,17 @@ setFakeTransparencyDetected(fakeTransparency.detected);
             <span>{statusIcon(item.status)}</span>
             <span>{item.label}</span>
           </div>
-          <div style={{ color: '#e5e7eb', lineHeight: 1.5 }}>{item.message}</div>
+          <div style={{ color: '#e5e7eb', lineHeight: 1.5 }}>
+  {item.message}
+</div>
+
+<div style={{ marginTop: 6, fontSize: 13, color: '#94a3b8' }}>
+  {item.status === 'fail'
+    ? 'Fix: This must be corrected before printing.'
+    : item.status === 'warn'
+    ? 'Fix: Improve this for better print quality.'
+    : ''}
+</div>
         </div>
       ))}
   </div>
