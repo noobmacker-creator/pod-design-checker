@@ -1309,7 +1309,7 @@ setFakeTransparencyDetected(fakeTransparency.detected);
     }}
   />
 </div>
-  <div>
+<div style={{ marginBottom: 6 }}>
   Issues Found:{' '}
   <div>Thin lines: {thinLinePercent.toFixed(1)}%</div>
 <div>Specks: {specks}</div>
