@@ -362,7 +362,33 @@ export default function Page() {
   const [coverage, setCoverage] = useState(0);
   const [specks, setSpecks] = useState(0);
   const [thinLinePercent, setThinLinePercent] = useState(0);
-  let printScore = 100;
+  let printScore = 0;
+
+if (img) {
+  printScore = 100;
+
+  if (imgW !== CANVAS_W || imgH !== CANVAS_H) {
+    printScore -= 20;
+  }
+
+  if (hasTransparency === false) {
+    printScore -= 25;
+  }
+
+  if (specks > 0) {
+    printScore -= 8;
+  }
+
+  if (thinLinePercent >= 18) {
+    printScore -= 12;
+  } else if (thinLinePercent >= 8) {
+    printScore -= 5;
+  }
+
+  if (printScore < 0) {
+    printScore = 0;
+  }
+}
 
 if (imgW !== CANVAS_W || imgH !== CANVAS_H) printScore -= 25;
 if (hasTransparency === false) printScore -= 20;
@@ -1254,27 +1280,30 @@ setFakeTransparencyDetected(fakeTransparency.detected);
     background: '#020617',
     border: '1px solid #334155',
   }}
-><div
-  style={{
-    marginBottom: 12,
-    padding: '10px 14px',
-    borderRadius: 8,
-    fontWeight: 700,
-    textAlign: 'center',
-    background:
-      hasTransparency === false
-        ? '#7f1d1d'
-        : printScore < 60
-        ? '#78350f'
-        : '#14532d',
-    color: '#fff',
-  }}
 >
-  {hasTransparency === false
-    ? '❌ NOT READY FOR PRINT'
-    : printScore < 60
-    ? '⚠ NEEDS FIXES'
-    : '✅ READY FOR PRINT'}
+  <div
+    style={{
+      marginBottom: 12,
+      padding: '10px 14px',
+      borderRadius: 8,
+      fontWeight: 700,
+      textAlign: 'center',
+      background:
+        hasTransparency === false
+          ? '#7f1d1d'
+          : printScore < 60
+          ? '#78350f'
+          : '#14532d',
+      color: '#fff',
+    }}
+  >
+{!img
+  ? 'Upload a design to begin'
+  : hasTransparency === false
+  ? '❌ NOT READY FOR PRINT'
+  : printScore < 60
+  ? '⚠ NEEDS FIXES'
+  : '✅ READY FOR PRINT'}
 </div>
   <div style={{ fontWeight: 700, marginBottom: 6 }}>Scan Summary</div>
   <div
