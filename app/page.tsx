@@ -1367,6 +1367,13 @@ setFakeTransparencyDetected(fakeTransparency.detected);
 <div style={{ marginBottom: 6 }}>
   Issues Found: {!img ? '—' : checks.filter((item) => item.status === 'fail' || item.status === 'warn').length}
 </div>
+<div style={{ marginBottom: 6, color: '#ef4444' }}>
+  Critical Issues: {!img ? '—' : checks.filter((item) => item.status === 'fail').length}
+</div>
+
+<div style={{ marginBottom: 6, color: '#f59e0b' }}>
+  Warnings: {!img ? '—' : checks.filter((item) => item.status === 'warn').length}
+</div>
 
 <div>Thin lines: {!img ? '—' : `${thinLinePercent.toFixed(1)}%`}</div>
 <div>Specks: {!img ? '—' : specks}</div>
