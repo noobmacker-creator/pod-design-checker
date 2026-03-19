@@ -860,8 +860,24 @@ function detectWhiteBackground(imageData: ImageData) {
         const drawY = transform.offsetY + shiftY;
 
         ctx.drawImage(img, drawX, drawY, drawW, drawH);
-        drawBoundsOverlay(ctx, targetX, targetY, effectiveBounds.w, effectiveBounds.h, overlayColor);
-      } else {
+
+// 🔴 Unsafe border overlay
+ctx.fillStyle = 'rgba(239, 68, 68, 0.12)';
+ctx.fillRect(0, 0, SAFE_BOX, CANVAS_H);
+ctx.fillRect(CANVAS_W - SAFE_BOX, 0, SAFE_BOX, CANVAS_H);
+ctx.fillRect(0, 0, CANVAS_W, SAFE_BOX);
+ctx.fillRect(0, CANVAS_H - SAFE_BOX, CANVAS_W, SAFE_BOX);
+
+if (effectiveBounds) {
+  drawBoundsOverlay(
+    ctx,
+    effectiveBounds.x,
+    effectiveBounds.y,
+    effectiveBounds.w,
+    effectiveBounds.h,
+    '#22c55e'
+  );
+} else {
         const drawX = (canvas.width - drawW) / 2;
         const drawY = (canvas.height - drawH) / 2;
         ctx.drawImage(img, drawX, drawY, drawW, drawH);
