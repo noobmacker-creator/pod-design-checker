@@ -813,18 +813,29 @@ function detectWhiteBackground(imageData: ImageData) {
       canvas.width = CANVAS_W;
       canvas.height = CANVAS_H;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-
+    
       drawPodBackground(ctx);
-
+    
       const drawW = img.naturalWidth * transform.scale;
       const drawH = img.naturalHeight * transform.scale;
       const drawX = transform.offsetX;
       const drawY = transform.offsetY;
-
+    
       ctx.drawImage(img, drawX, drawY, drawW, drawH);
-
+    
+      // 🔴 TEST RED BOX
+      ctx.fillStyle = 'rgba(255, 0, 0, 0.5)';
+      ctx.fillRect(0, 0, 300, 300);
+    
       if (effectiveBounds) {
-        drawBoundsOverlay(ctx, effectiveBounds.x, effectiveBounds.y, effectiveBounds.w, effectiveBounds.h, overlayColor);
+        drawBoundsOverlay(
+          ctx,
+          effectiveBounds.x,
+          effectiveBounds.y,
+          effectiveBounds.w,
+          effectiveBounds.h,
+          overlayColor
+        );
       }
     }
 
@@ -881,6 +892,9 @@ if (effectiveBounds) {
         const drawX = (canvas.width - drawW) / 2;
         const drawY = (canvas.height - drawH) / 2;
         ctx.drawImage(img, drawX, drawY, drawW, drawH);
+        // 🔴 TEST BOX
+ctx.fillStyle = 'rgba(255, 0, 0, 0.5)';
+ctx.fillRect(0, 0, 300, 300);
       }
     }
 
