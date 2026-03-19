@@ -1254,7 +1254,28 @@ setFakeTransparencyDetected(fakeTransparency.detected);
     background: '#020617',
     border: '1px solid #334155',
   }}
+><div
+  style={{
+    marginBottom: 12,
+    padding: '10px 14px',
+    borderRadius: 8,
+    fontWeight: 700,
+    textAlign: 'center',
+    background:
+      hasTransparency === false
+        ? '#7f1d1d'
+        : printScore < 60
+        ? '#78350f'
+        : '#14532d',
+    color: '#fff',
+  }}
 >
+  {hasTransparency === false
+    ? '❌ NOT READY FOR PRINT'
+    : printScore < 60
+    ? '⚠ NEEDS FIXES'
+    : '✅ READY FOR PRINT'}
+</div>
   <div style={{ fontWeight: 700, marginBottom: 6 }}>Scan Summary</div>
   <div
   style={{
