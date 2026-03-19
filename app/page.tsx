@@ -1329,7 +1329,7 @@ setFakeTransparencyDetected(fakeTransparency.detected);
     ? '⚠ Wrong size'
     : '✅ No major issues'}
 </div>
-<div>
+<div style={{ marginBottom: 6 }}>
   Confidence: {!img
     ? '—'
     : printScore >= 80
