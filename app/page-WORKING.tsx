@@ -1275,6 +1275,21 @@ ctx.fillRect(0, 0, 300, 300);
             }}
           >
             <h2 style={{ marginTop: 0, marginBottom: 16, fontSize: 24 }}>Scan Results</h2>
+            {img && checks.some((c) => c.status === 'fail') && (
+  <div
+    style={{
+      marginBottom: 16,
+      padding: '12px 14px',
+      borderRadius: 12,
+      background: '#7f1d1d',
+      border: '1px solid #ef4444',
+      color: '#fff',
+      fontWeight: 700,
+    }}
+  >
+    🔴 Main Issue: {checks.find((c) => c.status === 'fail')?.label}
+  </div>
+)}
 
             {!img && (
               <div
