@@ -1269,6 +1269,32 @@ setFakeTransparencyDetected(fakeTransparency.detected);
     ? '#f59e0b'
     : '#ef4444' }}>
   {printScore}%
+  <div
+  style={{
+    marginTop: 12,
+    width: '100%',
+    height: 14,
+    borderRadius: 999,
+    background: '#0f172a',
+    overflow: 'hidden',
+    border: '1px solid rgba(255,255,255,0.08)',
+  }}
+>
+  <div
+    style={{
+      width: `${printScore}%`,
+      height: '100%',
+      borderRadius: 999,
+      background:
+        printScore >= 80
+          ? '#22c55e'
+          : printScore >= 50
+          ? '#f59e0b'
+          : '#ef4444',
+      transition: 'width 0.3s ease',
+    }}
+  />
+</div>
   <div style={{ marginTop: 10, fontWeight: 700 }}>
   {hasTransparency === false
     ? '❌ PRINT WILL FAIL'
