@@ -1247,12 +1247,10 @@ setFakeTransparencyDetected(fakeTransparency.detected);
             }}
           >
             <h2 style={{ marginTop: 0, marginBottom: 8, fontSize: 24, fontWeight: 800, letterSpacing: 0.3 }}>Scan Results</h2>
-            <p style={{ marginTop: 0, marginBottom: 16, color: '#94a3b8', lineHeight: 1.5 }}>
+            <p style={{ marginTop: 0, marginBottom: 20, color: '#94a3b8', lineHeight: 1.5 }}>
   Review critical issues first, then warnings, before exporting your final print file.
 </p>
-            <p style={{ marginTop: 0, marginBottom: 16, color: '#94a3b8', lineHeight: 1.5 }}>
-  Review critical issues first, then warnings, before exporting your final print file.
-</p>
+            
             <div
   style={{
     marginBottom: 16,
