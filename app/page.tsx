@@ -1319,12 +1319,13 @@ setFakeTransparencyDetected(fakeTransparency.detected);
       fontWeight: 700,
       textAlign: 'center',
       background:
-        hasTransparency === false
-          ? '#7f1d1d'
-          : printScore < 60
-          ? '#78350f'
-          : '#14532d',
-      color: '#fff',
+  !img
+    ? '#1e293b'
+    : 100 - printScore >= 60
+    ? '#7f1d1d'
+    : 100 - printScore >= 30
+    ? '#78350f'
+    : '#14532d',
     }}
   >
 {!img
