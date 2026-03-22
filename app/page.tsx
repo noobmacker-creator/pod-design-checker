@@ -277,6 +277,10 @@ function detectSpecks(imageData: ImageData, thresholdAlpha = 40, maxSpeckPixels 
           [cx + 1, cy],
           [cx, cy - 1],
           [cx, cy + 1],
+          [cx - 1, cy - 1],
+          [cx + 1, cy - 1],
+          [cx - 1, cy + 1],
+          [cx + 1, cy + 1],
         ];
 
         for (const [nx, ny] of neighbors) {
