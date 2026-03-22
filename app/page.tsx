@@ -1347,7 +1347,7 @@ setFakeTransparencyDetected(fakeTransparency.detected);
       background:
   !img
     ? '#1e293b'
-    : 100 - printScore >= 60
+    : hasTransparency === false || printScore < 60
     ? '#7f1d1d'
     : 100 - printScore >= 30
     ? '#78350f'
