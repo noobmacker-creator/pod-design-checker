@@ -1329,11 +1329,11 @@ setFakeTransparencyDetected(fakeTransparency.detected);
   >
 {!img
   ? 'UPLOAD A DESIGN TO BEGIN'
-  : hasTransparency === false ? '❌ NOT READY FOR PRINT'
-  
-  : printScore < 60
-  ? '⚠ NEEDS FIXES'
-  : '✅ READY FOR PRINT'}
+  : 100 - printScore >= 60
+  ? '🔴 HIGH RISK'
+  : 100 - printScore >= 30
+  ? '🟡 MEDIUM RISK'
+  : '🟢 LOW RISK'}
 </div>
   <div style={{ fontWeight: 700, marginBottom: 6 }}>Scan Summary</div>
   <div
