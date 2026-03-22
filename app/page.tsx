@@ -390,13 +390,7 @@ if (img) {
   }
 }
 
-if (imgW !== CANVAS_W || imgH !== CANVAS_H) printScore -= 25;
-if (hasTransparency === false) printScore -= 20;
 
-if (specks > 0) printScore -= 10;
-
-if (thinLinePercent >= 18) printScore -= 15;
-else if (thinLinePercent >= 8) printScore -= 8;
 
 if (printScore < 0) printScore = 0;
  const [fakeTransparencyDetected, setFakeTransparencyDetected] = useState(false); 
@@ -441,7 +435,7 @@ if (printScore < 0) printScore = 0;
     const res = detectBoundsAndCoverage(imageData, 8);
     setOriginalBounds(res.bounds);
     setCoverage(res.coverage);
-    setSpecks(detectSpecks(imageData, 40, 2));
+    setSpecks(detectSpecks(imageData, 80, 1));
     setThinLinePercent(estimateThinLines(imageData));
     const fakeTransparency = detectFakeTransparencyBackground(imageData);
 setFakeTransparencyDetected(fakeTransparency.detected);
@@ -1330,6 +1324,8 @@ setFakeTransparencyDetected(fakeTransparency.detected);
   >
 {!img
   ? 'UPLOAD A DESIGN TO BEGIN'
+  : hasTransparency === false
+  ? '🔴 HIGH RISK'
   : 100 - printScore >= 60
   ? '🔴 HIGH RISK'
   : 100 - printScore >= 30
