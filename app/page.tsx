@@ -1345,105 +1345,74 @@ setFakeTransparencyDetected(fakeTransparency.detected);
       fontWeight: 700,
       textAlign: 'center',
       background:
-  !img
-    ? '#1e293b'
-    : hasTransparency === false || printScore < 60
-    ? '#7f1d1d'
-    : 100 - printScore >= 30
-    ? '#78350f'
-    : '#14532d',
+        !img
+          ? '#1e293b'
+          : hasTransparency === false || printScore < 60
+          ? '#7f1d1d'
+          : 100 - printScore >= 30
+          ? '#78350f'
+          : '#14532d',
     }}
   >
-{!img
-  ? 'UPLOAD A DESIGN TO BEGIN'
-  : hasTransparency === false
-  ? '🔴 HIGH RISK'
-  : 100 - printScore >= 60
-  ? '🔴 HIGH RISK'
-  : 100 - printScore >= 30
-  ? '🟡 MEDIUM RISK'
-  : '🟢 LOW RISK'}
-</div>
+    {!img
+      ? 'UPLOAD A DESIGN TO BEGIN'
+      : hasTransparency === false || printScore < 60
+      ? '🔴 HIGH RISK'
+      : 100 - printScore >= 30
+      ? '🟡 MEDIUM RISK'
+      : '🟢 LOW RISK'}
+  </div>
+
   <div style={{ fontWeight: 700, marginBottom: 6 }}>Scan Summary</div>
-  <div
-  style={{
-    height: 1,
-    background: '#334155',
-    marginBottom: 10,
-  }}
-/>
-  <div style={{ color: '#94a3b8', fontSize: 14, marginBottom: 8 }}>
-  Quick POD readiness overview
-</div>
-<div style={{ marginBottom: 6 }}>
-  Main Issue: {!img
-    ? '—'
-    : !hasTransparency
-    ? '❌ No transparency'
-    : thinLinePercent >= 18
-    ? '⚠ Too many thin lines'
-    : specks > 0
-    ? '⚠ Specks detected'
-    : imgW !== CANVAS_W || imgH !== CANVAS_H
-    ? '⚠ Wrong size'
-    : '✅ No major issues'}
-</div>
-<div style={{ marginBottom: 6 }}>
-  Confidence: {!img
-    ? '—'
-    : printScore >= 80
-    ? 'High'
-    : printScore >= 50
-    ? 'Medium'
-    : 'Low'}
-</div>
-<div style={{ marginBottom: 6 }}>Score: {printScore}%</div>
-  <div
-  style={{
-    marginTop: 10,
-    height: 10,
-    width: '100%',
-    background: '#1e293b',
-    borderRadius: 999,
-    overflow: 'hidden',
-  }}
->
+
   <div
     style={{
-      height: '100%',
-      width: `${printScore}%`,
-      background:
-        hasTransparency === false
-          ? '#ef4444'
-          : printScore < 60
-          ? '#f59e0b'
-          : '#22c55e',
-      transition: 'width 0.3s ease',
+      height: 1,
+      background: '#334155',
+      marginBottom: 10,
     }}
   />
-</div>
 
-<div style={{ marginBottom: 6 }}>
-  Issues Found: {!img ? '—' : checks.filter((item) => item.status === 'fail' || item.status === 'warn').length}
-</div>
-<div style={{ marginBottom: 6, color: '#ef4444' }}>
-  Critical Issues: {!img ? '—' : checks.filter((item) => item.status === 'fail').length}
-</div>
+  <div style={{ marginBottom: 8 }}>
+    Main Issue:{' '}
+    {!img
+      ? '—'
+      : hasTransparency === false
+      ? '❌ No transparency'
+      : thinLinePercent >= 18
+      ? '⚠ Too many thin lines'
+      : specks > 0
+      ? '⚠ Specks detected'
+      : imgW !== CANVAS_W || imgH !== CANVAS_H
+      ? '⚠ Wrong size'
+      : '✅ No major issues'}
+  </div>
 
-<div style={{ marginBottom: 6, color: '#f59e0b' }}>
-  Warnings: {!img ? '—' : checks.filter((item) => item.status === 'warn').length}
-</div>
+  <div style={{ marginBottom: 8 }}>
+    Issues Found:{' '}
+    {!img ? '—' : checks.filter((item) => item.status === 'fail' || item.status === 'warn').length}
+  </div>
 
-<div>Thin lines: {!img ? '—' : `${thinLinePercent.toFixed(1)}%`}</div>
-<div>Specks: {!img ? '—' : specks}</div>
-
-<div style={{ marginBottom: 6 }}>
+  <div style={{ marginBottom: 8 }}>
     Status:{' '}
-    {hasTransparency === false
+    {!img
+      ? '—'
+      : hasTransparency === false
       ? '❌ PRINT WILL FAIL'
       : printScore < 60
       ? '⚠ MAY PRINT POORLY'
       : '✅ READY FOR PRINT'}
+  </div>
+
+  <div style={{ marginBottom: 6 }}>
+    Confidence:{' '}
+    {!img
+      ? '—'
+      : printScore >= 80
+      ? 'High'
+      : printScore >= 50
+      ? 'Medium'
+      : 'Low'}
   </div>
 </div>
   </div>
