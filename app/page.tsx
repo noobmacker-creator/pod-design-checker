@@ -245,27 +245,55 @@ function detectBoundsAndCoverage(
   };
 }
 
-function detectSpecks(imageData: ImageData, thresholdAlpha = 40, islandSize = 3) {
+function detectSpecks(imageData: ImageData, thresholdAlpha = 40, maxSpeckPixels = 12) {
   const { width, height, data } = imageData;
+
+  const visited = new Uint8Array(width * height);
   let specks = 0;
 
-  for (let y = 1; y < height - 1; y += 2) {
-    for (let x = 1; x < width - 1; x += 2) {
-      const i = (y * width + x) * 4;
-      const a = data[i + 3];
+  function isSolid(x: number, y: number) {
+    const i = (y * width + x) * 4;
+    return data[i + 3] > thresholdAlpha;
+  }
 
-      if (a > thresholdAlpha) {
-        let neighbors = 0;
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const pixelIndex = y * width + x;
 
-        for (let ny = -1; ny <= 1; ny++) {
-          for (let nx = -1; nx <= 1; nx++) {
-            if (nx === 0 && ny === 0) continue;
-            const ni = ((y + ny) * width + (x + nx)) * 4;
-            if (data[ni + 3] > thresholdAlpha) neighbors++;
+      if (visited[pixelIndex]) continue;
+      visited[pixelIndex] = 1;
+
+      if (!isSolid(x, y)) continue;
+
+      const stack: [number, number][] = [[x, y]];
+      let blobSize = 0;
+
+      while (stack.length > 0) {
+        const [cx, cy] = stack.pop()!;
+        blobSize++;
+
+        const neighbors = [
+          [cx - 1, cy],
+          [cx + 1, cy],
+          [cx, cy - 1],
+          [cx, cy + 1],
+        ];
+
+        for (const [nx, ny] of neighbors) {
+          if (nx < 0 || ny < 0 || nx >= width || ny >= height) continue;
+
+          const ni = ny * width + nx;
+          if (visited[ni]) continue;
+          visited[ni] = 1;
+
+          if (isSolid(nx, ny)) {
+            stack.push([nx, ny]);
           }
         }
+      }
 
-        if (neighbors <= islandSize) specks++;
+      if (blobSize <= maxSpeckPixels) {
+        specks++;
       }
     }
   }
@@ -435,7 +463,7 @@ if (printScore < 0) printScore = 0;
     const res = detectBoundsAndCoverage(imageData, 8);
     setOriginalBounds(res.bounds);
     setCoverage(res.coverage);
-    setSpecks(detectSpecks(imageData, 80, 1));
+    setSpecks(detectSpecks(imageData, 120, 3));
     setThinLinePercent(estimateThinLines(imageData));
     const fakeTransparency = detectFakeTransparencyBackground(imageData);
 setFakeTransparencyDetected(fakeTransparency.detected);
