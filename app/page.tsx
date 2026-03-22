@@ -1052,6 +1052,38 @@ setFakeTransparencyDetected(fakeTransparency.detected);
   }
 
   function handleAutoFixTooSmall() {
+
+    function handleQuickFix() {
+      if (!originalBounds) return;
+    
+      setViewMode('pod');
+    
+      const availableW = CANVAS_W - SAFE_BOX * 2;
+      const availableH = CANVAS_H - SAFE_BOX * 2;
+    
+      const scaleX = availableW / originalBounds.w;
+      const scaleY = availableH / originalBounds.h;
+    
+      let nextScale = Math.min(scaleX, scaleY);
+    
+      if (nextScale > 1) {
+        nextScale = Math.min(nextScale, 1.25);
+      }
+    
+      const scaledW = originalBounds.w * nextScale;
+      const scaledH = originalBounds.h * nextScale;
+    
+      const x = (CANVAS_W - scaledW) / 2 - originalBounds.x * nextScale;
+      const y = (CANVAS_H - scaledH) / 2 - originalBounds.y * nextScale;
+    
+      setTransform({
+        scale: Math.round(nextScale * 1000) / 1000,
+        offsetX: Math.round(x),
+        offsetY: Math.round(y),
+      });
+    
+      setActionMessage('Quick Fix applied: artwork centered and fitted to a safer print area.');
+    }
     if (!originalBounds) return;
 
     setViewMode('pod');
@@ -1074,6 +1106,37 @@ setFakeTransparencyDetected(fakeTransparency.detected);
       offsetY: Math.round(y),
     });
     setActionMessage('Auto Fix Design Too Small applied.');
+  }
+  function handleQuickFix() {
+    if (!originalBounds) return;
+  
+    setViewMode('pod');
+  
+    const availableW = CANVAS_W - SAFE_BOX * 2;
+    const availableH = CANVAS_H - SAFE_BOX * 2;
+  
+    const scaleX = availableW / originalBounds.w;
+    const scaleY = availableH / originalBounds.h;
+  
+    let nextScale = Math.min(scaleX, scaleY);
+  
+    if (nextScale > 1) {
+      nextScale = Math.min(nextScale, 1.25);
+    }
+  
+    const scaledW = originalBounds.w * nextScale;
+    const scaledH = originalBounds.h * nextScale;
+  
+    const x = (CANVAS_W - scaledW) / 2 - originalBounds.x * nextScale;
+    const y = (CANVAS_H - scaledH) / 2 - originalBounds.y * nextScale;
+  
+    setTransform({
+      scale: Math.round(nextScale * 1000) / 1000,
+      offsetX: Math.round(x),
+      offsetY: Math.round(y),
+    });
+  
+    setActionMessage('Quick Fix applied: artwork centered and fitted to a safer print area.');
   }
 
   function resetToOriginalView() {
@@ -1200,12 +1263,13 @@ setFakeTransparencyDetected(fakeTransparency.detected);
               }}
             />
 
-            <button onClick={handleFixCanvas} disabled={!img}>Fix Canvas</button>
-            <button onClick={handleCenterArtwork} disabled={!img}>Center Artwork</button>
-            <button onClick={handleAutoFixSafetyBorder} disabled={!img || !originalBounds}>Auto Fix Safety Border</button>
-            <button onClick={handleAutoFixTooSmall} disabled={!img || !originalBounds}>Auto Fix Design Too Small</button>
-            <button onClick={resetToOriginalView} disabled={!img}>Reset View</button>
-            <button onClick={handleDownloadFixedPng} disabled={!img}>Download Fixed PNG</button>
+<button onClick={handleQuickFix} disabled={!img || !originalBounds}>Quick Fix</button>
+<button onClick={handleFixCanvas} disabled={!img}>Fix Canvas</button>
+<button onClick={handleCenterArtwork} disabled={!img}>Center Artwork</button>
+<button onClick={handleAutoFixSafetyBorder} disabled={!img || !originalBounds}>Auto Fix Safety Border</button>
+<button onClick={handleAutoFixTooSmall} disabled={!img || !originalBounds}>Auto Fix Design Too Small</button>
+<button onClick={resetToOriginalView} disabled={!img}>Reset View</button>
+<button onClick={handleDownloadFixedPng} disabled={!img}>Download Fixed PNG</button>
           </div>
 
           <div
