@@ -1264,7 +1264,7 @@ setFakeTransparencyDetected(fakeTransparency.detected);
             />
 
 <button onClick={handleQuickFix} disabled={!img || !originalBounds}>Quick Fix</button>
-<button onClick={handleFixCanvas} disabled={!img}>Fix Canvas</button>
+<button onClick={handleFixCanvas} disabled={!img}>Fix Size</button>
 <button onClick={handleCenterArtwork} disabled={!img}>Center Artwork</button>
 <button onClick={handleAutoFixSafetyBorder} disabled={!img || !originalBounds}>Auto Fix Safety Border</button>
 <button onClick={handleAutoFixTooSmall} disabled={!img || !originalBounds}>Auto Fix Design Too Small</button>
