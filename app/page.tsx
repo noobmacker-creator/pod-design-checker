@@ -1174,7 +1174,7 @@ setFakeTransparencyDetected(fakeTransparency.detected);
       offsetX: Math.round((CANVAS_W - img.naturalWidth) / 2),
       offsetY: Math.round((CANVAS_H - img.naturalHeight) / 2),
     });
-    setPreviewSize(0.25);
+    setPreviewSize(DEFAULT_PREVIEW_SIZE);
     setInspectZoom(1);
     setViewMode('pod');
     setActionMessage('View reset to original centered POD canvas.');
