@@ -382,6 +382,7 @@ export default function Page() {
   
 
   const [file, setFile] = useState<File | null>(null);
+  const [showMoreFixes, setShowMoreFixes] = useState(false);
   const [fileUrl, setFileUrl] = useState('');
   const [img, setImg] = useState<HTMLImageElement | null>(null);
 
