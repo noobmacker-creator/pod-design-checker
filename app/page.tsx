@@ -741,10 +741,10 @@ setFakeTransparencyDetected(fakeTransparency.detected);
       },
       {
         label: 'DPI Metadata',
-        status: dpiMetadata ? 'info' : 'warn',
+        status: 'info',
         message: dpiMetadata
           ? `Embedded DPI metadata: ${dpiMetadata} DPI`
-          : 'No DPI metadata found, or browser could not read it.',
+          : 'No DPI metadata found. This is informational only and does not usually matter for POD if pixel size is correct.',
       },
     ];
   }, [
