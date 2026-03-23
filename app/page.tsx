@@ -1269,7 +1269,7 @@ setFakeTransparencyDetected(fakeTransparency.detected);
 <button onClick={handleAutoFixSafetyBorder} disabled={!img || !originalBounds}>Fix Border</button>
 <button onClick={handleAutoFixTooSmall} disabled={!img || !originalBounds}>Fix Too Small</button>
 <button onClick={resetToOriginalView} disabled={!img}>Reset View</button>
-<button onClick={handleDownloadFixedPng} disabled={!img}>Download Fixed PNG</button>
+<button onClick={handleDownloadFixedPng} disabled={!img}>Download PNG</button>
           </div>
 
           <div
