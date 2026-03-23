@@ -29,6 +29,8 @@ const AUTO_FIX_MARGIN = 60;
 
 const VIEWPORT_W = 920;
 const VIEWPORT_H = 920;
+const DEFAULT_PREVIEW_SIZE =
+  Math.min(VIEWPORT_W / CANVAS_W, VIEWPORT_H / CANVAS_H) * 0.9;
 
 const SHIRT_W = 1600;
 const SHIRT_H = 1900;
@@ -427,7 +429,7 @@ if (img) {
 if (printScore < 0) printScore = 0;
  const [fakeTransparencyDetected, setFakeTransparencyDetected] = useState(false); 
   const [viewMode, setViewMode] = useState<ViewMode>('pod');
-  const [previewSize, setPreviewSize] = useState<PreviewSize>(0.25);
+  const [previewSize, setPreviewSize] = useState<PreviewSize>(DEFAULT_PREVIEW_SIZE);
   const [inspectZoom, setInspectZoom] = useState(1);
 
   const [transform, setTransform] = useState({
@@ -985,7 +987,7 @@ setFakeTransparencyDetected(fakeTransparency.detected);
         offsetY: Math.round((CANVAS_H - image.naturalHeight) / 2),
       });
 
-      setPreviewSize(0.25);
+      setPreviewSize(DEFAULT_PREVIEW_SIZE);
       setInspectZoom(1);
       setViewMode('pod');
       setActionMessage('Design uploaded and centered on the POD canvas.');
