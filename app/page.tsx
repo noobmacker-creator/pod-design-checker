@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 type CheckStatus = 'pass' | 'warn' | 'fail' | 'info';
 type ViewMode = 'pod' | 'design' | 'shirt';
-type PreviewSize = 0.1 | 0.25 | 0.5;
+type PreviewSize = number;
 
 type CheckItem = {
   label: string;
