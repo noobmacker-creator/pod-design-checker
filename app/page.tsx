@@ -1109,6 +1109,31 @@ setFakeTransparencyDetected(fakeTransparency.detected);
     });
     setActionMessage('Auto Fix Design Too Small applied.');
   }
+  function handleAutoFixTooSmall() {
+    if (!originalBounds) return;
+  
+    setViewMode('pod');
+  
+    const availableW = CANVAS_W - SAFE_BOX * 2;
+    const availableH = CANVAS_H - SAFE_BOX * 2;
+    const scaleX = availableW / originalBounds.w;
+    const scaleY = availableH / originalBounds.h;
+    const nextScale = Math.min(scaleX, scaleY);
+  
+    const scaledW = originalBounds.w * nextScale;
+    const scaledH = originalBounds.h * nextScale;
+  
+    const x = (CANVAS_W - scaledW) / 2 - originalBounds.x * nextScale;
+    const y = (CANVAS_H - scaledH) / 2 - originalBounds.y * nextScale;
+  
+    setTransform({
+      scale: Math.round(nextScale * 1000) / 1000,
+      offsetX: Math.round(x),
+      offsetY: Math.round(y),
+    });
+    setActionMessage('Auto Fix Design Too Small applied.');
+  }
+  
   function handleQuickFix() {
     if (!originalBounds) return;
   
@@ -1140,10 +1165,10 @@ setFakeTransparencyDetected(fakeTransparency.detected);
   
     setActionMessage('Quick Fix applied: artwork centered and fitted to a safer print area.');
   }
-
+  
   function resetToOriginalView() {
     if (!img) return;
-
+  
     setTransform({
       scale: 1,
       offsetX: Math.round((CANVAS_W - img.naturalWidth) / 2),
@@ -1154,8 +1179,9 @@ setFakeTransparencyDetected(fakeTransparency.detected);
     setViewMode('pod');
     setActionMessage('View reset to original centered POD canvas.');
   }
-
+  
   function handleDownloadFixedPng() {
+    if (!img) return;
   if (!img) return;
 
   const exportCanvas = document.createElement('canvas');
