@@ -1300,7 +1300,7 @@ setFakeTransparencyDetected(fakeTransparency.detected);
               color: '#e0f2fe',
             }}
           >
-            <div style={{ fontWeight: 700, marginBottom: 6 }}>Button Feedback</div>
+            <div style={{ fontWeight: 700, marginBottom: 6, color: '#93c5fd' }}>Last Action</div>
             <div>{actionMessage}</div>
             {downloadMessage && <div style={{ marginTop: 8, color: '#7dd3fc' }}>{downloadMessage}</div>}
           </div>
