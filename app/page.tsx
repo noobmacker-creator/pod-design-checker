@@ -1477,7 +1477,7 @@ setFakeTransparencyDetected(fakeTransparency.detected);
   }}
 />
 
-  <div style={{ marginBottom: 8 }}>
+<div style={{ marginBottom: hasTransparency === false || printScore < 60 || 100 - printScore >= 30 ? 8 : 6 }}>
     Main Issue:{' '}
     {!img
       ? '—'
