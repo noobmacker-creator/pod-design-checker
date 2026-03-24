@@ -1492,10 +1492,12 @@ setFakeTransparencyDetected(fakeTransparency.detected);
       : '✅ No major issues'}
   </div>
 
+  {hasTransparency === false || printScore < 60 || 100 - printScore >= 30 ? (
   <div style={{ marginBottom: 8 }}>
     Issues Found:{' '}
     {!img ? '—' : checks.filter((item) => item.status === 'fail' || item.status === 'warn').length}
   </div>
+) : null}
 
   <div style={{ marginBottom: 8 }}>
     Status:{' '}
