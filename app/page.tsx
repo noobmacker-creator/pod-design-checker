@@ -678,30 +678,21 @@ setFakeTransparencyDetected(fakeTransparency.detected);
 
 
 
-      {
-        label: 'File Size',
-        status: fileSize <= 10 * 1024 * 1024 ? 'pass' : 'warn',
-        message:
-          fileSize <= 10 * 1024 * 1024
-            ? `Good file size: ${formatBytes(fileSize)}`
-            : `Large file size: ${formatBytes(fileSize)}. Keep an eye on upload limits.`,
-      },
-      {
-        label: 'POD Print Size',
-        status: largeEnough ? 'pass' : 'fail',
-        message: largeEnough
-          ? 'Large enough for common POD front print area.'
-          : 'Too small for recommended POD shirt print size.',
-      },
-      {
-        label: 'Print Resolution',
-        status: practicalGood ? 'pass' : practicalPrintDpi >= 220 ? 'warn' : 'fail',
-        message: practicalGood
-          ? `Practical print resolution looks good: about ${practicalPrintDpi} DPI`
-          : practicalPrintDpi >= 220
-          ? `Borderline print resolution: about ${practicalPrintDpi} DPI`
-          : `Low practical print resolution: about ${practicalPrintDpi} DPI`,
-      },
+{
+  label: 'File Size',
+  status:
+    fileSize <= 50 * 1024 * 1024
+      ? 'pass'
+      : fileSize <= 100 * 1024 * 1024
+      ? 'warn'
+      : 'fail',
+  message:
+    fileSize <= 50 * 1024 * 1024
+      ? `Good file size: ${formatBytes(fileSize)}`
+      : fileSize <= 100 * 1024 * 1024
+      ? `Large file size: ${formatBytes(fileSize)}. Should still be okay for many POD platforms, but check upload limits.`
+      : `Very large file size: ${formatBytes(fileSize)}. This may fail on some POD platforms.`,
+},
       {
         label: 'Artwork Size',
         status:
