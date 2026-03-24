@@ -427,7 +427,7 @@ if (img) {
 
 
 
-if (printScore < 0) printScore = 0;
+
  const [fakeTransparencyDetected, setFakeTransparencyDetected] = useState(false); 
   const [viewMode, setViewMode] = useState<ViewMode>('pod');
   const [previewSize, setPreviewSize] = useState<PreviewSize>(DEFAULT_PREVIEW_SIZE);
