@@ -1469,13 +1469,13 @@ setFakeTransparencyDetected(fakeTransparency.detected);
   {hasTransparency === false || printScore < 60 || 100 - printScore >= 30 ? 'Scan Summary' : 'Ready'}
 </div>
 
-  <div
-    style={{
-      height: 1,
-      background: '#334155',
-      marginBottom: 10,
-    }}
-  />
+<div
+  style={{
+    height: 1,
+    background: '#334155',
+    marginBottom: hasTransparency === false || printScore < 60 || 100 - printScore >= 30 ? 10 : 6,
+  }}
+/>
 
   <div style={{ marginBottom: 8 }}>
     Main Issue:{' '}
@@ -1499,16 +1499,16 @@ setFakeTransparencyDetected(fakeTransparency.detected);
   </div>
 ) : null}
 
-  <div style={{ marginBottom: 8 }}>
-    Status:{' '}
-    {!img
-      ? '—'
-      : hasTransparency === false
-      ? '❌ PRINT WILL FAIL'
-      : printScore < 60
-      ? '⚠ MAY PRINT POORLY'
-      : '✅ READY FOR PRINT'}
-  </div>
+<div style={{ marginBottom: hasTransparency === false || printScore < 60 || 100 - printScore >= 30 ? 8 : 4 }}>
+  {hasTransparency === false || printScore < 60 || 100 - printScore >= 30 ? 'Status: ' : ''}
+  {!img
+    ? '—'
+    : hasTransparency === false
+    ? '❌ PRINT WILL FAIL'
+    : printScore < 60
+    ? '⚠ MAY PRINT POORLY'
+    : '✅ READY FOR PRINT'}
+</div>
 
   <div style={{ marginBottom: 6 }}>
     Confidence:{' '}
