@@ -1174,7 +1174,6 @@ setFakeTransparencyDetected(fakeTransparency.detected);
   
   function handleDownloadFixedPng() {
     if (!img) return;
-  if (!img) return;
 
   const exportCanvas = document.createElement('canvas');
   exportCanvas.width = CANVAS_W;
