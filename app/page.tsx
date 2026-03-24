@@ -467,7 +467,8 @@ if (img) {
     setSpecks(detectSpecks(imageData, 120, 3));
     setThinLinePercent(estimateThinLines(imageData));
     const fakeTransparency = detectFakeTransparencyBackground(imageData);
-setFakeTransparencyDetected(fakeTransparency.detected);
+    setFakeTransparencyDetected(fakeTransparency.detected);
+    
     let transparentFound = false;
     for (let i = 3; i < imageData.data.length; i += 4) {
       if (imageData.data[i] < 255) {
