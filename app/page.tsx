@@ -341,10 +341,6 @@ function estimateThinLines(imageData: ImageData) {
   return (thinHits / checked) * 100;
 }
 
-
-
-
-
 function getEffectiveArtBounds(
   originalBounds: Bounds | null,
   transform: { scale: number; offsetX: number; offsetY: number }
@@ -379,8 +375,6 @@ function getDesignCanvasSize(effectiveBounds: Bounds | null, img: HTMLImageEleme
 
 export default function Page() {
   
-  
-
   const [file, setFile] = useState<File | null>(null);
   const [showMoreFixes, setShowMoreFixes] = useState(false);
   const [fileUrl, setFileUrl] = useState('');
