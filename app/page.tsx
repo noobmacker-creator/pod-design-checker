@@ -1293,12 +1293,21 @@ setFakeTransparencyDetected(fakeTransparency.detected);
             />
 
 <button onClick={handleQuickFix} disabled={!img || !originalBounds}>Quick Fix</button>
-<button onClick={handleFixCanvas} disabled={!img}>Fix Size</button>
-<button onClick={handleCenterArtwork} disabled={!img}>Center</button>
-<button onClick={handleAutoFixSafetyBorder} disabled={!img || !originalBounds}>Fix Border</button>
-<button onClick={handleAutoFixTooSmall} disabled={!img || !originalBounds}>Fix Too Small</button>
 <button onClick={resetToOriginalView} disabled={!img}>Reset View</button>
 <button onClick={handleDownloadFixedPng} disabled={!img}>Download Fixed PNG (4200×4800)</button>
+
+<button onClick={() => setShowMoreFixes((v) => !v)} disabled={!img}>
+  {showMoreFixes ? 'Hide More Fixes' : 'More Fixes'}
+</button>
+
+{showMoreFixes && (
+  <>
+    <button onClick={handleFixCanvas} disabled={!img}>Fix Size</button>
+    <button onClick={handleCenterArtwork} disabled={!img}>Center</button>
+    <button onClick={handleAutoFixSafetyBorder} disabled={!img || !originalBounds}>Fix Border</button>
+    <button onClick={handleAutoFixTooSmall} disabled={!img || !originalBounds}>Fix Too Small</button>
+  </>
+)}
           </div>
 
           <div
