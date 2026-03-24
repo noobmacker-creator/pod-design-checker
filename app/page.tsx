@@ -419,25 +419,22 @@ if (img) {
   }
 }
 
+const [fakeTransparencyDetected, setFakeTransparencyDetected] = useState(false);
+const [viewMode, setViewMode] = useState<ViewMode>('pod');
+const [previewSize, setPreviewSize] = useState<PreviewSize>(DEFAULT_PREVIEW_SIZE);
+const [inspectZoom, setInspectZoom] = useState(1);
 
+const [transform, setTransform] = useState({
+  scale: 1,
+  offsetX: 0,
+  offsetY: 0,
+});
 
+const [actionMessage, setActionMessage] = useState('Upload a design to begin.');
+const [downloadMessage, setDownloadMessage] = useState('');
 
- const [fakeTransparencyDetected, setFakeTransparencyDetected] = useState(false); 
-  const [viewMode, setViewMode] = useState<ViewMode>('pod');
-  const [previewSize, setPreviewSize] = useState<PreviewSize>(DEFAULT_PREVIEW_SIZE);
-  const [inspectZoom, setInspectZoom] = useState(1);
-
-  const [transform, setTransform] = useState({
-    scale: 1,
-    offsetX: 0,
-    offsetY: 0,
-  });
-
-  const [actionMessage, setActionMessage] = useState('Upload a design to begin.');
-  const [downloadMessage, setDownloadMessage] = useState('');
-
-  const previewCanvasRef = useRef<HTMLCanvasElement | null>(null);
-  const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
+const previewCanvasRef = useRef<HTMLCanvasElement | null>(null);
+const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
     return () => {
