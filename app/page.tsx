@@ -993,24 +993,24 @@ const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
   }
 
   function handleCenterArtwork() {
-  if (!img || !originalBounds) return;
-
-  setViewMode('pod');
-
-  const scaledW = originalBounds.w * transform.scale;
-  const scaledH = originalBounds.h * transform.scale;
-
-  const x = (CANVAS_W - scaledW) / 2 - originalBounds.x * transform.scale;
-  const y = (CANVAS_H - scaledH) / 2 - originalBounds.y * transform.scale;
-
-  setTransform((prev) => ({
-    ...prev,
-    offsetX: Math.round(x),
-    offsetY: Math.round(y),
-  }));
-
-  setActionMessage('Artwork centered using detected artwork bounds.');
-}
+    if (!img || !originalBounds) return;
+  
+    setViewMode('pod');
+  
+    const scaledW = originalBounds.w * transform.scale;
+    const scaledH = originalBounds.h * transform.scale;
+  
+    const x = (CANVAS_W - scaledW) / 2 - originalBounds.x * transform.scale;
+    const y = (CANVAS_H - scaledH) / 2 - originalBounds.y * transform.scale;
+  
+    setTransform((prev) => ({
+      ...prev,
+      offsetX: Math.round(x),
+      offsetY: Math.round(y),
+    }));
+  
+    setActionMessage('Artwork centered using detected artwork bounds.');
+  }
 
   function handleAutoFixSafetyBorder() {
     if (!originalBounds) return;
