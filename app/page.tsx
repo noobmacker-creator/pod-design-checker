@@ -1465,7 +1465,9 @@ setFakeTransparencyDetected(fakeTransparency.detected);
       : '🟢 LOW RISK'}
   </div>
 
-  <div style={{ fontWeight: 700, marginBottom: 6 }}>Scan Summary</div>
+  <div style={{ fontWeight: 700, marginBottom: hasTransparency === false || printScore < 60 || 100 - printScore >= 30 ? 6 : 2 }}>
+  {hasTransparency === false || printScore < 60 || 100 - printScore >= 30 ? 'Scan Summary' : 'Ready'}
+</div>
 
   <div
     style={{
