@@ -1302,7 +1302,7 @@ const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
               alignItems: 'center',
             }}
           >
-            <span style={{ color: '#cbd5e1', fontWeight: 700 }}>View Mode:</span>
+            <span style={{ fontWeight: 700, color: '#bae6fd' }}>Canvas Zoom</span>
 
             <button onClick={() => { setViewMode('pod'); setActionMessage('POD Canvas view selected.'); }} disabled={!img}>POD Canvas</button>
             <button onClick={() => { setViewMode('design'); setActionMessage('Design & Zoom view selected.'); }} disabled={!img}>
