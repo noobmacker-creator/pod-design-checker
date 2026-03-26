@@ -1800,19 +1800,19 @@ const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
                 marginBottom: 16,
               }}
             >
-              <div style={{ background: '#0f172a', padding: '12px 14px', borderRadius: 12 }}>
+              <div style={{ background: '#0f172a', padding: '12px 14px', borderRadius: 12, border: '1px solid rgba(255,255,255,0.06)' }}>
                 Canvas: <strong>{imgW || '-'} × {imgH || '-'}</strong>
               </div>
 
-              <div style={{ background: '#0f172a', padding: '12px 14px', borderRadius: 12 }}>
+              <div style={{ background: '#0f172a', padding: '12px 14px', borderRadius: 12, border: '1px solid rgba(255,255,255,0.06)' }}>
                 Preview Size: <strong>{Math.round(previewSize * 100)}%</strong>
               </div>
 
-              <div style={{ background: '#0f172a', padding: '12px 14px', borderRadius: 12 }}>
+              <div style={{ background: '#0f172a', padding: '12px 14px', borderRadius: 12, border: '1px solid rgba(255,255,255,0.06)' }}>
                 Inspect Zoom: <strong>{inspectZoom * 100}%</strong>
               </div>
 
-              <div style={{ background: '#0f172a', padding: '12px 14px', borderRadius: 12 }}>
+              <div style={{ background: '#0f172a', padding: '12px 14px', borderRadius: 12, border: '1px solid rgba(255,255,255,0.06)' }}>
                 Practical DPI: <strong>{practicalPrintDpi || '-'}</strong>
               </div>
             </div>
