@@ -1189,7 +1189,7 @@ const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
   link.href = exportCanvas.toDataURL('image/png');
   link.click();
 
-  setDownloadMessage(`Download started: ${baseName}-fixed-transparent.png`);
+  setDownloadMessage(`Download ready: 4200×4800 transparent PNG`);
   setActionMessage('Clean transparent PNG exported.');
 }
 
