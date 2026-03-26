@@ -1374,7 +1374,9 @@ const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
     textAlign: 'center',
   }}
 >
-  <div style={{ fontSize: 14, color: '#94a3b8' }}>READY FOR PRINT</div>
+<div style={{ fontSize: 14, color: '#ffffff', fontWeight: 700 }}>
+  PRINT READINESS
+</div>
   <div style={{ fontSize: 36, fontWeight: 800, color:
   printScore >= 80
     ? '#22c55e'
