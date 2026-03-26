@@ -1498,16 +1498,7 @@ const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
 </div>
 ) : null}
 
-<div style={{ marginBottom: hasTransparency === false || printScore < 60 || 100 - printScore >= 30 ? 8 : 2 }}>
-  {hasTransparency === false || printScore < 60 || 100 - printScore >= 30 ? 'Status: ' : ''}
-  {!img
-    ? '—'
-    : hasTransparency === false
-    ? ' PRINT WILL FAIL'
-    : printScore < 60
-    ? ' MAY PRINT POORLY'
-    : '✅ READY FOR PRINT'}
-</div>
+
 
   <div style={{ marginBottom: 6 }}>
     Confidence:{' '}
