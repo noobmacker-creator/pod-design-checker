@@ -1277,7 +1277,7 @@ const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
 <button onClick={handleQuickFix} disabled={!img || !originalBounds}>Quick Fix (Auto)</button>
 <button onClick={resetToOriginalView} disabled={!img}>Reset Position</button>
-<button onClick={handleDownloadFixedPng} disabled={!img}>Download Fixed PNG (4200×4800)</button>
+<button onClick={handleDownloadFixedPng} disabled={!img}>Download Print-Ready PNG (4200×4800)</button>
 
 <button onClick={() => setShowMoreFixes((v) => !v)} disabled={!img}>
   {showMoreFixes ? 'Hide More Fixes' : 'More Fixes'}
