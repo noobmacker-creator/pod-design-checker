@@ -1468,7 +1468,7 @@ const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
 <div style={{ marginBottom: hasTransparency === false || printScore < 60 || 100 - printScore >= 30 ? 10 : 6, fontWeight: 600 }}>
 <div style={{ padding: 18, borderRadius: 16, background: 'rgba(15,23,42,0.55)', backdropFilter: 'blur(6px)', border: '1px solid rgba(255,255,255,0.12)' }}>
-    Main Issue:{' '}
+<span style={{ fontWeight: 800 }}>Main Issue:</span>
     {!img
       ? '—'
       : hasTransparency === false
@@ -1484,7 +1484,7 @@ const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
   {hasTransparency === false || printScore < 60 || 100 - printScore >= 30 ? (
   <div style={{ marginBottom: 8 }}>
-  Next Step:{' '}
+<span style={{ fontWeight: 800 }}>Next Step:</span>
   {!img
     ? '—'
     : hasTransparency === false
