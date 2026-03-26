@@ -1483,9 +1483,19 @@ const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
   {hasTransparency === false || printScore < 60 || 100 - printScore >= 30 ? (
   <div style={{ marginBottom: 8 }}>
-    Issues Found:{' '}
-    {!img ? '—' : checks.filter((item) => item.status === 'fail' || item.status === 'warn').length}
-  </div>
+  Next Step:{' '}
+  {!img
+    ? '—'
+    : hasTransparency === false
+    ? 'Add transparent background'
+    : thinLinePercent >= 18
+    ? 'Thicken thin lines'
+    : specks > 0
+    ? 'Clean specks / noise'
+    : imgW !== CANVAS_W || imgH !== CANVAS_H
+    ? 'Resize to 4200×4800'
+    : 'Ready to download'}
+</div>
 ) : null}
 
 <div style={{ marginBottom: hasTransparency === false || printScore < 60 || 100 - printScore >= 30 ? 8 : 2 }}>
