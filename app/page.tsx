@@ -1728,7 +1728,7 @@ const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
                   The <span style={{ color: '#ef4444', fontWeight: 700 }}>red dashed overlay</span> shows the safety border,
                   the <span style={{ color: '#3b82f6', fontWeight: 700 }}> blue dashed box</span> shows the safe print zone,
                   the <span style={{ color: '#22c55e', fontWeight: 700 }}> green box</span> shows detected artwork bounds,
-                  and the <span style={{ color: '#facc15', fontWeight: 700 }}> yellow cross</span> shows the artwork center.
+                  and the <span style={{ color: '#facc15', fontWeight: 700 }}> yellow center marker</span> shows the artwork center.
                 </p>
 
                 <p style={{ marginBottom: 0, color: '#cbd5e1', lineHeight: 1.6 }}>
