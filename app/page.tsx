@@ -1719,7 +1719,9 @@ const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
                   border: '1px solid rgba(255,255,255,0.08)',
                 }}
               >
-                <h3 style={{ marginTop: 0, marginBottom: 12 }}>Important POD Notes</h3>
+                <h3 style={{ marginTop: 0, marginBottom: 12, fontWeight: 800 }}>
+  Important POD Notes
+</h3>
 
                 <p style={{ marginTop: 0, color: '#cbd5e1', lineHeight: 1.6 }}>
                   Important: <strong>300 DPI metadata by itself does not guarantee the file is correct for POD.</strong>{' '}
