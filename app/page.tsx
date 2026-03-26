@@ -1843,7 +1843,7 @@ backdropFilter: 'blur(4px)',
                     width: `${previewCanvasW * totalScale}px`,
                     height: `${previewCanvasH * totalScale}px`,
                     boxShadow: '0 12px 50px rgba(0,0,0,0.55)',
-                    borderRadius: 8,
+                    borderRadius: 12,
                   }}
                 />
               </div>
