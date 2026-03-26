@@ -1337,7 +1337,7 @@ const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
               }}
             >
               <div style={{ fontWeight: 700, marginBottom: 6 }}>Uploaded file:</div>
-              <div style={{ color: '#fdba74' }}>{file.name}</div>
+              <div style={{ color: '#fdba74', fontWeight: 600 }}>{file.name}</div>
             </div>
           )}
         </div>
