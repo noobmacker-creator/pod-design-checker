@@ -1308,7 +1308,7 @@ const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
             <button onClick={() => { setViewMode('design'); setActionMessage('Design & Zoom view selected.'); }} disabled={!img}>
   Design & Zoom
 </button>
-            <button onClick={() => { setViewMode('shirt'); setActionMessage('Shirt Preview view selected.'); }} disabled={!img}>Shirt Preview</button>
+<button onClick={() => { setViewMode('shirt'); setActionMessage('Shirt Preview selected.'); }} disabled={!img}>Preview on Shirt</button>
           </div>
 
           <div
