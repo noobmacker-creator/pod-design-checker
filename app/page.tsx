@@ -1414,10 +1414,10 @@ const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
 </div>
 <div style={{ marginTop: 12, fontWeight: 800 }}>
   {hasTransparency === false
-    ? ' PRINT WILL FAIL'
+    ? 'HIGH RISK'
     : printScore < 60
-    ? '⚠ MAY PRINT POORLY'
-    : '✅ READY FOR PRINT'}
+    ? 'MEDIUM RISK'
+    : 'READY FOR PRINT'}
 </div>
 <div
   style={{
