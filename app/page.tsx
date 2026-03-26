@@ -1246,7 +1246,7 @@ const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
             marginBottom: 20,
           }}
         >
-          <h1 style={{ margin: 0, fontSize: 34, fontWeight: 800 }}>POD Design Checker</h1>
+          <h1 style={{ margin: 0, fontSize: 34, fontWeight: 800 }}>POD Design Checker™</h1>
           <p style={{ marginTop: 10, color: '#cbd5e1', lineHeight: 1.6 }}>
             Upload your design to scan POD readiness for shirt printing.
           </p>
