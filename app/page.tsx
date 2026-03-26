@@ -1749,7 +1749,7 @@ const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
               borderRadius: 20,
               padding: 20,
               background: 'rgba(255,255,255,0.04)',
-              boxShadow: '0 20px 60px rgba(0,0,0,0.28)',
+              boxShadow: '0 25px 70px rgba(0,0,0,0.35)',
               minWidth: 0,
             }}
           >
