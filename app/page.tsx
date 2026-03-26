@@ -1478,7 +1478,7 @@ const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
       ? ' Specks detected'
       : imgW !== CANVAS_W || imgH !== CANVAS_H
       ? ' Wrong size'
-      : '✅ No major issues'}
+      : ' No major issues'}
   </div>
 
   {hasTransparency === false || printScore < 60 || 100 - printScore >= 30 ? (
