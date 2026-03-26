@@ -1471,13 +1471,13 @@ const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
     {!img
       ? '—'
       : hasTransparency === false
-      ? '❌ No transparency'
+      ? ' No transparency'
       : thinLinePercent >= 18
-      ? '⚠ Too many thin lines'
+      ? ' Too many thin lines'
       : specks > 0
-      ? '⚠ Specks detected'
+      ? ' Specks detected'
       : imgW !== CANVAS_W || imgH !== CANVAS_H
-      ? '⚠ Wrong size'
+      ? ' Wrong size'
       : '✅ No major issues'}
   </div>
 
@@ -1493,9 +1493,9 @@ const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
   {!img
     ? '—'
     : hasTransparency === false
-    ? '❌ PRINT WILL FAIL'
+    ? ' PRINT WILL FAIL'
     : printScore < 60
-    ? '⚠ MAY PRINT POORLY'
+    ? ' MAY PRINT POORLY'
     : '✅ READY FOR PRINT'}
 </div>
 
