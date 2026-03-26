@@ -1267,7 +1267,7 @@ const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
               accept="image/png,image/jpeg,image/jpg,image/webp"
               onChange={handleFileChange}
               style={{
-                background: '#0f172a',
+                background: 'rgba(15,23,42,0.85)',
                 color: '#fff',
                 padding: 12,
                 borderRadius: 12,
@@ -1392,7 +1392,7 @@ const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
     width: '100%',
     height: 18,
     borderRadius: 999,
-    background: '#0f172a',
+    background: 'rgba(15,23,42,0.85)',
     overflow: 'hidden',
     border: '1px solid rgba(255,255,255,0.08)',
   }}
@@ -1518,7 +1518,7 @@ const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
                 style={{
                   padding: 16,
                   borderRadius: 14,
-                  background: '#0f172a',
+                  background: 'rgba(15,23,42,0.85)',
                   color: '#cbd5e1',
                 }}
               >
@@ -1686,7 +1686,7 @@ const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
                   marginTop: 12,
                   padding: 14,
                   borderRadius: 14,
-                  background: '#0f172a',
+                  background: 'rgba(15,23,42,0.85)',
                   border: '1px solid rgba(34,197,94,0.35)',
                 }}
               >
@@ -1800,19 +1800,19 @@ const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
                 marginBottom: 16,
               }}
             >
-              <div style={{ background: '#0f172a', padding: '12px 14px', borderRadius: 12, border: '1px solid rgba(255,255,255,0.06)' }}>
+              <div style={{ background: 'rgba(15,23,42,0.85)', padding: '12px 14px', borderRadius: 12, border: '1px solid rgba(255,255,255,0.06)' }}>
                 Canvas: <strong>{imgW || '-'} × {imgH || '-'}</strong>
               </div>
 
-              <div style={{ background: '#0f172a', padding: '12px 14px', borderRadius: 12, border: '1px solid rgba(255,255,255,0.06)' }}>
+              <div style={{ background: 'rgba(15,23,42,0.85)', padding: '12px 14px', borderRadius: 12, border: '1px solid rgba(255,255,255,0.06)' }}>
                 Preview Size: <strong>{Math.round(previewSize * 100)}%</strong>
               </div>
 
-              <div style={{ background: '#0f172a', padding: '12px 14px', borderRadius: 12, border: '1px solid rgba(255,255,255,0.06)' }}>
+              <div style={{ background: 'rgba(15,23,42,0.85)', padding: '12px 14px', borderRadius: 12, border: '1px solid rgba(255,255,255,0.06)' }}>
                 Inspect Zoom: <strong>{inspectZoom * 100}%</strong>
               </div>
 
-              <div style={{ background: '#0f172a', padding: '12px 14px', borderRadius: 12, border: '1px solid rgba(255,255,255,0.06)' }}>
+              <div style={{ background: 'rgba(15,23,42,0.85)', padding: '12px 14px', borderRadius: 12, border: '1px solid rgba(255,255,255,0.06)' }}>
                 Practical DPI: <strong>{practicalPrintDpi || '-'}</strong>
               </div>
             </div>
