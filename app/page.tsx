@@ -1377,7 +1377,7 @@ const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
 <div style={{ fontSize: 14, color: '#ffffff', fontWeight: 700 }}>
   PRINT READINESS
 </div>
-  <div style={{ fontSize: 36, fontWeight: 800, color:
+  <div style={{ fontSize: 42, fontWeight: 800, color:
   printScore >= 80
     ? '#22c55e'
     : printScore >= 50
