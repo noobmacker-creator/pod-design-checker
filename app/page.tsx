@@ -1369,7 +1369,7 @@ const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
     marginBottom: 16,
     padding: 16,
     borderRadius: 14,
-    background: '#020617',
+    background: 'linear-gradient(180deg, #020617 0%, #020617 60%, #020617cc 100%)',
     border: '2px solid rgba(56,189,248,0.6)',
     textAlign: 'center',
   }}
