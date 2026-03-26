@@ -1686,7 +1686,8 @@ const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
                   marginTop: 12,
                   padding: 14,
                   borderRadius: 14,
-                  background: 'rgba(15,23,42,0.85)',
+                  background: 'rgba(15,23,42,0.75)',
+backdropFilter: 'blur(4px)',
                   border: '1px solid rgba(34,197,94,0.35)',
                 }}
               >
