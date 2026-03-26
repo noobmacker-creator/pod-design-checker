@@ -1370,7 +1370,7 @@ const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
     padding: 16,
     borderRadius: 14,
     background: '#020617',
-    border: '2px solid #38bdf8',
+    border: '2px solid rgba(56,189,248,0.6)',
     textAlign: 'center',
   }}
 >
