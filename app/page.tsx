@@ -1305,7 +1305,9 @@ const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
             <span style={{ color: '#cbd5e1', fontWeight: 700 }}>View Mode:</span>
 
             <button onClick={() => { setViewMode('pod'); setActionMessage('POD Canvas view selected.'); }} disabled={!img}>POD Canvas</button>
-            <button onClick={() => { setViewMode('design'); setActionMessage('Zoom & Inspect view selected.'); }} disabled={!img}>Zoom & Inspect</button>
+            <button onClick={() => { setViewMode('design'); setActionMessage('Design & Zoom view selected.'); }} disabled={!img}>
+  Design & Zoom
+</button>
             <button onClick={() => { setViewMode('shirt'); setActionMessage('Shirt Preview view selected.'); }} disabled={!img}>Shirt Preview</button>
           </div>
 
