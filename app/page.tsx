@@ -1771,7 +1771,7 @@ const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
               </div>
 
               <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
-                <span style={{ fontWeight: 700, color: '#bae6fd' }}>Inspect Zoom</span>
+              <span style={{ fontWeight: 700, color: '#bae6fd' }}>Detail Zoom</span>
                 {[1, 2, 4, 8].map((z) => (
                   <button
                     key={z}
