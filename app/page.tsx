@@ -1466,7 +1466,7 @@ const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
   }}
 />
 
-<div style={{ marginBottom: hasTransparency === false || printScore < 60 || 100 - printScore >= 30 ? 8 : 6 }}>
+<div style={{ marginBottom: hasTransparency === false || printScore < 60 || 100 - printScore >= 30 ? 10 : 6, fontWeight: 600 }}>
     Main Issue:{' '}
     {!img
       ? '—'
