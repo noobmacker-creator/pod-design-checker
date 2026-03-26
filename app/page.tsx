@@ -1827,7 +1827,7 @@ backdropFilter: 'blur(4px)',
                 border: '2px solid #38bdf8',
                 boxShadow: '0 0 0 1px rgba(56,189,248,0.25), inset 0 0 30px rgba(8,47,73,0.25)',
                 background: '#020617',
-                padding: 16,
+                padding: 20,
               }}
             >
               <div
