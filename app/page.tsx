@@ -1388,7 +1388,7 @@ const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
   style={{
     marginTop: 12,
     width: '100%',
-    height: 14,
+    height: 18,
     borderRadius: 999,
     background: '#0f172a',
     overflow: 'hidden',
