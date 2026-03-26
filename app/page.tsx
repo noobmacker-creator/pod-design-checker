@@ -1285,7 +1285,7 @@ const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
 {showMoreFixes && (
   <>
-    <button onClick={handleFixCanvas} disabled={!img}>Fix Size</button>
+    <button onClick={handleFixCanvas} disabled={!img}>Fit to Canvas</button>
     <button onClick={handleCenterArtwork} disabled={!img}>Center</button>
     <button onClick={handleAutoFixSafetyBorder} disabled={!img || !originalBounds}>Fix Border</button>
     <button onClick={handleAutoFixTooSmall} disabled={!img || !originalBounds}>Fix Too Small</button>
