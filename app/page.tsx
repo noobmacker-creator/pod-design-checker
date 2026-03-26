@@ -1359,7 +1359,9 @@ const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
               alignSelf: 'start',
             }}
           >
-            <h2 style={{ marginTop: 0, marginBottom: 8, fontSize: 24, fontWeight: 800, letterSpacing: 0.3 }}>Scan Results</h2>
+            <h2 style={{ marginTop: 0, marginBottom: 8, fontSize: 24, fontWeight: 800, letterSpacing: 0.6 }}>
+  Scan Results
+</h2>
             <p style={{ marginTop: 0, marginBottom: 20, color: '#cbd5e1', lineHeight: 1.6, fontSize: 14 }}>
   Review critical issues first, then warnings, before exporting your final print file.
 </p>
