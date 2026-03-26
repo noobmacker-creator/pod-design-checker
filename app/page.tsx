@@ -1500,16 +1500,7 @@ const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
 
 
-  <div style={{ marginBottom: 6 }}>
-    Confidence:{' '}
-    {!img
-      ? '—'
-      : printScore >= 80
-      ? 'High'
-      : printScore >= 50
-      ? 'Medium'
-      : 'Low'}
-  </div>
+  
 </div>
   </div>
 </div>
