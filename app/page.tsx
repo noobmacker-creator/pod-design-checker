@@ -1406,7 +1406,7 @@ const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
           : printScore >= 50
           ? '#f59e0b'
           : '#ef4444',
-      transition: 'width 0.3s ease',
+          transition: 'width 0.5s ease',
     }}
   />
 </div>
