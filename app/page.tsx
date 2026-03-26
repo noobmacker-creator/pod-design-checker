@@ -1767,7 +1767,7 @@ const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
                 marginBottom: 16,
               }}
             >
-              <h2 style={{ margin: 0, fontSize: 24 }}>Preview</h2>
+              <h2 style={{ margin: 0, fontSize: 24, fontWeight: 800 }}>Preview</h2>
 
               <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
                 <span style={{ fontWeight: 700, color: '#bae6fd' }}>Preview Size</span>
