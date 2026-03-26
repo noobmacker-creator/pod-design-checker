@@ -1315,7 +1315,7 @@ const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
             style={{
               marginTop: 14,
               padding: 14,
-              borderRadius: 14,
+              borderRadius: 18,
               background: 'rgba(8,47,73,0.6)',
               border: '1px solid rgba(56,189,248,0.35)',
               color: '#e0f2fe',
