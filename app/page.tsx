@@ -1467,7 +1467,7 @@ const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
 />
 
 <div style={{ marginBottom: hasTransparency === false || printScore < 60 || 100 - printScore >= 30 ? 10 : 6, fontWeight: 600 }}>
-<div style={{ padding: 16, borderRadius: 16, background: 'rgba(15,23,42,0.55)', backdropFilter: 'blur(6px)', border: '1px solid rgba(255,255,255,0.12)' }}>
+<div style={{ padding: 18, borderRadius: 16, background: 'rgba(15,23,42,0.55)', backdropFilter: 'blur(6px)', border: '1px solid rgba(255,255,255,0.12)' }}>
     Main Issue:{' '}
     {!img
       ? '—'
