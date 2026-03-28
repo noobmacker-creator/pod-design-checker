@@ -341,6 +341,43 @@ function estimateThinLines(imageData: ImageData) {
   return (thinHits / checked) * 100;
 }
 
+function resizeImage(file: File) {
+  return new Promise<HTMLImageElement>((resolve) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d')!;
+
+      let w = img.width;
+      let h = img.height;
+
+      const max = 1200;
+
+      if (w > max || h > max) {
+        if (w > h) {
+          h = h * (max / w);
+          w = max;
+        } else {
+          w = w * (max / h);
+          h = max;
+        }
+      }
+
+      canvas.width = w;
+      canvas.height = h;
+
+      ctx.drawImage(img, 0, 0, w, h);
+
+      const newImg = new Image();
+      newImg.onload = () => resolve(newImg);
+      newImg.src = canvas.toDataURL('image/png');
+    };
+
+    img.src = url;
+  });
+}
 function getEffectiveArtBounds(
   originalBounds: Bounds | null,
   transform: { scale: number; offsetX: number; offsetY: number }
@@ -959,25 +996,25 @@ const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
     const url = URL.createObjectURL(selected);
     setFileUrl(url);
 
-    const image = new Image();
-    image.onload = () => {
-      setImg(image);
-      setImgW(image.naturalWidth);
-      setImgH(image.naturalHeight);
-
-      setTransform({
-        scale: 1,
-        offsetX: Math.round((CANVAS_W - image.naturalWidth) / 2),
-        offsetY: Math.round((CANVAS_H - image.naturalHeight) / 2),
-      });
-
-      setPreviewSize(DEFAULT_PREVIEW_SIZE);
-      setInspectZoom(1);
-      setViewMode('pod');
-      setActionMessage('Design uploaded and centered on the POD canvas.');
-      setDownloadMessage('');
-    };
-    image.src = url;
+    setActionMessage('Scanning design...');
+    const image = await resizeImage(selected);
+    
+    setImg(image);
+    setImgW(image.naturalWidth);
+    setImgH(image.naturalHeight);
+    
+    setTransform({
+      scale: 1,
+      offsetX: Math.round((CANVAS_W - image.naturalWidth) / 2),
+      offsetY: Math.round((CANVAS_H - image.naturalHeight) / 2),
+    });
+    
+    setPreviewSize(DEFAULT_PREVIEW_SIZE);
+    setInspectZoom(1);
+    setViewMode('pod');
+    setActionMessage('Design uploaded and centered on the POD canvas.');
+    setDownloadMessage('');
+    
   }
 
   function handleFixCanvas() {
