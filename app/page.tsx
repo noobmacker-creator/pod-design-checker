@@ -353,7 +353,7 @@ function resizeImage(file: File) {
       let w = img.width;
       let h = img.height;
 
-      const max = 1200;
+      const max = 2000;
 
       if (w > max || h > max) {
         if (w > h) {
@@ -984,37 +984,43 @@ const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const selected = e.target.files?.[0];
     if (!selected) return;
-
+  
     if (fileUrl) URL.revokeObjectURL(fileUrl);
-
+  
     setFile(selected);
     setFileSize(selected.size);
-
+  
     const arrayBuffer = await selected.arrayBuffer();
     setDpiMetadata(getImageDpi(selected, arrayBuffer));
-
+  
     const url = URL.createObjectURL(selected);
     setFileUrl(url);
-
+  
     setActionMessage('Scanning design...');
-    const image = await resizeImage(selected);
-    
-    setImg(image);
-    setImgW(image.naturalWidth);
-    setImgH(image.naturalHeight);
-    
-    setTransform({
-      scale: 1,
-      offsetX: Math.round((CANVAS_W - image.naturalWidth) / 2),
-      offsetY: Math.round((CANVAS_H - image.naturalHeight) / 2),
-    });
-    
-    setPreviewSize(DEFAULT_PREVIEW_SIZE);
-    setInspectZoom(1);
-    setViewMode('pod');
-    setActionMessage('Design uploaded and centered on the POD canvas.');
-    setDownloadMessage('');
-    
+  
+    const resized = await resizeImage(selected);
+  
+    const original = new Image();
+    original.src = url;
+  
+    original.onload = () => {
+      setImg(resized);
+  
+      setImgW(original.naturalWidth);
+      setImgH(original.naturalHeight);
+  
+      setTransform({
+        scale: 1,
+        offsetX: Math.round((CANVAS_W - resized.naturalWidth) / 2),
+        offsetY: Math.round((CANVAS_H - resized.naturalHeight) / 2),
+      });
+  
+      setPreviewSize(DEFAULT_PREVIEW_SIZE);
+      setInspectZoom(1);
+      setViewMode('pod');
+      setActionMessage('Design uploaded and centered on the POD canvas.');
+      setDownloadMessage('');
+    };
   }
 
   function handleFixCanvas() {
