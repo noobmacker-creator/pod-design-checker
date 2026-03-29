@@ -997,7 +997,27 @@ const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
     setFileUrl(url);
 
     setActionMessage('Scanning design...');
-    const image = await resizeImage(selected);
+    const image = new Image();
+image.src = url;
+
+image.onload = () => {
+  setImg(image);
+  setImgW(image.naturalWidth);
+  setImgH(image.naturalHeight);
+
+  setTransform({
+    scale: 1,
+    offsetX: Math.round((CANVAS_W - image.naturalWidth) / 2),
+    offsetY: Math.round((CANVAS_H - image.naturalHeight) / 2),
+  });
+
+  setPreviewSize(DEFAULT_PREVIEW_SIZE);
+  setInspectZoom(1);
+  setViewMode('pod');
+  setActionMessage('Design uploaded and centered on the POD canvas.');
+  setDownloadMessage('');
+};
+return;
     
     setImg(image);
     setImgW(image.naturalWidth);
