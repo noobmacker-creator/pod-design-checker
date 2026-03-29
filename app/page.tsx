@@ -489,7 +489,7 @@ const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
     if (!ctx) return;
 
     canvas.width = img.naturalWidth;
-    canvas.height = img.naturalHeight;
+canvas.height = img.naturalHeight;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(img, 0, 0);
 
@@ -644,8 +644,10 @@ const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
     if (minEdge >= SAFE_BORDER) {
       return {
-        status: 'warn' as CheckStatus,
-        message: `Artwork is inside the ${SAFE_BORDER}px border, but still close to the edge.`,
+        
+      
+status: 'warn' as CheckStatus,
+message: "Safe but close to edge. For best results, use quick fix Auto ."
       };
     }
 
