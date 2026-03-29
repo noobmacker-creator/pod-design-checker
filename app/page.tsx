@@ -1019,9 +1019,7 @@ image.onload = () => {
 };
 return;
     
-    setImg(image);
-    setImgW(image.naturalWidth);
-    setImgH(image.naturalHeight);
+    
     
     setTransform({
       scale: 1,
