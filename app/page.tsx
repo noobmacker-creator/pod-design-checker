@@ -495,7 +495,7 @@ canvas.height = img.naturalHeight;
 
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
-    const res = detectBoundsAndCoverage(imageData, 8);
+    const res = detectBoundsAndCoverage(imageData, 10);
     setOriginalBounds(res.bounds);
     setCoverage(res.coverage);
     setSpecks(detectSpecks(imageData, 120, 3));
@@ -749,14 +749,20 @@ message: "Safe but close to edge. For best results, use quick fix Auto ."
         status: safetyBorderStatus.status,
         message: safetyBorderStatus.message,
       },
+      
       {
         label: 'Speck Detector',
         status: specks === 0 ? 'pass' : specks < 25 ? 'warn' : 'fail',
-        message: specks === 0 ? 'No obvious specks detected.' : `${specks} possible tiny specks detected.`,
-      },
-      {
-        label: 'Line Thickness',
-        status: thinLinePercent < 8 ? 'pass' : thinLinePercent < 18 ? 'warn' : 'fail',
+        message:
+          specks === 0
+            ? 'No obvious specks detected.'
+            : specks <= 2
+            ? 'Specks detected. Clean up small stray marks before printing.'
+            : `${specks} specks detected. Clean your design before printing.`,
+          },
+          {
+            label: 'Line Thickness',
+            status: thinLinePercent < 8 ? 'pass' : thinLinePercent < 18 ? 'warn' : 'fail',
         message:
           thinLinePercent < 8
             ? 'Line thickness looks healthy for print.'
