@@ -1367,6 +1367,72 @@ return;
             }}
           >
             <h2 style={{ marginTop: 0, marginBottom: 8, fontSize: 24, fontWeight: 800, letterSpacing: 0.6 }}>
+            <div
+  style={{
+    marginBottom: 16,
+    padding: 16,
+    borderRadius: 14,
+    background: 'linear-gradient(180deg, #020617 0%, #020617 60%, #020617cc 100%)',
+    border: '2px solid rgba(56,189,248,0.6)',
+    textAlign: 'center',
+  }}
+>
+  <div style={{ fontSize: 14, color: '#ffffff', fontWeight: 700 }}>
+    PRINT READINESS
+  </div>
+
+  <div
+    style={{
+      fontSize: 42,
+      fontWeight: 800,
+      color:
+        printScore >= 80
+          ? '#22c55e'
+          : printScore >= 50
+          ? '#f59e0b'
+          : '#ef4444',
+    }}
+  >
+    {printScore}%
+  </div>
+
+  <div
+    style={{
+      marginTop: 12,
+      width: '100%',
+      height: 18,
+      borderRadius: 999,
+      background: 'rgba(15,23,42,0.85)',
+      overflow: 'hidden',
+      border: '1px solid rgba(255,255,255,0.08)',
+    }}
+  >
+    <div
+      style={{
+        width: `${printScore}%`,
+        height: '100%',
+        borderRadius: 999,
+        background:
+          printScore >= 80
+            ? '#22c55e'
+            : printScore >= 50
+            ? '#f59e0b'
+            : '#ef4444',
+        transition: 'width 0.5s ease',
+      }}
+    />
+  </div>
+
+  <div style={{ marginTop: 12, fontWeight: 800 }}>
+    {!img
+      ? 'UPLOAD A DESIGN TO BEGIN'
+      : hasTransparency === false || printScore < 60
+      ? 'HIGH RISK'
+      : 100 - printScore >= 30
+      ? 'NEEDS FIX'
+      : 'READY FOR PRINT'}
+  </div>
+</div>
   Scan Results
 </h2>
             <p style={{ marginTop: 0, marginBottom: 20, color: '#cbd5e1', lineHeight: 1.6, fontSize: 15 }}>
