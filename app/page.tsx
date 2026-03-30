@@ -1548,9 +1548,9 @@ return;
         <div
           key={`${item.label}-fail-${index}`}
           style={{
-            marginBottom: 12,
-            borderRadius: 14,
-            padding: 14,
+            marginBottom: 8,
+            borderRadius: 10,
+            padding: 10,
             background: 'linear-gradient(180deg, rgba(127,29,29,0.55), rgba(15,23,42,0.92))',
             border: `1px solid ${statusColor(item.status)}66`,
           }}
@@ -1605,9 +1605,9 @@ return;
         <div
           key={`${item.label}-warn-${index}`}
           style={{
-            marginBottom: 12,
-            borderRadius: 14,
-            padding: 14,
+            marginBottom: 8,
+            borderRadius: 10,
+            padding: 10,
             background: 'linear-gradient(180deg, rgba(154,52,18,0.45), rgba(15,23,42,0.92))',
             border: `1px solid ${statusColor(item.status)}66`,
           }}
@@ -1652,9 +1652,9 @@ return;
         <div
           key={`${item.label}-pass-${index}`}
           style={{
-            marginBottom: 12,
-            borderRadius: 14,
-            padding: 14,
+            marginBottom: 8,
+            borderRadius: 10,
+            padding: 10,
             background:
               item.status === 'pass'
                 ? 'linear-gradient(180deg, rgba(20,83,45,0.45), rgba(15,23,42,0.92))'
