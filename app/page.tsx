@@ -1799,7 +1799,7 @@ backdropFilter: 'blur(4px)',
                 display: 'flex',
                 gap: 14,
                 flexWrap: 'wrap',
-                marginBottom: 16,
+                marginBottom: 10,
               }}
             >
               <div style={{ background: 'rgba(15,23,42,0.85)', padding: '12px 14px', borderRadius: 12, border: '1px solid rgba(255,255,255,0.06)' }}>
@@ -1828,7 +1828,7 @@ backdropFilter: 'blur(4px)',
                 border: '2px solid #38bdf8',
                 boxShadow: '0 0 0 1px rgba(56,189,248,0.25), inset 0 0 30px rgba(8,47,73,0.25)',
                 background: '#020617',
-                padding: 20,
+                padding: 12,
               }}
             >
               <div
