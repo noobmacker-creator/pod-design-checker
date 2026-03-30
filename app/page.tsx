@@ -1352,15 +1352,15 @@ return;
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: '420px 1fr',
-            gap: 20,
+            gridTemplateColumns: '360px minmax(0, 1fr)',
+            gap: 16,
           }}
         >
           <div
             style={{
               border: '1px solid rgba(255,255,255,0.08)',
               borderRadius: 20,
-              padding: 20,
+              padding: 1,
               background: 'rgba(255,255,255,0.04)',
               boxShadow: '0 20px 60px rgba(0,0,0,0.28)',
               alignSelf: 'start',
