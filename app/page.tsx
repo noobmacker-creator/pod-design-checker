@@ -1242,7 +1242,7 @@ return;
         }
       `}</style>
 
-      <div style={{ maxWidth: 1520, margin: '0 auto' }}>
+<div style={{ width: '100%', padding: '0 20px' }}>
         <div
           style={{
             border: '1px solid rgba(255,255,255,0.08)',
