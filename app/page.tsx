@@ -1366,7 +1366,7 @@ return;
               alignSelf: 'start',
             }}
           >
-           <h2 style={{ marginTop: 0, marginBottom: 8, fontSize: 24, fontWeight: 800, letterSpacing: 0.6 }}>
+           <h2 style={{ marginTop: 0, marginBottom: 6, fontSize: 20, fontWeight: 800, letterSpacing: 0.4 }}>
   Scan Results
 </h2>
             <p style={{ marginTop: 0, marginBottom: 20, color: '#cbd5e1', lineHeight: 1.6, fontSize: 15 }}>
@@ -1375,9 +1375,9 @@ return;
             
             <div
   style={{
-    marginBottom: 16,
-    padding: 16,
-    borderRadius: 14,
+    marginBottom: 10,
+    padding: 12,
+    borderRadius: 10,
     background: 'linear-gradient(180deg, #020617 0%, #020617 60%, #020617cc 100%)',
     border: '2px solid rgba(56,189,248,0.6)',
     textAlign: 'center',
