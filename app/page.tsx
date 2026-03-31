@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 type CheckStatus = 'pass' | 'warn' | 'fail' | 'info';
-type ViewMode = 'pod' | 'design' | 'shirt';
+type ViewMode = 'pod' | 'design' | 'shirt' | 'mockup';
 type PreviewSize = number;
 
 type CheckItem = {
@@ -416,6 +416,7 @@ export default function Page() {
   const [showMoreFixes, setShowMoreFixes] = useState(false);
   const [fileUrl, setFileUrl] = useState('');
   const [img, setImg] = useState<HTMLImageElement | null>(null);
+  const [shirtImg, setShirtImg] = useState<HTMLImageElement | null>(null);
 
   const [imgW, setImgW] = useState(0);
   const [imgH, setImgH] = useState(0);
@@ -472,6 +473,22 @@ const [downloadMessage, setDownloadMessage] = useState('');
 
 const previewCanvasRef = useRef<HTMLCanvasElement | null>(null);
 const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
+useEffect(() => {
+  const shirt = new Image();
+  shirt.src = '/mockups/shirt-front.png';
+
+  shirt.onload = () => {
+    setShirtImg(shirt);
+  };
+}, []);
+useEffect(() => {
+  const shirt = new Image();
+  shirt.src = '/mockups/shirt-front.png';
+
+  shirt.onload = () => {
+    setShirtImg(shirt);
+  };
+}, []);
 
   useEffect(() => {
     return () => {
@@ -932,8 +949,9 @@ message: "Safe but close to edge. For best results, use quick fix Auto ."
       canvas.height = SHIRT_H;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      ctx.fillStyle = '#dbe4f0';
-      ctx.fillRect(0, 0, SHIRT_W, SHIRT_H);
+      if (shirtImg) {
+        ctx.drawImage(shirtImg, 0, 0, SHIRT_W, SHIRT_H);
+      }
 
       ctx.fillStyle = '#f8fafc';
       ctx.beginPath();
@@ -987,7 +1005,7 @@ message: "Safe but close to edge. For best results, use quick fix Auto ."
 
   useEffect(() => {
     drawPreview();
-  }, [img, transform, effectiveBounds, viewMode, designCanvasSize]);
+  }, [img, shirtImg, transform, effectiveBounds, viewMode, designCanvasSize]);
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const selected = e.target.files?.[0];
