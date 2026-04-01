@@ -417,6 +417,10 @@ export default function Page() {
   const [fileUrl, setFileUrl] = useState('');
   const [img, setImg] = useState<HTMLImageElement | null>(null);
   const [shirtImg, setShirtImg] = useState<HTMLImageElement | null>(null);
+  const [mockupOffsetX, setMockupOffsetX] = useState(0);
+const [mockupOffsetY, setMockupOffsetY] = useState(0);
+const [mockupScale, setMockupScale] = useState(1);
+const [isDraggingMockup, setIsDraggingMockup] = useState(false);
 
   const [imgW, setImgW] = useState(0);
   const [imgH, setImgH] = useState(0);
