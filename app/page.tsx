@@ -988,10 +988,10 @@ message: "Safe but close to edge. For best results, use quick fix Auto ."
       const mapX = SHIRT_PRINT_W / CANVAS_W;
       const mapY = SHIRT_PRINT_H / CANVAS_H;
 
-      const drawW = img.naturalWidth * transform.scale * mapX;
-      const drawH = img.naturalHeight * transform.scale * mapY;
-      const drawX = SHIRT_PRINT_X + transform.offsetX * mapX;
-      const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY;
+      const drawW = img.naturalWidth * transform.scale * mapX * mockupScale;
+const drawH = img.naturalHeight * transform.scale * mapY * mockupScale;
+const drawX = SHIRT_PRINT_X + transform.offsetX * mapX + mockupOffsetX;
+const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
 
       ctx.drawImage(img, drawX, drawY, drawW, drawH);
 
