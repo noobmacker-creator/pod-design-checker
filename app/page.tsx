@@ -1390,7 +1390,7 @@ setPreviewSize(0.5);
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: '360px minmax(0, 1fr)',
+            gridTemplateColumns: '360px minmax(0, 1fr) 360px',
             gap: 16,
           }}
         >
@@ -1889,6 +1889,34 @@ backdropFilter: 'blur(4px)',
             </div>
           </div>
         </div>
+        <div
+  style={{
+    border: '1px solid rgba(255,255,255,0.08)',
+    borderRadius: 20,
+    padding: 20,
+    background: 'rgba(255,255,255,0.04)',
+    boxShadow: '0 25px 70px rgba(0,0,0,0.35)',
+  }}
+>
+  <h2 style={{ margin: 0, fontSize: 24, fontWeight: 800 }}>
+    Shirt Preview
+  </h2>
+
+  <div
+    style={{
+      marginTop: 16,
+      height: 500,
+      borderRadius: 18,
+      border: '2px solid #38bdf8',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      color: '#94a3b8',
+    }}
+  >
+    Shirt preview coming next
+  </div>
+</div>
 
         <canvas ref={analysisCanvasRef} style={{ display: 'none' }} />
       </div>
