@@ -420,7 +420,7 @@ export default function Page() {
   const [mockupOffsetX, setMockupOffsetX] = useState(0);
 const [mockupOffsetY, setMockupOffsetY] = useState(0);
 const [mockupScale, setMockupScale] = useState(1);
-const [isDraggingMockup, setIsDraggingMockup] = useState(false);
+
 
   const [imgW, setImgW] = useState(0);
   const [imgH, setImgH] = useState(0);
@@ -1016,11 +1016,11 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
       setMockupOffsetY(0);
       setMockupScale(1);
   
-      setPreviewSize(DEFAULT_PREVIEW_SIZE);
       setInspectZoom(1);
-      setActionMessage('Design uploaded and centered on the POD canvas.');
-      setDownloadMessage('');
-      setViewMode('shirt');
+setActionMessage('Design uploaded and centered on the POD canvas.');
+setDownloadMessage('');
+setViewMode('shirt');
+setPreviewSize(0.5);
     };
   
     image.onerror = () => {
