@@ -950,29 +950,7 @@ message: "Safe but close to edge. For best results, use quick fix Auto ."
         ctx.drawImage(shirtImg, 0, 0, SHIRT_W, SHIRT_H);
       }
 
-      ctx.fillStyle = '#f8fafc';
-      ctx.beginPath();
-      ctx.moveTo(520, 190);
-      ctx.lineTo(680, 130);
-      ctx.lineTo(920, 130);
-      ctx.lineTo(1080, 190);
-      ctx.lineTo(1240, 360);
-      ctx.lineTo(1160, 580);
-      ctx.lineTo(1110, 1680);
-      ctx.lineTo(490, 1680);
-      ctx.lineTo(440, 580);
-      ctx.lineTo(360, 360);
-      ctx.closePath();
-      ctx.fill();
-
-      ctx.fillStyle = '#e2e8f0';
-      ctx.beginPath();
-      ctx.moveTo(710, 190);
-      ctx.quadraticCurveTo(800, 250, 890, 190);
-      ctx.lineTo(860, 150);
-      ctx.quadraticCurveTo(800, 195, 740, 150);
-      ctx.closePath();
-      ctx.fill();
+      
 
       ctx.strokeStyle = '#60a5fa';
       ctx.lineWidth = 4;
