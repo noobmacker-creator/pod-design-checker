@@ -27,13 +27,13 @@ const SAFE_BORDER = 6;
 const SAFE_BOX = 180;
 const AUTO_FIX_MARGIN = 60;
 
-const VIEWPORT_W = 920;
-const VIEWPORT_H = 920;
-const DEFAULT_PREVIEW_SIZE =
-  Math.min(VIEWPORT_W / CANVAS_W, VIEWPORT_H / CANVAS_H) * 0.9;
+const VIEWPORT_W = 1100;
+const VIEWPORT_H = 1100;
 
-const SHIRT_W = 1600;
-const SHIRT_H = 1900;
+const DEFAULT_PREVIEW_SIZE = 0.45;
+
+  const SHIRT_W = 1900;
+  const SHIRT_H = 2250;
 const SHIRT_PRINT_X = 400;
 const SHIRT_PRINT_Y = 420;
 const SHIRT_PRINT_W = 800;
