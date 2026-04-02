@@ -1302,7 +1302,16 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
             <button onClick={() => { setViewMode('design'); setActionMessage('Design & Zoom view selected.'); }} disabled={!img}>
   Design & Zoom
 </button>
-<button onClick={() => { setViewMode('shirt'); setActionMessage('Shirt Preview selected.'); }} disabled={!img}>Preview on Shirt</button>
+<button
+  onClick={() => {
+    setViewMode('shirt');
+    setPreviewSize(0.5);
+    setActionMessage('Shirt Preview selected.');
+  }}
+  disabled={!img}
+>
+  Preview on Shirt
+</button>
 {viewMode === 'shirt' && img && (
   <div
     style={{
