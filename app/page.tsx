@@ -485,14 +485,7 @@ useEffect(() => {
     setShirtImg(shirt);
   };
 }, []);
-useEffect(() => {
-  const shirt = new Image();
-  shirt.src = '/mockups/shirt-front.png';
 
-  shirt.onload = () => {
-    setShirtImg(shirt);
-  };
-}, []);
 
   useEffect(() => {
     return () => {
@@ -1009,60 +1002,54 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
 
   useEffect(() => {
     drawPreview();
-  }, [img, shirtImg, transform, effectiveBounds, viewMode, designCanvasSize]);
+  }, [img, shirtImg, transform, effectiveBounds, viewMode, designCanvasSize, mockupOffsetX, mockupOffsetY, mockupScale]);
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const selected = e.target.files?.[0];
     if (!selected) return;
-
+  
     if (fileUrl) URL.revokeObjectURL(fileUrl);
-
+  
     setFile(selected);
     setFileSize(selected.size);
-
+  
     const arrayBuffer = await selected.arrayBuffer();
     setDpiMetadata(getImageDpi(selected, arrayBuffer));
-
+  
     const url = URL.createObjectURL(selected);
     setFileUrl(url);
-
+  
     setActionMessage('Scanning design...');
+  
     const image = new Image();
-image.src = url;
-
-image.onload = () => {
-  setImg(image);
-  setImgW(image.naturalWidth);
-  setImgH(image.naturalHeight);
-
-  setTransform({
-    scale: 1,
-    offsetX: Math.round((CANVAS_W - image.naturalWidth) / 2),
-    offsetY: Math.round((CANVAS_H - image.naturalHeight) / 2),
-  });
-
-  setPreviewSize(DEFAULT_PREVIEW_SIZE);
-  setInspectZoom(1);
-  setViewMode('pod');
-  setActionMessage('Design uploaded and centered on the POD canvas.');
-  setDownloadMessage('');
-};
-return;
-    
-    
-    
-    setTransform({
-      scale: 1,
-      offsetX: Math.round((CANVAS_W - image.naturalWidth) / 2),
-      offsetY: Math.round((CANVAS_H - image.naturalHeight) / 2),
-    });
-    
-    setPreviewSize(DEFAULT_PREVIEW_SIZE);
-    setInspectZoom(1);
-    setViewMode('pod');
-    setActionMessage('Design uploaded and centered on the POD canvas.');
-    setDownloadMessage('');
-    
+  
+    image.onload = () => {
+      setImg(image);
+      setImgW(image.naturalWidth);
+      setImgH(image.naturalHeight);
+  
+      setTransform({
+        scale: 1,
+        offsetX: Math.round((CANVAS_W - image.naturalWidth) / 2),
+        offsetY: Math.round((CANVAS_H - image.naturalHeight) / 2),
+      });
+  
+      setMockupOffsetX(0);
+      setMockupOffsetY(0);
+      setMockupScale(1);
+  
+      setPreviewSize(DEFAULT_PREVIEW_SIZE);
+      setInspectZoom(1);
+      setActionMessage('Design uploaded and centered on the POD canvas.');
+      setDownloadMessage('');
+      setViewMode('shirt');
+    };
+  
+    image.onerror = () => {
+      setActionMessage('Could not load that image.');
+    };
+  
+    image.src = url;
   }
 
   function handleFixCanvas() {
