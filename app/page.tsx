@@ -1894,6 +1894,9 @@ justifyContent: 'center',
         </div>
         <div
   style={{
+    width: 'calc(100% - 376px)',
+    marginTop: 16,
+    marginLeft: 376,
     border: '1px solid rgba(255,255,255,0.08)',
     borderRadius: 20,
     padding: 20,
@@ -1907,7 +1910,7 @@ justifyContent: 'center',
 
   <div
     style={{
-      marginTop: 16,
+      marginTop: 0,
       height: 500,
       borderRadius: 18,
       border: '2px solid #38bdf8',
