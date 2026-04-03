@@ -1229,7 +1229,7 @@ setPreviewSize(0.5);
         }
       `}</style>
 
-<div style={{ maxWidth: 1600, margin: '0 auto', padding: '0 20px' }}>
+<div style={{ width: '100%', padding: '0 20px' }}>
         <div
           style={{
             border: '1px solid rgba(255,255,255,0.08)',
@@ -1390,7 +1390,7 @@ setPreviewSize(0.5);
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: '360px minmax(0, 1fr) 360px',
+            gridTemplateColumns: '360px minmax(0, 1fr)',
             gap: 16,
           }}
         >
