@@ -1802,6 +1802,7 @@ backdropFilter: 'blur(4px)',
               background: 'rgba(255,255,255,0.04)',
               boxShadow: '0 25px 70px rgba(0,0,0,0.35)',
               minWidth: 0,
+              height: 'fit-content',
             }}
           >
             <div
