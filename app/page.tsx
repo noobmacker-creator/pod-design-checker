@@ -1909,19 +1909,37 @@ justifyContent: 'center',
   </h2>
 
   <div
+  style={{
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr 200px',
+    gap: 16,
+    marginTop: 0,
+  }}
+>
+<div style={{ height: 400, border: '2px solid #38bdf8', borderRadius: 18 }}>
+  <img
+    src="/mockups/shirt-front.png"
     style={{
-      marginTop: 0,
-      height: 500,
-      borderRadius: 18,
-      border: '2px solid #38bdf8',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      color: '#94a3b8',
+      maxWidth: '100%',
+      maxHeight: '100%',
+      objectFit: 'contain',
     }}
-  >
-    Shirt preview coming next
-  </div>
+  />
+</div>
+
+<div style={{ height: 400, border: '2px solid #38bdf8', borderRadius: 18 }}>
+  <img
+    src="/mockups/shirt-back.png"
+    style={{
+      maxWidth: '100%',
+      maxHeight: '100%',
+      objectFit: 'contain',
+    }}
+  />
+</div>
+
+  <div style={{ height: 400, border: '2px solid #38bdf8', borderRadius: 18 }} />
+</div>
 </div>
 
       <canvas ref={analysisCanvasRef} style={{ display: 'none' }} />
