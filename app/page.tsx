@@ -1916,29 +1916,29 @@ justifyContent: 'center',
     marginTop: 0,
   }}
 >
-<div style={{ height: 400, border: '2px solid #38bdf8', borderRadius: 18 }}>
+<div style={{ height: 400, border: '11px solid #38bdf8', borderRadius: 20 }}>
   <img
     src="/mockups/shirt-front.png"
     style={{
-      maxWidth: '100%',
-      maxHeight: '100%',
+      maxWidth: '101.05%',
+      maxHeight: '101.05%',
       objectFit: 'contain',
     }}
   />
 </div>
 
-<div style={{ height: 400, border: '2px solid #38bdf8', borderRadius: 18 }}>
+<div style={{ height: 400, border: '11px solid #38bdf8', borderRadius: 20 }}>
   <img
     src="/mockups/shirt-back.png"
     style={{
-      maxWidth: '100%',
-      maxHeight: '100%',
+      maxWidth: '101.05%',
+      maxHeight: '101.05%',
       objectFit: 'contain',
     }}
   />
 </div>
 
-  <div style={{ height: 400, border: '2px solid #38bdf8', borderRadius: 18 }} />
+  <div style={{ height: 400, border: '11px solid #38bdf8', borderRadius: 18 }} />
 </div>
 </div>
 
