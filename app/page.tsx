@@ -1006,11 +1006,18 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
       setImgW(image.naturalWidth);
       setImgH(image.naturalHeight);
   
-      setTransform({
-        scale: 1,
-        offsetX: Math.round((CANVAS_W - image.naturalWidth) / 2),
-        offsetY: Math.round((CANVAS_H - image.naturalHeight) / 2),
-      });
+      const scaleX = CANVAS_W / image.naturalWidth;
+const scaleY = CANVAS_H / image.naturalHeight;
+const scale = Math.min(scaleX, scaleY);
+
+const scaledW = image.naturalWidth * scale;
+const scaledH = image.naturalHeight * scale;
+
+setTransform({
+  scale,
+  offsetX: Math.round((CANVAS_W - scaledW) / 2),
+  offsetY: Math.round((CANVAS_H - scaledH) / 2),
+});
   
       setMockupOffsetX(0);
       setMockupOffsetY(0);
@@ -1020,7 +1027,7 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
       setActionMessage('Design uploaded and centered on the POD canvas.');
       setDownloadMessage('');
       setViewMode('design');
-      setPreviewSize(0.25);
+      setPreviewSize(0.15);
     };
   
     image.onerror = () => {
@@ -1860,7 +1867,7 @@ backdropFilter: 'blur(4px)',
             <div
               style={{
                 width: '100%',
-                height: VIEWPORT_H,
+                height: '100vh',
                 overflow: 'auto',
                 borderRadius: 18,
                 border: '2px solid #38bdf8',
