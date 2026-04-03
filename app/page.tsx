@@ -1390,7 +1390,7 @@ setPreviewSize(0.5);
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: '360px minmax(0, 1fr)',
+            gridTemplateColumns: '360px minmax(0, 1fr) 360px',
             gap: 16,
           }}
         >
