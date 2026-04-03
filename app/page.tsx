@@ -1859,7 +1859,7 @@ backdropFilter: 'blur(4px)',
 
             <div
               style={{
-                width: VIEWPORT_W,
+                width: '100%',
                 height: VIEWPORT_H,
                 overflow: 'auto',
                 borderRadius: 18,
@@ -1867,12 +1867,15 @@ backdropFilter: 'blur(4px)',
                 boxShadow: '0 0 0 1px rgba(56,189,248,0.25), inset 0 0 30px rgba(8,47,73,0.25)',
                 background: '#020617',
                 padding: 12,
+                minWidth: 0,
               }}
             >
               <div
                 style={{
-                  width: previewCanvasW * totalScale,
+                  width: '100%',
                   height: previewCanvasH * totalScale,
+                  display: 'flex',
+justifyContent: 'center',
                 }}
               >
                 <canvas
@@ -1917,25 +1920,7 @@ backdropFilter: 'blur(4px)',
     Shirt preview coming next
   </div>
 </div>
-<div
-  style={{
-    border: '1px solid rgba(255,255,255,0.08)',
-    borderRadius: 20,
-    padding: 20,
-    background: 'rgba(255,255,255,0.04)',
-    boxShadow: '0 25px 70px rgba(0,0,0,0.35)',
-    minWidth: 0,
-  }}
->
-  <h2 style={{ margin: 0, fontSize: 24, fontWeight: 800 }}>
-    Right Panel
-  </h2>
 
-  <div style={{ marginTop: 12, color: '#94a3b8' }}>
-    Placeholder
-  </div>
-  
-      </div>
       <canvas ref={analysisCanvasRef} style={{ display: 'none' }} />
       </div>
     </main>
