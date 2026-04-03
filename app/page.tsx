@@ -1911,7 +1911,7 @@ justifyContent: 'center',
   <div
   style={{
     display: 'grid',
-    gridTemplateColumns: '1fr 1fr 200px',
+    gridTemplateColumns: '1fr 1fr 540px',
     gap: 16,
     marginTop: 0,
   }}
