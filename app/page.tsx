@@ -1017,10 +1017,10 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
       setMockupScale(1);
   
       setInspectZoom(1);
-setActionMessage('Design uploaded and centered on the POD canvas.');
-setDownloadMessage('');
-setViewMode('shirt');
-setPreviewSize(0.5);
+      setActionMessage('Design uploaded and centered on the POD canvas.');
+      setDownloadMessage('');
+      setViewMode('design');
+      setPreviewSize(0.25);
     };
   
     image.onerror = () => {
