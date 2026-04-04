@@ -1900,56 +1900,7 @@ justifyContent: 'center',
             </div>
           </div>
         </div>
-        <div
-  style={{
-    width: 'calc(100% - 376px)',
-    marginTop: 16,
-    marginLeft: 376,
-    border: '1px solid rgba(255,255,255,0.08)',
-    borderRadius: 20,
-    padding: 20,
-    background: 'rgba(255,255,255,0.04)',
-    boxShadow: '0 25px 70px rgba(0,0,0,0.35)',
-  }}
->
-  <h2 style={{ margin: 0, fontSize: 24, fontWeight: 800 }}>
-    Shirt Preview
-  </h2>
-
-  <div
-  style={{
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr 540px',
-    gap: 16,
-    marginTop: 0,
-  }}
->
-<div style={{ height: 400, border: '11px solid #38bdf8', borderRadius: 20 }}>
-  <img
-    src="/mockups/shirt-front.png"
-    style={{
-      maxWidth: '101.05%',
-      maxHeight: '101.05%',
-      objectFit: 'contain',
-    }}
-  />
-</div>
-
-<div style={{ height: 400, border: '11px solid #38bdf8', borderRadius: 20 }}>
-  <img
-    src="/mockups/shirt-back.png"
-    style={{
-      maxWidth: '101.05%',
-      maxHeight: '101.05%',
-      objectFit: 'contain',
-    }}
-  />
-</div>
-
-  <div style={{ height: 400, border: '11px solid #38bdf8', borderRadius: 18 }} />
-</div>
-</div>
-
+        
       <canvas ref={analysisCanvasRef} style={{ display: 'none' }} />
       </div>
     </main>
