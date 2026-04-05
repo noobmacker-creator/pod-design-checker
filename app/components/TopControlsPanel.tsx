@@ -130,59 +130,9 @@ export default function TopControlsPanel({
         <button onClick={() => { setViewMode('design'); setActionMessage('Design & Zoom view selected.'); }} disabled={!img}>
           Design & Zoom
         </button>
-        <button
-          onClick={() => {
-            setViewMode('shirt');
-            setPreviewSize(0.5);
-            setActionMessage('Shirt Preview selected.');
-          }}
-          disabled={!img}
-        >
-          Preview on Shirt
-        </button>
+        
 
-        {viewMode === 'shirt' && img && (
-          <div
-            style={{
-              marginTop: 12,
-              display: 'flex',
-              gap: 8,
-              flexWrap: 'wrap',
-              alignItems: 'center',
-            }}
-          >
-            <span style={{ fontWeight: 800, color: '#bae6fd' }}>Mockup Tools</span>
-
-            <button
-              onClick={() => {
-                setMockupScale(1);
-                setMockupOffsetX(0);
-                setMockupOffsetY(0);
-              }}
-            >
-              Reset
-            </button>
-
-            <button
-              onClick={() => {
-                setMockupOffsetX(0);
-                setMockupOffsetY(0);
-              }}
-            >
-              Center on Shirt
-            </button>
-
-            <button
-              onClick={() => {
-                setMockupScale(0.9);
-                setMockupOffsetX(0);
-                setMockupOffsetY(0);
-              }}
-            >
-              Fit to Shirt
-            </button>
-          </div>
-        )}
+        
       </div>
 
       <div
