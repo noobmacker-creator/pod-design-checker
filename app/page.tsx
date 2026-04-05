@@ -947,8 +947,8 @@ setTransform({
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: '360px minmax(0, 1fr)',
-            gap: 16,
+            gridTemplateColumns: '360px minmax(0, 1fr) 360px',
+gap: 16,
           }}
         >
           <div
@@ -1358,6 +1358,21 @@ backdropFilter: 'blur(4px)',
   setInspectZoom={setInspectZoom}
   setActionMessage={setActionMessage}
 />
+<div
+  style={{
+    border: '1px solid rgba(255,255,255,0.08)',
+    borderRadius: 20,
+    padding: 20,
+    background: 'rgba(255,255,255,0.04)',
+    boxShadow: '0 25px 70px rgba(0,0,0,0.35)',
+    minWidth: 0,
+  }}
+>
+  <h2 style={{ margin: 0, fontSize: 20, fontWeight: 800 }}>Right Panel</h2>
+  <p style={{ marginTop: 10, color: '#cbd5e1' }}>
+    This is the new 3rd child.
+  </p>
+</div>
         </div>
         
       <canvas ref={analysisCanvasRef} style={{ display: 'none' }} />
