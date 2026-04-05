@@ -16,6 +16,7 @@ import {
 import type { CheckStatus, ViewMode, PreviewSize, CheckItem } from './lib/podCheckerTypes';
 import ScanResultsPanel from './components/ScanResultsPanel';
 import DesignPreviewPanel from './components/DesignPreviewPanel';
+import TopControlsPanel from './components/TopControlsPanel';
 
 
 
@@ -914,162 +915,34 @@ setTransform({
       `}</style>
 
 <div style={{ width: '100%', padding: '0 20px' }}>
-        <div
-          style={{
-            border: '1px solid rgba(255,255,255,0.08)',
-            borderRadius: 20,
-            padding: 24,
-            background: 'rgba(255,255,255,0.04)',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.35)',
-            marginBottom: 20,
-          }}
-        >
-          <h1 style={{ margin: 0, fontSize: 34, fontWeight: 800 }}>POD Design Checker™</h1>
-          <p style={{ marginTop: 10, color: '#cbd5e1', lineHeight: 1.6 }}>
-          Upload your design to instantly see if it's ready for print.
-</p>
-          
-          
-
-          <div
-            style={{
-              marginTop: 18,
-              display: 'flex',
-              gap: 12,
-              flexWrap: 'wrap',
-              alignItems: 'center',
-            }}
-          >
-            <input
-              type="file"
-              accept="image/png,image/jpeg,image/jpg,image/webp"
-              onChange={handleFileChange}
-              style={{
-                background: 'rgba(15,23,42,0.85)',
-                color: '#fff',
-                padding: 12,
-                borderRadius: 12,
-                border: '1px solid rgba(255,255,255,0.12)',
-              }}
-            />
-
-<button onClick={handleQuickFix} disabled={!img || !originalBounds}>Quick Fix (Auto)</button>
-<button onClick={resetToOriginalView} disabled={!img}>Reset Position</button>
-<button onClick={handleDownloadFixedPng} disabled={!img}>Download Print-Ready PNG (4200×4800)</button>
-
-<button onClick={() => setShowMoreFixes((v) => !v)} disabled={!img}>
-  {showMoreFixes ? 'Hide Tools' : 'More Tools'}
-</button>
-
-{showMoreFixes && (
-  <>
-    <button onClick={handleFixCanvas} disabled={!img}>Fit to Canvas</button>
-    <button onClick={handleCenterArtwork} disabled={!img}>Center Design</button>
-    <button onClick={handleAutoFixSafetyBorder} disabled={!img || !originalBounds}>Fix Safety Border</button>
-    <button onClick={handleAutoFixTooSmall} disabled={!img || !originalBounds}>Scale Design Up</button>
-  </>
-)}
-          </div>
-
-          <div
-            style={{
-              marginTop: 14,
-              display: 'flex',
-              gap: 10,
-              flexWrap: 'wrap',
-              alignItems: 'center',
-            }}
-          >
-            <span style={{ fontWeight: 800, color: '#bae6fd' }}>Canvas Zoom</span>
-
-            <button onClick={() => { setViewMode('pod'); setActionMessage('POD Canvas view selected.'); }} disabled={!img}>POD Canvas</button>
-            <button onClick={() => { setViewMode('design'); setActionMessage('Design & Zoom view selected.'); }} disabled={!img}>
-  Design & Zoom
-</button>
-<button
-  onClick={() => {
-    setViewMode('shirt');
-    setPreviewSize(0.5);
-    setActionMessage('Shirt Preview selected.');
-  }}
-  disabled={!img}
->
-  Preview on Shirt
-</button>
-{viewMode === 'shirt' && img && (
-  <div
-    style={{
-      marginTop: 12,
-      display: 'flex',
-      gap: 8,
-      flexWrap: 'wrap',
-      alignItems: 'center',
-    }}
-  >
-    <span style={{ fontWeight: 800, color: '#bae6fd' }}>Mockup Tools</span>
-
-    <button
-      onClick={() => {
-        setMockupScale(1);
-        setMockupOffsetX(0);
-        setMockupOffsetY(0);
-      }}
-    >
-      Reset
-    </button>
-
-    <button
-      onClick={() => {
-        setMockupOffsetX(0);
-        setMockupOffsetY(0);
-      }}
-    >
-      Center on Shirt
-    </button>
-
-    <button
-      onClick={() => {
-        setMockupScale(0.9);
-        setMockupOffsetX(0);
-        setMockupOffsetY(0);
-      }}
-    >
-      Fit to Shirt
-    </button>
-  </div>
-)}
-          </div>
-
-          <div
-            style={{
-              marginTop: 14,
-              padding: 14,
-              borderRadius: 18,
-              background: 'rgba(8,47,73,0.6)',
-              border: '1px solid rgba(56,189,248,0.35)',
-              color: '#e0f2fe',
-            }}
-          >
-            <div style={{ fontWeight: 800, marginBottom: 6, color: '#93c5fd' }}>Last Action</div>
-            <div>{actionMessage}</div>
-            {downloadMessage && <div style={{ marginTop: 8, color: '#7dd3fc' }}>{downloadMessage}</div>}
-          </div>
-
-          {file && (
-            <div
-              style={{
-                marginTop: 18,
-                padding: 14,
-                borderRadius: 14,
-                background: 'rgba(15,23,42,0.8)',
-                border: '1px solid rgba(255,255,255,0.08)',
-              }}
-            >
-              <div style={{ fontWeight: 700, marginBottom: 6 }}>Uploaded file:</div>
-              <div style={{ color: '#fdba74', fontWeight: 600 }}>{file.name}</div>
-            </div>
-          )}
-        </div>
+<TopControlsPanel
+  file={file}
+  img={img}
+  originalBounds={originalBounds}
+  showMoreFixes={showMoreFixes}
+  setShowMoreFixes={setShowMoreFixes}
+  viewMode={viewMode}
+  setViewMode={setViewMode}
+  previewSize={previewSize}
+  setPreviewSize={setPreviewSize}
+  mockupOffsetX={mockupOffsetX}
+  mockupOffsetY={mockupOffsetY}
+  mockupScale={mockupScale}
+  setMockupOffsetX={setMockupOffsetX}
+  setMockupOffsetY={setMockupOffsetY}
+  setMockupScale={setMockupScale}
+  actionMessage={actionMessage}
+  downloadMessage={downloadMessage}
+  handleFileChange={handleFileChange}
+  handleQuickFix={handleQuickFix}
+  resetToOriginalView={resetToOriginalView}
+  handleDownloadFixedPng={handleDownloadFixedPng}
+  handleFixCanvas={handleFixCanvas}
+  handleCenterArtwork={handleCenterArtwork}
+  handleAutoFixSafetyBorder={handleAutoFixSafetyBorder}
+  handleAutoFixTooSmall={handleAutoFixTooSmall}
+  setActionMessage={setActionMessage}
+/>       
 
         <div
           style={{
