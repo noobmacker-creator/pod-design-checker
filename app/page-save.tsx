@@ -13,16 +13,9 @@ import {
   getEffectiveArtBounds,
   getDesignCanvasSize,
 } from './lib/podCheckerUtils';
+import type { CheckStatus, ViewMode, PreviewSize, CheckItem } from './lib/podCheckerTypes';
 
-type CheckStatus = 'pass' | 'warn' | 'fail' | 'info';
-type ViewMode = 'pod' | 'design' | 'shirt' | 'mockup';
-type PreviewSize = number;
 
-type CheckItem = {
-  label: string;
-  status: CheckStatus;
-  message: string;
-};
 
 type Bounds = {
   x: number;
