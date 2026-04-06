@@ -84,18 +84,7 @@ export default function TopControlsPanel({
           alignItems: 'center',
         }}
       >
-        <input
-          type="file"
-          accept="image/png,image/jpeg,image/jpg,image/webp"
-          onChange={handleFileChange}
-          style={{
-            background: 'rgba(15,23,42,0.85)',
-            color: '#fff',
-            padding: 12,
-            borderRadius: 12,
-            border: '1px solid rgba(255,255,255,0.12)',
-          }}
-        />
+        
 
         <button onClick={handleQuickFix} disabled={!img || !originalBounds}>Quick Fix (Auto)</button>
         <button onClick={resetToOriginalView} disabled={!img}>Reset Position</button>
