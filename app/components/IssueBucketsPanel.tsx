@@ -69,12 +69,14 @@ function Section({ title, items, emptyText, headingColor }: SectionProps) {
               </div>
 
               {item.status === 'fail' || item.status === 'warn' ? (
-                <div style={{ marginTop: 5, color: '#94a3b8', fontSize: 11, lineHeight: 1.35 }}>
-                  {item.status === 'fail'
-                    ? 'Fix: Use Quick Fix (Auto) or press Fix Safety Border to resolve this issue.'
-                    : 'Fix: Improve this for better print quality.'}
-                </div>
-              ) : null}
+  <div style={{ marginTop: 5, color: '#94a3b8', fontSize: 11, lineHeight: 1.35 }}>
+    {item.status === 'fail'
+      ? item.label === 'Fake Transparency Background'
+        ? 'Recommended: remove background and re-upload.'
+        : 'Fix: Use Quick Fix (Auto) or correct this issue before printing.'
+      : 'Fix: Improve this for better print quality.'}
+  </div>
+) : null}
             </div>
           ))}
 
