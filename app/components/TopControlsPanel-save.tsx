@@ -84,18 +84,7 @@ export default function TopControlsPanel({
           alignItems: 'center',
         }}
       >
-        <input
-          type="file"
-          accept="image/png,image/jpeg,image/jpg,image/webp"
-          onChange={handleFileChange}
-          style={{
-            background: 'rgba(15,23,42,0.85)',
-            color: '#fff',
-            padding: 12,
-            borderRadius: 12,
-            border: '1px solid rgba(255,255,255,0.12)',
-          }}
-        />
+        
 
         <button onClick={handleQuickFix} disabled={!img || !originalBounds}>Quick Fix (Auto)</button>
         <button onClick={resetToOriginalView} disabled={!img}>Reset Position</button>
@@ -135,35 +124,9 @@ export default function TopControlsPanel({
         
       </div>
 
-      <div
-        style={{
-          marginTop: 14,
-          padding: 14,
-          borderRadius: 18,
-          background: 'rgba(8,47,73,0.6)',
-          border: '1px solid rgba(56,189,248,0.35)',
-          color: '#e0f2fe',
-        }}
-      >
-        <div style={{ fontWeight: 800, marginBottom: 6, color: '#93c5fd' }}>Last Action</div>
-        <div>{actionMessage}</div>
-        {downloadMessage && <div style={{ marginTop: 8, color: '#7dd3fc' }}>{downloadMessage}</div>}
-      </div>
+      
 
-      {file && (
-        <div
-          style={{
-            marginTop: 18,
-            padding: 14,
-            borderRadius: 14,
-            background: 'rgba(15,23,42,0.8)',
-            border: '1px solid rgba(255,255,255,0.08)',
-          }}
-        >
-          <div style={{ fontWeight: 700, marginBottom: 6 }}>Uploaded file:</div>
-          <div style={{ color: '#fdba74', fontWeight: 600 }}>{file.name}</div>
-        </div>
-      )}
+     
     </div>
   );
 }

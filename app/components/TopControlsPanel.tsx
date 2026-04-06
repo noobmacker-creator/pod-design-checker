@@ -33,7 +33,6 @@ type TopControlsPanelProps = {
 };
 
 export default function TopControlsPanel({
-  file,
   img,
   originalBounds,
   showMoreFixes,
@@ -41,15 +40,6 @@ export default function TopControlsPanel({
   viewMode,
   setViewMode,
   setPreviewSize,
-  mockupOffsetX,
-  mockupOffsetY,
-  mockupScale,
-  setMockupOffsetX,
-  setMockupOffsetY,
-  setMockupScale,
-  actionMessage,
-  downloadMessage,
-  handleFileChange,
   handleQuickFix,
   resetToOriginalView,
   handleDownloadFixedPng,
@@ -63,70 +53,118 @@ export default function TopControlsPanel({
     <div
       style={{
         border: '1px solid rgba(255,255,255,0.08)',
-        borderRadius: 20,
-        padding: 24,
+        borderRadius: 16,
+        padding: 10,
         background: 'rgba(255,255,255,0.04)',
-        boxShadow: '0 20px 60px rgba(0,0,0,0.35)',
-        marginBottom: 20,
+        boxShadow: '0 16px 40px rgba(0,0,0,0.28)',
+        marginBottom: 10,
       }}
     >
-      <h1 style={{ margin: 0, fontSize: 34, fontWeight: 800 }}>POD Design Checker™</h1>
-      <p style={{ marginTop: 10, color: '#cbd5e1', lineHeight: 1.6 }}>
-        Upload your design to instantly see if it's ready for print.
-      </p>
-
       <div
         style={{
-          marginTop: 18,
           display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
           gap: 12,
           flexWrap: 'wrap',
-          alignItems: 'center',
         }}
       >
-        
+        <div>
+          <div style={{ fontSize: 20, fontWeight: 800, lineHeight: 1.1 }}>
+            POD Design Checker™
+          </div>
+          <div style={{ marginTop: 4, color: '#cbd5e1', fontSize: 13 }}>
+            Fast print-readiness actions
+          </div>
+        </div>
 
-        <button onClick={handleQuickFix} disabled={!img || !originalBounds}>Quick Fix (Auto)</button>
-        <button onClick={resetToOriginalView} disabled={!img}>Reset Position</button>
-        <button onClick={handleDownloadFixedPng} disabled={!img}>Download Print-Ready PNG (4200×4800)</button>
+        <div
+          style={{
+            display: 'flex',
+            gap: 10,
+            flexWrap: 'wrap',
+            alignItems: 'center',
+          }}
+        >
+          <button onClick={handleQuickFix} disabled={!img || !originalBounds}>
+            Quick Fix
+          </button>
 
-        <button onClick={() => setShowMoreFixes((v) => !v)} disabled={!img}>
-          {showMoreFixes ? 'Hide Tools' : 'More Tools'}
-        </button>
+          <button onClick={resetToOriginalView} disabled={!img}>
+            Reset
+          </button>
 
-        {showMoreFixes && (
-          <>
-            <button onClick={handleFixCanvas} disabled={!img}>Fit to Canvas</button>
-            <button onClick={handleCenterArtwork} disabled={!img}>Center Design</button>
-            <button onClick={handleAutoFixSafetyBorder} disabled={!img || !originalBounds}>Fix Safety Border</button>
-            <button onClick={handleAutoFixTooSmall} disabled={!img || !originalBounds}>Scale Design Up</button>
-          </>
-        )}
+          <button onClick={handleDownloadFixedPng} disabled={!img}>
+            Download PNG
+          </button>
+
+          <button onClick={() => setShowMoreFixes((v) => !v)} disabled={!img}>
+            {showMoreFixes ? 'Hide Tools' : 'More Tools'}
+          </button>
+        </div>
       </div>
 
       <div
         style={{
-          marginTop: 14,
+          marginTop: 8,
           display: 'flex',
           gap: 10,
           flexWrap: 'wrap',
           alignItems: 'center',
         }}
       >
-        <span style={{ fontWeight: 800, color: '#bae6fd' }}>Canvas Zoom</span>
+        <span style={{ fontWeight: 800, color: '#bae6fd', fontSize: 13 }}>
+          View
+        </span>
 
-        <button onClick={() => { setViewMode('pod'); setActionMessage('POD Canvas view selected.'); }} disabled={!img}>POD Canvas</button>
-        <button onClick={() => { setViewMode('design'); setActionMessage('Design & Zoom view selected.'); }} disabled={!img}>
-          Design & Zoom
+        <button
+          onClick={() => {
+            setViewMode('pod');
+            setActionMessage('POD Canvas view selected.');
+          }}
+          disabled={!img}
+        >
+          POD Canvas
         </button>
-        
 
-        
+        <button
+          onClick={() => {
+            setViewMode('design');
+            setActionMessage('Design view selected.');
+          }}
+          disabled={!img}
+        >
+          Design
+        </button>
       </div>
 
-      
+      {showMoreFixes && (
+        <div
+          style={{
+            marginTop: 8,
+            display: 'flex',
+            gap: 10,
+            flexWrap: 'wrap',
+            alignItems: 'center',
+          }}
+        >
+          <button onClick={handleFixCanvas} disabled={!img}>
+            Fit to Canvas
+          </button>
 
-     
+          <button onClick={handleCenterArtwork} disabled={!img}>
+            Center Design
+          </button>
+
+          <button onClick={handleAutoFixSafetyBorder} disabled={!img || !originalBounds}>
+            Fix Safety Border
+          </button>
+
+          <button onClick={handleAutoFixTooSmall} disabled={!img || !originalBounds}>
+            Scale Design Up
+          </button>
+        </div>
+      )}
     </div>
   );
 }
