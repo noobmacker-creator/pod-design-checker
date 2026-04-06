@@ -17,6 +17,7 @@ import type { CheckStatus, ViewMode, PreviewSize, CheckItem } from './lib/podChe
 import ScanResultsPanel from './components/ScanResultsPanel';
 import DesignPreviewPanel from './components/DesignPreviewPanel';
 import TopControlsPanel from './components/TopControlsPanel';
+import IssueBucketsPanel from './components/IssueBucketsPanel';
 
 
 
@@ -1358,21 +1359,7 @@ backdropFilter: 'blur(4px)',
   setInspectZoom={setInspectZoom}
   setActionMessage={setActionMessage}
 />
-<div
-  style={{
-    border: '1px solid rgba(255,255,255,0.08)',
-    borderRadius: 20,
-    padding: 20,
-    background: 'rgba(255,255,255,0.04)',
-    boxShadow: '0 25px 70px rgba(0,0,0,0.35)',
-    minWidth: 0,
-  }}
->
-  <h2 style={{ margin: 0, fontSize: 20, fontWeight: 800 }}>Right Panel</h2>
-  <p style={{ marginTop: 10, color: '#cbd5e1' }}>
-    This is the new 3rd child.
-  </p>
-</div>
+<IssueBucketsPanel checks={checks} />
         </div>
         
       <canvas ref={analysisCanvasRef} style={{ display: 'none' }} />
