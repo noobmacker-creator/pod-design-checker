@@ -17,6 +17,7 @@ import type { CheckStatus, ViewMode, PreviewSize, CheckItem } from './lib/podChe
 import ScanResultsPanel from './components/ScanResultsPanel';
 import DesignPreviewPanel from './components/DesignPreviewPanel';
 import TopControlsPanel from './components/TopControlsPanel';
+import IssueBucketsPanel from './components/IssueBucketsPanel';
 
 
 
@@ -947,8 +948,8 @@ setTransform({
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: '360px minmax(0, 1fr)',
-            gap: 16,
+            gridTemplateColumns: '360px minmax(0, 1fr) 360px',
+gap: 16,
           }}
         >
           <div
@@ -1358,6 +1359,7 @@ backdropFilter: 'blur(4px)',
   setInspectZoom={setInspectZoom}
   setActionMessage={setActionMessage}
 />
+<IssueBucketsPanel checks={checks} />
         </div>
         
       <canvas ref={analysisCanvasRef} style={{ display: 'none' }} />

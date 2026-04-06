@@ -206,148 +206,151 @@ export default function ScanResultsPanel({
   </div>
 </div>
 
+<div
+  style={{
+    marginBottom: 14,
+    padding: 14,
+    borderRadius: 16,
+    background: 'rgba(2,6,23,0.92)',
+    border: '1px solid rgba(56,189,248,0.28)',
+  }}
+>
+  <div
+    style={{
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      gap: 10,
+      marginBottom: 10,
+      flexWrap: 'wrap',
+    }}
+  >
+    <div style={{ fontSize: 13, color: '#ffffff', fontWeight: 800, letterSpacing: 0.4 }}>
+      PRINT READINESS
+    </div>
+
+    <div
+      style={{
+        padding: '6px 10px',
+        borderRadius: 999,
+        fontSize: 12,
+        fontWeight: 800,
+        background:
+          !img
+            ? '#1e293b'
+            : hasTransparency === false || printScore < 60
+            ? '#7f1d1d'
+            : 100 - printScore >= 30
+            ? '#78350f'
+            : '#14532d',
+      }}
+    >
+      {!img
+        ? 'UPLOAD A DESIGN'
+        : hasTransparency === false || printScore < 60
+        ? 'HIGH RISK'
+        : 100 - printScore >= 30
+        ? 'MEDIUM RISK'
+        : 'READY'}
+    </div>
+  </div>
+
+  <div
+    style={{
+      fontSize: 36,
+      fontWeight: 800,
+      color:
+        printScore >= 80
+          ? '#22c55e'
+          : printScore >= 50
+          ? '#f59e0b'
+          : '#ef4444',
+      lineHeight: 1,
+      marginBottom: 10,
+    }}
+  >
+    {printScore}%
+  </div>
+
+  <div
+    style={{
+      width: '100%',
+      height: 14,
+      borderRadius: 999,
+      background: 'rgba(15,23,42,0.85)',
+      overflow: 'hidden',
+      border: '1px solid rgba(255,255,255,0.08)',
+      marginBottom: 12,
+    }}
+  >
+    <div
+      style={{
+        width: `${printScore}%`,
+        height: '100%',
+        borderRadius: 999,
+        background:
+          printScore >= 80
+            ? '#22c55e'
+            : printScore >= 50
+            ? '#f59e0b'
+            : '#ef4444',
+        transition: 'width 0.5s ease',
+      }}
+    />
+  </div>
+
+  <div style={{ display: 'grid', gap: 8 }}>
+    <div
+      style={{
+        padding: '10px 12px',
+        borderRadius: 12,
+        background: 'rgba(15,23,42,0.68)',
+        border: '1px solid rgba(255,255,255,0.10)',
+        fontSize: 14,
+        lineHeight: 1.45,
+      }}
+    >
+      <span style={{ fontWeight: 800 }}>Main Issue:</span>
+      {!img
+        ? ' —'
+        : hasTransparency === false
+        ? ' No transparency'
+        : thinLinePercent >= 18
+        ? ' Too many thin lines'
+        : specks > 0
+        ? ' Specks detected'
+        : imgW !== 4200 || imgH !== 4800
+        ? ' Wrong size'
+        : ' No major issues'}
+    </div>
+
+    {(hasTransparency === false || printScore < 60 || 100 - printScore >= 30) && (
       <div
         style={{
-          marginBottom: 10,
-          padding: 10,
-          borderRadius: 10,
-          background: 'linear-gradient(180deg, #020617 0%, #020617 60%, #020617cc 100%)',
-          border: '2px solid rgba(56,189,248,0.6)',
-          textAlign: 'center',
+          padding: '10px 12px',
+          borderRadius: 12,
+          background: 'rgba(15,23,42,0.68)',
+          border: '1px solid rgba(255,255,255,0.10)',
+          fontSize: 14,
+          lineHeight: 1.45,
         }}
       >
-        <div style={{ fontSize: 14, color: '#ffffff', fontWeight: 700 }}>
-          PRINT READINESS
-        </div>
-        <div
-          style={{
-            fontSize: 36,
-            fontWeight: 800,
-            color:
-              printScore >= 80
-                ? '#22c55e'
-                : printScore >= 50
-                ? '#f59e0b'
-                : '#ef4444',
-          }}
-        >
-          {printScore}%
-          <div
-            style={{
-              marginTop: 12,
-              width: '100%',
-              height: 18,
-              borderRadius: 999,
-              background: 'rgba(15,23,42,0.85)',
-              overflow: 'hidden',
-              border: '1px solid rgba(255,255,255,0.08)',
-            }}
-          >
-            <div
-              style={{
-                width: `${printScore}%`,
-                height: '100%',
-                borderRadius: 999,
-                background:
-                  printScore >= 80
-                    ? '#22c55e'
-                    : printScore >= 50
-                    ? '#f59e0b'
-                    : '#ef4444',
-                transition: 'width 0.5s ease',
-              }}
-            />
-          </div>
-          <div style={{ marginTop: 12, fontWeight: 800 }}>
-            {hasTransparency === false
-              ? 'HIGH RISK'
-              : printScore < 60
-              ? 'MEDIUM RISK'
-              : 'READY FOR PRINT'}
-          </div>
-          <div
-            style={{
-              marginTop: 20,
-              padding: 16,
-              borderRadius: 12,
-              background: '#020617',
-              border: '1px solid #334155',
-            }}
-          >
-            <div
-              style={{
-                marginBottom: 12,
-                padding: '10px 14px',
-                borderRadius: 8,
-                fontWeight: 700,
-                textAlign: 'center',
-                background:
-                  !img
-                    ? '#1e293b'
-                    : hasTransparency === false || printScore < 60
-                    ? '#7f1d1d'
-                    : 100 - printScore >= 30
-                    ? '#78350f'
-                    : '#14532d',
-              }}
-            >
-              {!img
-                ? 'UPLOAD A DESIGN TO BEGIN'
-                : hasTransparency === false || printScore < 60
-                ? '🔴 HIGH RISK'
-                : 100 - printScore >= 30
-                ? '🟡 MEDIUM RISK'
-                : '🟢 LOW RISK'}
-            </div>
-
-            <div style={{ fontWeight: 700, marginBottom: hasTransparency === false || printScore < 60 || 100 - printScore >= 30 ? 6 : 2 }}>
-              {hasTransparency === false || printScore < 60 || 100 - printScore >= 30 ? 'Scan Summary' : 'Ready'}
-            </div>
-
-            <div
-              style={{
-                height: 1,
-                background: '#334155',
-                marginBottom: hasTransparency === false || printScore < 60 || 100 - printScore >= 30 ? 10 : 6,
-              }}
-            />
-
-            <div style={{ marginBottom: hasTransparency === false || printScore < 60 || 100 - printScore >= 30 ? 10 : 6, fontWeight: 600 }}>
-              <div style={{ padding: 18, borderRadius: 16, background: 'rgba(15,23,42,0.55)', backdropFilter: 'blur(6px)', border: '1px solid rgba(255,255,255,0.12)' }}>
-                <span style={{ fontWeight: 800 }}>Main Issue:</span>
-                {!img
-                  ? '—'
-                  : hasTransparency === false
-                  ? ' No transparency'
-                  : thinLinePercent >= 18
-                  ? ' Too many thin lines'
-                  : specks > 0
-                  ? ' Specks detected'
-                  : imgW !== 4200 || imgH !== 4800
-                  ? ' Wrong size'
-                  : ' No major issues'}
-              </div>
-
-              {hasTransparency === false || printScore < 60 || 100 - printScore >= 30 ? (
-                <div style={{ marginBottom: 8 }}>
-                  <span style={{ fontWeight: 800 }}>Next Step:</span>
-                  {!img
-                    ? '—'
-                    : hasTransparency === false
-                    ? 'Add transparent background'
-                    : thinLinePercent >= 18
-                    ? 'Thicken thin lines'
-                    : specks > 0
-                    ? 'Clean specks / noise'
-                    : imgW !== 4200 || imgH !== 4800
-                    ? 'Resize to 4200×4800'
-                    : 'Ready to download'}
-                </div>
-              ) : null}
-            </div>
-          </div>
-        </div>
+        <span style={{ fontWeight: 800 }}>Next Step:</span>
+        {!img
+          ? ' —'
+          : hasTransparency === false
+          ? ' Add transparent background'
+          : thinLinePercent >= 18
+          ? ' Thicken thin lines'
+          : specks > 0
+          ? ' Clean specks / noise'
+          : imgW !== 4200 || imgH !== 4800
+          ? ' Resize to 4200×4800'
+          : ' Ready to download'}
       </div>
+    )}
+  </div>
+</div>
 
       {!img && (
         <div

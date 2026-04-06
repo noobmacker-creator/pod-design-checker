@@ -1,8 +1,6 @@
 'use client';
 
 import React from 'react';
-import type { CheckItem, CheckStatus } from '../lib/podCheckerTypes';
-import { statusColor, statusIcon } from '../lib/podCheckerUtils';
 
 type Bounds = {
   x: number;
@@ -17,7 +15,7 @@ type ScanResultsPanelProps = {
   downloadMessage: string;
   handleFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   img: HTMLImageElement | null;
-  checks: CheckItem[];
+  checks: any[];
   printScore: number;
   hasTransparency: boolean | null;
   thinLinePercent: number;
@@ -38,7 +36,6 @@ export default function ScanResultsPanel({
   downloadMessage,
   handleFileChange,
   img,
-  checks,
   printScore,
   hasTransparency,
   thinLinePercent,
@@ -52,539 +49,265 @@ export default function ScanResultsPanel({
   inspectZoom,
   practicalPrintDpi,
 }: ScanResultsPanelProps) {
+  const riskLabel =
+    !img
+      ? 'UPLOAD A DESIGN'
+      : hasTransparency === false || printScore < 60
+      ? 'HIGH RISK'
+      : 100 - printScore >= 30
+      ? 'MEDIUM RISK'
+      : 'READY';
+
+  const riskBg =
+    !img
+      ? '#1e293b'
+      : hasTransparency === false || printScore < 60
+      ? '#7f1d1d'
+      : 100 - printScore >= 30
+      ? '#78350f'
+      : '#14532d';
+
+  const mainIssue =
+    !img
+      ? '—'
+      : hasTransparency === false
+      ? 'No transparency'
+      : thinLinePercent >= 18
+      ? 'Too many thin lines'
+      : specks > 0
+      ? 'Specks detected'
+      : imgW !== 4200 || imgH !== 4800
+      ? 'Wrong size'
+      : 'No major issues';
+
+  const nextStep =
+    !img
+      ? 'Upload a design to begin.'
+      : hasTransparency === false
+      ? 'Add transparent background.'
+      : thinLinePercent >= 18
+      ? 'Thicken thin lines.'
+      : specks > 0
+      ? 'Clean specks / noise.'
+      : imgW !== 4200 || imgH !== 4800
+      ? 'Resize to 4200×4800.'
+      : 'Ready to download.';
+
   return (
     <div
       style={{
         border: '1px solid rgba(255,255,255,0.08)',
         borderRadius: 20,
-        padding: 1,
+        padding: 16,
         background: 'rgba(255,255,255,0.04)',
         boxShadow: '0 20px 60px rgba(0,0,0,0.28)',
         alignSelf: 'start',
+        display: 'grid',
+        gap: 14,
       }}
     >
-      <h2 style={{ marginTop: 0, marginBottom: 6, fontSize: 20, fontWeight: 800, letterSpacing: 0.4 }}>
-        Scan Results
-      </h2>
-      <p style={{ marginTop: 0, marginBottom: 12, color: '#cbd5e1', lineHeight: 1.5, fontSize: 14 }}>
-        Review critical issues first, then warnings, before exporting your final print file.
-      </p>
-      <div
-  style={{
-    marginBottom: 16,
-    display: 'grid',
-    gap: 10,
-  }}
->
-  <input
-    type="file"
-    accept="image/png,image/jpeg,image/jpg,image/webp"
-    onChange={handleFileChange}
-    style={{
-      background: 'rgba(15,23,42,0.85)',
-      color: '#fff',
-      padding: 12,
-      borderRadius: 12,
-      border: '1px solid rgba(255,255,255,0.12)',
-    }}
-  />
+      <div>
+        <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800 }}>Summary</h2>
+        <p style={{ marginTop: 6, marginBottom: 0, color: '#cbd5e1', lineHeight: 1.5, fontSize: 14 }}>
+          Upload your design, review the result, then fix issues before export.
+        </p>
+      </div>
 
-  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-    {file ? (
+      <div style={{ display: 'grid', gap: 10 }}>
+        <input
+          type="file"
+          accept="image/png,image/jpeg,image/jpg,image/webp"
+          onChange={handleFileChange}
+          style={{
+            background: 'rgba(15,23,42,0.85)',
+            color: '#fff',
+            padding: 12,
+            borderRadius: 12,
+            border: '1px solid rgba(255,255,255,0.12)',
+          }}
+        />
+
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          {file ? (
+            <div
+              style={{
+                padding: '6px 10px',
+                borderRadius: 999,
+                background: 'rgba(15,23,42,0.82)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                color: '#fdba74',
+                fontSize: 12,
+                fontWeight: 700,
+              }}
+            >
+              File: {file.name}
+            </div>
+          ) : null}
+
+          <div
+            style={{
+              padding: '6px 10px',
+              borderRadius: 999,
+              background: 'rgba(15,23,42,0.82)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              color: '#cbd5e1',
+              fontSize: 12,
+              fontWeight: 700,
+            }}
+          >
+            Status: {actionMessage}
+          </div>
+
+          {downloadMessage ? (
+            <div
+              style={{
+                padding: '6px 10px',
+                borderRadius: 999,
+                background: 'rgba(8,47,73,0.72)',
+                border: '1px solid rgba(56,189,248,0.25)',
+                color: '#7dd3fc',
+                fontSize: 12,
+                fontWeight: 700,
+              }}
+            >
+              {downloadMessage}
+            </div>
+          ) : null}
+        </div>
+      </div>
+
       <div
         style={{
-          padding: '6px 10px',
-          borderRadius: 999,
-          background: 'rgba(15,23,42,0.82)',
-          border: '1px solid rgba(255,255,255,0.08)',
-          color: '#fdba74',
-          fontSize: 12,
-          fontWeight: 700,
+          padding: 14,
+          borderRadius: 16,
+          background: 'rgba(2,6,23,0.92)',
+          border: '1px solid rgba(56,189,248,0.28)',
         }}
       >
-        File: {file.name}
-      </div>
-    ) : null}
-
-    <div
-      style={{
-        padding: '6px 10px',
-        borderRadius: 999,
-        background: 'rgba(15,23,42,0.82)',
-        border: '1px solid rgba(255,255,255,0.08)',
-        color: '#cbd5e1',
-        fontSize: 12,
-        fontWeight: 700,
-      }}
-    >
-      Status: {actionMessage}
-    </div>
-
-    {downloadMessage ? (
-      <div
-        style={{
-          padding: '6px 10px',
-          borderRadius: 999,
-          background: 'rgba(8,47,73,0.72)',
-          border: '1px solid rgba(56,189,248,0.25)',
-          color: '#7dd3fc',
-          fontSize: 12,
-          fontWeight: 700,
-        }}
-      >
-        {downloadMessage}
-      </div>
-    ) : null}
-  </div>
-</div>
-      <div
-  style={{
-    marginBottom: 16,
-    display: 'grid',
-    gap: 10,
-  }}
->
-  <input
-    type="file"
-    accept="image/png,image/jpeg,image/jpg,image/webp"
-    onChange={handleFileChange}
-    style={{
-      background: 'rgba(15,23,42,0.85)',
-      color: '#fff',
-      padding: 12,
-      borderRadius: 12,
-      border: '1px solid rgba(255,255,255,0.12)',
-    }}
-  />
-
-  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-    {file ? (
-      <div
-        style={{
-          padding: '6px 10px',
-          borderRadius: 999,
-          background: 'rgba(15,23,42,0.82)',
-          border: '1px solid rgba(255,255,255,0.08)',
-          color: '#fdba74',
-          fontSize: 12,
-          fontWeight: 700,
-        }}
-      >
-        File: {file.name}
-      </div>
-    ) : null}
-
-    <div
-      style={{
-        padding: '6px 10px',
-        borderRadius: 999,
-        background: 'rgba(15,23,42,0.82)',
-        border: '1px solid rgba(255,255,255,0.08)',
-        color: '#cbd5e1',
-        fontSize: 12,
-        fontWeight: 700,
-      }}
-    >
-      Status: {actionMessage}
-    </div>
-
-    {downloadMessage ? (
-      <div
-        style={{
-          padding: '6px 10px',
-          borderRadius: 999,
-          background: 'rgba(8,47,73,0.72)',
-          border: '1px solid rgba(56,189,248,0.25)',
-          color: '#7dd3fc',
-          fontSize: 12,
-          fontWeight: 700,
-        }}
-      >
-        {downloadMessage}
-      </div>
-    ) : null}
-  </div>
-</div>
-
-<div
-  style={{
-    marginBottom: 14,
-    padding: 14,
-    borderRadius: 16,
-    background: 'rgba(2,6,23,0.92)',
-    border: '1px solid rgba(56,189,248,0.28)',
-  }}
->
-  <div
-    style={{
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      gap: 10,
-      marginBottom: 10,
-      flexWrap: 'wrap',
-    }}
-  >
-    <div style={{ fontSize: 13, color: '#ffffff', fontWeight: 800, letterSpacing: 0.4 }}>
-      PRINT READINESS
-    </div>
-
-    <div
-      style={{
-        padding: '6px 10px',
-        borderRadius: 999,
-        fontSize: 12,
-        fontWeight: 800,
-        background:
-          !img
-            ? '#1e293b'
-            : hasTransparency === false || printScore < 60
-            ? '#7f1d1d'
-            : 100 - printScore >= 30
-            ? '#78350f'
-            : '#14532d',
-      }}
-    >
-      {!img
-        ? 'UPLOAD A DESIGN'
-        : hasTransparency === false || printScore < 60
-        ? 'HIGH RISK'
-        : 100 - printScore >= 30
-        ? 'MEDIUM RISK'
-        : 'READY'}
-    </div>
-  </div>
-
-  <div
-    style={{
-      fontSize: 36,
-      fontWeight: 800,
-      color:
-        printScore >= 80
-          ? '#22c55e'
-          : printScore >= 50
-          ? '#f59e0b'
-          : '#ef4444',
-      lineHeight: 1,
-      marginBottom: 10,
-    }}
-  >
-    {printScore}%
-  </div>
-
-  <div
-    style={{
-      width: '100%',
-      height: 14,
-      borderRadius: 999,
-      background: 'rgba(15,23,42,0.85)',
-      overflow: 'hidden',
-      border: '1px solid rgba(255,255,255,0.08)',
-      marginBottom: 12,
-    }}
-  >
-    <div
-      style={{
-        width: `${printScore}%`,
-        height: '100%',
-        borderRadius: 999,
-        background:
-          printScore >= 80
-            ? '#22c55e'
-            : printScore >= 50
-            ? '#f59e0b'
-            : '#ef4444',
-        transition: 'width 0.5s ease',
-      }}
-    />
-  </div>
-
-  <div style={{ display: 'grid', gap: 8 }}>
-    <div
-      style={{
-        padding: '10px 12px',
-        borderRadius: 12,
-        background: 'rgba(15,23,42,0.68)',
-        border: '1px solid rgba(255,255,255,0.10)',
-        fontSize: 14,
-        lineHeight: 1.45,
-      }}
-    >
-      <span style={{ fontWeight: 800 }}>Main Issue:</span>
-      {!img
-        ? ' —'
-        : hasTransparency === false
-        ? ' No transparency'
-        : thinLinePercent >= 18
-        ? ' Too many thin lines'
-        : specks > 0
-        ? ' Specks detected'
-        : imgW !== 4200 || imgH !== 4800
-        ? ' Wrong size'
-        : ' No major issues'}
-    </div>
-
-    {(hasTransparency === false || printScore < 60 || 100 - printScore >= 30) && (
-      <div
-        style={{
-          padding: '10px 12px',
-          borderRadius: 12,
-          background: 'rgba(15,23,42,0.68)',
-          border: '1px solid rgba(255,255,255,0.10)',
-          fontSize: 14,
-          lineHeight: 1.45,
-        }}
-      >
-        <span style={{ fontWeight: 800 }}>Next Step:</span>
-        {!img
-          ? ' —'
-          : hasTransparency === false
-          ? ' Add transparent background'
-          : thinLinePercent >= 18
-          ? ' Thicken thin lines'
-          : specks > 0
-          ? ' Clean specks / noise'
-          : imgW !== 4200 || imgH !== 4800
-          ? ' Resize to 4200×4800'
-          : ' Ready to download'}
-      </div>
-    )}
-  </div>
-</div>
-
-      {!img && (
         <div
           style={{
-            padding: 16,
-            borderRadius: 14,
-            background: 'rgba(15,23,42,0.85)',
-            color: '#cbd5e1',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            gap: 10,
+            marginBottom: 10,
+            flexWrap: 'wrap',
           }}
         >
-          Upload your design to start scanning.
-        </div>
-      )}
-
-      {checks.filter((item) => item.status === 'fail').length > 0 && (
-        <div style={{ marginBottom: 16 }}>
-          <div
-            style={{
-              marginBottom: 10,
-              padding: '10px 14px',
-              borderRadius: 10,
-              background: '#7f1d1d',
-              color: '#fff',
-              fontWeight: 800,
-            }}
-          >
-            Critical Issues
+          <div style={{ fontSize: 13, color: '#ffffff', fontWeight: 800, letterSpacing: 0.4 }}>
+            PRINT READINESS
           </div>
 
-          {checks
-            .filter((item) => item.status === 'fail')
-            .map((item, index) => (
-              <div
-                key={`${item.label}-fail-${index}`}
-                style={{
-                  marginBottom: 8,
-                  borderRadius: 10,
-                  padding: 10,
-                  background: 'linear-gradient(180deg, rgba(127,29,29,0.55), rgba(15,23,42,0.92))',
-                  border: `1px solid ${statusColor(item.status)}66`,
-                }}
-              >
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 8,
-                    fontWeight: 700,
-                    marginBottom: 6,
-                    color: statusColor(item.status),
-                  }}
-                >
-                  <span>{statusIcon(item.status)}</span>
-                  <span>{item.label}</span>
-                </div>
-                <div style={{ color: '#e5e7eb', lineHeight: 1.5 }}>
-                  {item.message}
-                </div>
-
-                <div style={{ marginTop: 6, fontSize: 13, color: '#94a3b8' }}>
-                  {item.status === 'fail'
-                    ? 'Fix: This must be corrected before printing.'
-                    : item.status === 'warn'
-                    ? 'Fix: Improve this for better print quality.'
-                    : ''}
-                </div>
-              </div>
-            ))}
-        </div>
-      )}
-
-      {checks.filter((item) => item.status === 'warn').length > 0 && (
-        <div style={{ marginBottom: 16 }}>
           <div
             style={{
-              marginBottom: 10,
-              padding: '10px 14px',
-              borderRadius: 10,
-              background: '#78350f',
-              color: '#fff',
+              padding: '6px 10px',
+              borderRadius: 999,
+              fontSize: 12,
               fontWeight: 800,
+              background: riskBg,
             }}
           >
-            Warnings
+            {riskLabel}
           </div>
-
-          {checks
-            .filter((item) => item.status === 'warn')
-            .map((item, index) => (
-              <div
-                key={`${item.label}-warn-${index}`}
-                style={{
-                  marginBottom: 8,
-                  borderRadius: 10,
-                  padding: 10,
-                  background: 'linear-gradient(180deg, rgba(154,52,18,0.45), rgba(15,23,42,0.92))',
-                  border: `1px solid ${statusColor(item.status)}66`,
-                }}
-              >
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 8,
-                    fontWeight: 700,
-                    marginBottom: 6,
-                    color: statusColor(item.status),
-                  }}
-                >
-                  <span>{statusIcon(item.status)}</span>
-                  <span>{item.label}</span>
-                </div>
-                <div style={{ color: '#e5e7eb', lineHeight: 1.5 }}>{item.message}</div>
-              </div>
-            ))}
         </div>
-      )}
 
-      {checks.filter((item) => item.status === 'pass' || item.status === 'info').length > 0 && (
-        <div style={{ marginBottom: 16 }}>
-          <div
-            style={{
-              marginBottom: 10,
-              padding: '10px 14px',
-              borderRadius: 10,
-              background: '#14532d',
-              color: '#fff',
-              fontWeight: 800,
-            }}
-          >
-            Passed Checks
-          </div>
-
-          {checks
-            .filter((item) => item.status === 'pass' || item.status === 'info')
-            .map((item, index) => (
-              <div
-                key={`${item.label}-pass-${index}`}
-                style={{
-                  marginBottom: 8,
-                  borderRadius: 10,
-                  padding: 10,
-                  background:
-                    item.status === 'pass'
-                      ? 'linear-gradient(180deg, rgba(20,83,45,0.45), rgba(15,23,42,0.92))'
-                      : '#0f172a',
-                  border: `1px solid ${statusColor(item.status)}66`,
-                }}
-              >
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 8,
-                    fontWeight: 700,
-                    marginBottom: 6,
-                    color: statusColor(item.status),
-                  }}
-                >
-                  <span>{statusIcon(item.status)}</span>
-                  <span>{item.label}</span>
-                </div>
-                <div style={{ color: '#e5e7eb', lineHeight: 1.5 }}>{item.message}</div>
-              </div>
-            ))}
-        </div>
-      )}
-
-      {img && effectiveBounds && (
         <div
           style={{
-            marginTop: 12,
-            padding: 14,
+            fontSize: 36,
+            fontWeight: 800,
+            color:
+              printScore >= 80
+                ? '#22c55e'
+                : printScore >= 50
+                ? '#f59e0b'
+                : '#ef4444',
+            lineHeight: 1,
+            marginBottom: 10,
+          }}
+        >
+          {printScore}%
+        </div>
+
+        <div
+          style={{
+            width: '100%',
+            height: 14,
+            borderRadius: 999,
+            background: 'rgba(15,23,42,0.85)',
+            overflow: 'hidden',
+            border: '1px solid rgba(255,255,255,0.08)',
+            marginBottom: 12,
+          }}
+        >
+          <div
+            style={{
+              width: `${printScore}%`,
+              height: '100%',
+              borderRadius: 999,
+              background:
+                printScore >= 80
+                  ? '#22c55e'
+                  : printScore >= 50
+                  ? '#f59e0b'
+                  : '#ef4444',
+              transition: 'width 0.5s ease',
+            }}
+          />
+        </div>
+
+        <div style={{ display: 'grid', gap: 8 }}>
+          <div
+            style={{
+              padding: '10px 12px',
+              borderRadius: 12,
+              background: 'rgba(15,23,42,0.68)',
+              border: '1px solid rgba(255,255,255,0.10)',
+              fontSize: 14,
+              lineHeight: 1.45,
+            }}
+          >
+            <span style={{ fontWeight: 800 }}>Main Issue:</span> {mainIssue}
+          </div>
+
+          <div
+            style={{
+              padding: '10px 12px',
+              borderRadius: 12,
+              background: 'rgba(15,23,42,0.68)',
+              border: '1px solid rgba(255,255,255,0.10)',
+              fontSize: 14,
+              lineHeight: 1.45,
+            }}
+          >
+            <span style={{ fontWeight: 800 }}>Next Step:</span> {nextStep}
+          </div>
+        </div>
+      </div>
+
+      {img && effectiveBounds ? (
+        <div
+          style={{
+            padding: 12,
             borderRadius: 14,
             background: 'rgba(15,23,42,0.75)',
-            backdropFilter: 'blur(4px)',
-            border: '1px solid rgba(34,197,94,0.35)',
+            border: '1px solid rgba(34,197,94,0.22)',
+            display: 'grid',
+            gap: 6,
+            fontSize: 13,
+            lineHeight: 1.45,
+            color: '#e5e7eb',
           }}
         >
-          <div style={{ fontWeight: 700, marginBottom: 8, color: '#22c55e' }}>
-            Artwork Fill Info
-          </div>
-          <div style={{ color: '#e5e7eb', lineHeight: 1.5 }}>
-            Width fill: <strong>{((effectiveBounds.w / 4200) * 100).toFixed(1)}%</strong>
-            <br />
-            Height fill: <strong>{((effectiveBounds.h / 4800) * 100).toFixed(1)}%</strong>
-            <br />
-            Coverage sample: <strong>{coverage.toFixed(1)}%</strong>
-            <br />
-            Current scale: <strong>{(transform.scale * 100).toFixed(1)}%</strong>
-            <br />
-            Preview size: <strong>{Math.round(previewSize * 100)}%</strong>
-            <br />
-            Inspect zoom: <strong>{inspectZoom * 100}%</strong>
-          </div>
+          <div style={{ fontWeight: 800, color: '#86efac' }}>Artwork Info</div>
+          <div>Width fill: <strong>{((effectiveBounds.w / 4200) * 100).toFixed(1)}%</strong></div>
+          <div>Height fill: <strong>{((effectiveBounds.h / 4800) * 100).toFixed(1)}%</strong></div>
+          <div>Coverage: <strong>{coverage.toFixed(1)}%</strong></div>
+          <div>Scale: <strong>{(transform.scale * 100).toFixed(1)}%</strong></div>
+          <div>Preview: <strong>{Math.round(previewSize * 100)}%</strong></div>
+          <div>Inspect Zoom: <strong>{inspectZoom * 100}%</strong></div>
+          <div>Practical DPI: <strong>{practicalPrintDpi || '-'}</strong></div>
         </div>
-      )}
-
-      {img && (
-        <div
-          style={{
-            marginTop: 20,
-            borderRadius: 16,
-            padding: 16,
-            background: 'rgba(2,6,23,0.9)',
-            border: '1px solid rgba(255,255,255,0.08)',
-          }}
-        >
-          <h3 style={{ marginTop: 0, marginBottom: 12, fontWeight: 800 }}>
-            Important POD Notes
-          </h3>
-
-          <p style={{ marginTop: 0, color: '#cbd5e1', lineHeight: 1.6 }}>
-            Important: <strong>300 DPI metadata by itself does not guarantee the file is correct for POD.</strong>{' '}
-            What matters most is the pixel size and whether the art sits properly on the canvas.
-          </p>
-
-          <p style={{ color: '#cbd5e1', lineHeight: 1.6 }}>
-            <strong>Print Resolution</strong> is the practical POD check. DPI metadata can be shown for information,
-            but printers care mainly about pixel dimensions and layout quality.
-          </p>
-
-          <p style={{ color: '#cbd5e1', lineHeight: 1.6 }}>
-            The <span style={{ color: '#ef4444', fontWeight: 700 }}>red dashed overlay</span> shows the safety border,
-            the <span style={{ color: '#3b82f6', fontWeight: 700 }}> blue dashed box</span> shows the safe print zone,
-            the <span style={{ color: '#22c55e', fontWeight: 700 }}> green box</span> shows detected artwork bounds,
-            and the <span style={{ color: '#facc15', fontWeight: 700 }}> yellow center marker</span> shows the artwork center.
-          </p>
-
-          <p style={{ marginBottom: 0, color: '#cbd5e1', lineHeight: 1.6 }}>
-            Recommended shirt workflow: <strong>4200 × 4800 px</strong>, PNG, transparent background, RGB / sRGB.
-          </p>
-        </div>
-      )}
+      ) : null}
     </div>
   );
 }
