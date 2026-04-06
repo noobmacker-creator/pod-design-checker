@@ -12,6 +12,10 @@ type Bounds = {
 };
 
 type ScanResultsPanelProps = {
+  file: File | null;
+  actionMessage: string;
+  downloadMessage: string;
+  handleFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   img: HTMLImageElement | null;
   checks: CheckItem[];
   printScore: number;
@@ -29,6 +33,10 @@ type ScanResultsPanelProps = {
 };
 
 export default function ScanResultsPanel({
+  file,
+  actionMessage,
+  downloadMessage,
+  handleFileChange,
   img,
   checks,
   printScore,
@@ -61,6 +69,142 @@ export default function ScanResultsPanel({
       <p style={{ marginTop: 0, marginBottom: 20, color: '#cbd5e1', lineHeight: 1.6, fontSize: 15 }}>
         Review critical issues first, then warnings, before exporting your final print file.
       </p>
+      <div
+  style={{
+    marginBottom: 16,
+    display: 'grid',
+    gap: 10,
+  }}
+>
+  <input
+    type="file"
+    accept="image/png,image/jpeg,image/jpg,image/webp"
+    onChange={handleFileChange}
+    style={{
+      background: 'rgba(15,23,42,0.85)',
+      color: '#fff',
+      padding: 12,
+      borderRadius: 12,
+      border: '1px solid rgba(255,255,255,0.12)',
+    }}
+  />
+
+  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+    {file ? (
+      <div
+        style={{
+          padding: '6px 10px',
+          borderRadius: 999,
+          background: 'rgba(15,23,42,0.82)',
+          border: '1px solid rgba(255,255,255,0.08)',
+          color: '#fdba74',
+          fontSize: 12,
+          fontWeight: 700,
+        }}
+      >
+        File: {file.name}
+      </div>
+    ) : null}
+
+    <div
+      style={{
+        padding: '6px 10px',
+        borderRadius: 999,
+        background: 'rgba(15,23,42,0.82)',
+        border: '1px solid rgba(255,255,255,0.08)',
+        color: '#cbd5e1',
+        fontSize: 12,
+        fontWeight: 700,
+      }}
+    >
+      Status: {actionMessage}
+    </div>
+
+    {downloadMessage ? (
+      <div
+        style={{
+          padding: '6px 10px',
+          borderRadius: 999,
+          background: 'rgba(8,47,73,0.72)',
+          border: '1px solid rgba(56,189,248,0.25)',
+          color: '#7dd3fc',
+          fontSize: 12,
+          fontWeight: 700,
+        }}
+      >
+        {downloadMessage}
+      </div>
+    ) : null}
+  </div>
+</div>
+      <div
+  style={{
+    marginBottom: 16,
+    display: 'grid',
+    gap: 10,
+  }}
+>
+  <input
+    type="file"
+    accept="image/png,image/jpeg,image/jpg,image/webp"
+    onChange={handleFileChange}
+    style={{
+      background: 'rgba(15,23,42,0.85)',
+      color: '#fff',
+      padding: 12,
+      borderRadius: 12,
+      border: '1px solid rgba(255,255,255,0.12)',
+    }}
+  />
+
+  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+    {file ? (
+      <div
+        style={{
+          padding: '6px 10px',
+          borderRadius: 999,
+          background: 'rgba(15,23,42,0.82)',
+          border: '1px solid rgba(255,255,255,0.08)',
+          color: '#fdba74',
+          fontSize: 12,
+          fontWeight: 700,
+        }}
+      >
+        File: {file.name}
+      </div>
+    ) : null}
+
+    <div
+      style={{
+        padding: '6px 10px',
+        borderRadius: 999,
+        background: 'rgba(15,23,42,0.82)',
+        border: '1px solid rgba(255,255,255,0.08)',
+        color: '#cbd5e1',
+        fontSize: 12,
+        fontWeight: 700,
+      }}
+    >
+      Status: {actionMessage}
+    </div>
+
+    {downloadMessage ? (
+      <div
+        style={{
+          padding: '6px 10px',
+          borderRadius: 999,
+          background: 'rgba(8,47,73,0.72)',
+          border: '1px solid rgba(56,189,248,0.25)',
+          color: '#7dd3fc',
+          fontSize: 12,
+          fontWeight: 700,
+        }}
+      >
+        {downloadMessage}
+      </div>
+    ) : null}
+  </div>
+</div>
 
       <div
         style={{

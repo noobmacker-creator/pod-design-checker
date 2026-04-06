@@ -66,7 +66,7 @@ export default function ScanResultsPanel({
       <h2 style={{ marginTop: 0, marginBottom: 6, fontSize: 20, fontWeight: 800, letterSpacing: 0.4 }}>
         Scan Results
       </h2>
-      <p style={{ marginTop: 0, marginBottom: 20, color: '#cbd5e1', lineHeight: 1.6, fontSize: 15 }}>
+      <p style={{ marginTop: 0, marginBottom: 12, color: '#cbd5e1', lineHeight: 1.5, fontSize: 14 }}>
         Review critical issues first, then warnings, before exporting your final print file.
       </p>
       <div
@@ -209,7 +209,7 @@ export default function ScanResultsPanel({
       <div
         style={{
           marginBottom: 10,
-          padding: 12,
+          padding: 10,
           borderRadius: 10,
           background: 'linear-gradient(180deg, #020617 0%, #020617 60%, #020617cc 100%)',
           border: '2px solid rgba(56,189,248,0.6)',
@@ -221,7 +221,7 @@ export default function ScanResultsPanel({
         </div>
         <div
           style={{
-            fontSize: 42,
+            fontSize: 36,
             fontWeight: 800,
             color:
               printScore >= 80
