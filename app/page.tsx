@@ -16,7 +16,7 @@ import {
 import type { CheckStatus, ViewMode, PreviewSize, CheckItem } from './lib/podCheckerTypes';
 
 import DesignPreviewPanel from './components/DesignPreviewPanel';
-import TopControlsPanel from './components/TopControlsPanel';
+
 import IssueBucketsPanel from './components/IssueBucketsPanel';
 import ScanResultsPanel from './components/ScanResultsPanel';
 
@@ -922,35 +922,7 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
       `}</style>
 
 <div style={{ width: '100%', padding: '0 20px' }}>
-<TopControlsPanel
-  file={file}
-  img={img}
-  originalBounds={originalBounds}
-  showMoreFixes={showMoreFixes}
-  setShowMoreFixes={setShowMoreFixes}
-  viewMode={viewMode}
-  setViewMode={setViewMode}
-  previewSize={previewSize}
-  setPreviewSize={setPreviewSize}
-  mockupOffsetX={mockupOffsetX}
-  mockupOffsetY={mockupOffsetY}
-  mockupScale={mockupScale}
-  setMockupOffsetX={setMockupOffsetX}
-  setMockupOffsetY={setMockupOffsetY}
-  setMockupScale={setMockupScale}
-  actionMessage={actionMessage}
-  downloadMessage={downloadMessage}
-  isScanning={isScanning}
-  handleFileChange={handleFileChange}
-  handleQuickFix={handleQuickFix}
-  resetToOriginalView={resetToOriginalView}
-  handleDownloadFixedPng={handleDownloadFixedPng}
-  handleFixCanvas={handleFixCanvas}
-  handleCenterArtwork={handleCenterArtwork}
-  handleAutoFixSafetyBorder={handleAutoFixSafetyBorder}
-  handleAutoFixTooSmall={handleAutoFixTooSmall}
-  setActionMessage={setActionMessage}
-/>       
+
 
         <div
           style={{
