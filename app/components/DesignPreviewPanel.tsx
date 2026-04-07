@@ -117,24 +117,24 @@ export default function DesignPreviewPanel({
         }}
       >
         <div
-          style={{
-            width: '100%',
-            height: previewCanvasH * totalScale,
-            display: 'flex',
-            justifyContent: 'center',
-          }}
-        >
-          <canvas
-            ref={previewCanvasRef}
-            style={{
-              display: 'block',
-              width: `${previewCanvasW * totalScale}px`,
-              height: `${previewCanvasH * totalScale}px`,
-              boxShadow: '0 12px 50px rgba(0,0,0,0.55)',
-              borderRadius: 12,
-            }}
-          />
-        </div>
+  style={{
+    width: 'fit-content',
+    minWidth: '100%',
+    minHeight: '100%',
+    paddingBottom: 12,
+  }}
+>
+  <canvas
+    ref={previewCanvasRef}
+    style={{
+      display: 'block',
+      width: `${previewCanvasW * totalScale}px`,
+      height: `${previewCanvasH * totalScale}px`,
+      boxShadow: '0 12px 50px rgba(0,0,0,0.55)',
+      borderRadius: 12,
+    }}
+  />
+</div>
       </div>
     </div>
   );
