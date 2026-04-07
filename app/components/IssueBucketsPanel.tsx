@@ -6,6 +6,7 @@ import { statusColor, statusIcon } from '../lib/podCheckerUtils';
 
 type IssueBucketsPanelProps = {
   checks: CheckItem[];
+  isScanning: boolean;
 };
 
 type SectionProps = {
@@ -91,7 +92,7 @@ function Section({ title, items, emptyText, headingColor }: SectionProps) {
   );
 }
 
-export default function IssueBucketsPanel({ checks }: IssueBucketsPanelProps) {
+export default function IssueBucketsPanel({ checks, isScanning }: IssueBucketsPanelProps) {
   const criticalItems = checks.filter((item) => item.status === 'fail');
   const warningItems = checks.filter((item) => item.status === 'warn');
   const passedItems = checks.filter(
@@ -113,6 +114,23 @@ export default function IssueBucketsPanel({ checks }: IssueBucketsPanelProps) {
       <h2 style={{ margin: 0, marginBottom: 14, fontSize: 20, fontWeight: 800 }}>
         Issue Buckets
       </h2>
+      {isScanning && (
+  <div
+    style={{
+      marginBottom: 14,
+      padding: '8px 12px',
+      borderRadius: 14,
+      background: 'rgba(59,130,246,0.14)',
+      border: '1px solid rgba(59,130,246,0.35)',
+      color: '#dbeafe',
+      fontWeight: 700,
+      fontSize: 13,
+      lineHeight: 1.4,
+    }}
+  >
+    Scanning design...
+  </div>
+)}
 
       <Section
         title="Critical Issues"
