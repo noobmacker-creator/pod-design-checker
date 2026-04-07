@@ -21,6 +21,7 @@ type TopControlsPanelProps = {
   setMockupScale: React.Dispatch<React.SetStateAction<number>>;
   actionMessage: string;
   downloadMessage: string;
+  isScanning: boolean;
   handleFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleQuickFix: () => void;
   resetToOriginalView: () => void;
@@ -40,6 +41,8 @@ export default function TopControlsPanel({
   viewMode,
   setViewMode,
   setPreviewSize,
+  actionMessage,
+  isScanning,
   handleQuickFix,
   resetToOriginalView,
   handleDownloadFixedPng,
@@ -64,7 +67,7 @@ export default function TopControlsPanel({
         style={{
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'center',
+          alignItems: 'flex-start',
           gap: 12,
           flexWrap: 'wrap',
         }}
@@ -81,26 +84,60 @@ export default function TopControlsPanel({
         <div
           style={{
             display: 'flex',
-            gap: 10,
-            flexWrap: 'wrap',
-            alignItems: 'center',
+            flexDirection: 'column',
+            alignItems: 'flex-end',
+            gap: 8,
+            width: '100%',
+            maxWidth: 332,
+            flexShrink: 0,
           }}
         >
-          <button onClick={handleQuickFix} disabled={!img || !originalBounds}>
-            Quick Fix
-          </button>
+          <div
+            style={{
+              display: 'flex',
+              gap: 10,
+              flexWrap: 'wrap',
+              alignItems: 'center',
+              justifyContent: 'flex-end',
+              width: '100%',
+            }}
+          >
+            <button onClick={handleQuickFix} disabled={!img || !originalBounds}>
+              Quick Fix
+            </button>
 
-          <button onClick={resetToOriginalView} disabled={!img}>
-            Reset
-          </button>
+            <button onClick={resetToOriginalView} disabled={!img}>
+              Reset
+            </button>
 
-          <button onClick={handleDownloadFixedPng} disabled={!img}>
-            Download PNG
-          </button>
+            <button onClick={handleDownloadFixedPng} disabled={!img}>
+              Download PNG
+            </button>
 
-          <button onClick={() => setShowMoreFixes((v) => !v)} disabled={!img}>
-            {showMoreFixes ? 'Hide Tools' : 'More Tools'}
-          </button>
+            <button onClick={() => setShowMoreFixes((v) => !v)} disabled={!img}>
+              {showMoreFixes ? 'Hide Tools' : 'More Tools'}
+            </button>
+          </div>
+
+          {isScanning && (
+            <div
+              style={{
+                width: '100%',
+                maxWidth: 332,
+                padding: '8px 12px',
+                borderRadius: 14,
+                background: 'rgba(59,130,246,0.14)',
+                border: '1px solid rgba(59,130,246,0.35)',
+                color: '#dbeafe',
+                fontWeight: 700,
+                fontSize: 13,
+                lineHeight: 1.4,
+                boxSizing: 'border-box',
+              }}
+            >
+              {actionMessage || 'Scanning design...'}
+            </div>
+          )}
         </div>
       </div>
 

@@ -154,6 +154,7 @@ const [transform, setTransform] = useState({
 
 const [actionMessage, setActionMessage] = useState('Upload a design to begin.');
 const [downloadMessage, setDownloadMessage] = useState('');
+const [isScanning, setIsScanning] = useState(false);
 
 const previewCanvasRef = useRef<HTMLCanvasElement | null>(null);
 const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -666,6 +667,8 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
     const selected = e.target.files?.[0];
     if (!selected) return;
   
+    setIsScanning(true);
+  
     if (fileUrl) URL.revokeObjectURL(fileUrl);
   
     setFile(selected);
@@ -687,17 +690,17 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
       setImgH(image.naturalHeight);
   
       const scaleX = CANVAS_W / image.naturalWidth;
-const scaleY = CANVAS_H / image.naturalHeight;
-const scale = Math.min(scaleX, scaleY);
-
-const scaledW = image.naturalWidth * scale;
-const scaledH = image.naturalHeight * scale;
-
-setTransform({
-  scale,
-  offsetX: Math.round((CANVAS_W - scaledW) / 2),
-  offsetY: Math.round((CANVAS_H - scaledH) / 2),
-});
+      const scaleY = CANVAS_H / image.naturalHeight;
+      const scale = Math.min(scaleX, scaleY);
+  
+      const scaledW = image.naturalWidth * scale;
+      const scaledH = image.naturalHeight * scale;
+  
+      setTransform({
+        scale,
+        offsetX: Math.round((CANVAS_W - scaledW) / 2),
+        offsetY: Math.round((CANVAS_H - scaledH) / 2),
+      });
   
       setMockupOffsetX(0);
       setMockupOffsetY(0);
@@ -708,10 +711,12 @@ setTransform({
       setDownloadMessage('');
       setViewMode('design');
       setPreviewSize(0.15);
+      setTimeout(() => setIsScanning(false), 600);
     };
   
     image.onerror = () => {
       setActionMessage('Could not load that image.');
+      setTimeout(() => setIsScanning(false), 600);
     };
   
     image.src = url;
@@ -935,6 +940,7 @@ setTransform({
   setMockupScale={setMockupScale}
   actionMessage={actionMessage}
   downloadMessage={downloadMessage}
+  isScanning={isScanning}
   handleFileChange={handleFileChange}
   handleQuickFix={handleQuickFix}
   resetToOriginalView={resetToOriginalView}

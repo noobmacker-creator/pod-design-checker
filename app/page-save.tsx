@@ -40,7 +40,7 @@ const AUTO_FIX_MARGIN = 60;
 const VIEWPORT_W = 1100;
 const VIEWPORT_H = 1100;
 
-const DEFAULT_PREVIEW_SIZE = 0.45;
+const DEFAULT_PREVIEW_SIZE = 0.2;
 
   const SHIRT_W = 1900;
   const SHIRT_H = 2250;
