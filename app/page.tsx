@@ -833,7 +833,7 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
       offsetY: Math.round(y),
     });
   
-    setActionMessage('Quick Fix applied: artwork centered and fitted to a safer print area.');
+    setActionMessage('Auto Fix applied: artwork centered and fitted to a safer print area.');
   }
   
   function resetToOriginalView() {
@@ -939,6 +939,7 @@ gap: 16,
   viewMode={viewMode}
   setViewMode={setViewMode}
   setActionMessage={setActionMessage}
+  handleQuickFix={handleQuickFix} 
   img={img}
   checks={checks}
   printScore={printScore}

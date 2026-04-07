@@ -17,6 +17,7 @@ type ScanResultsPanelProps = {
   viewMode: 'pod' | 'design';
 setViewMode: React.Dispatch<React.SetStateAction<'pod' | 'design'>>;
 setActionMessage: React.Dispatch<React.SetStateAction<string>>;
+handleQuickFix: () => void;
   img: HTMLImageElement | null;
   checks: any[];
   printScore: number;
@@ -41,6 +42,7 @@ export default function ScanResultsPanel({
 viewMode,
 setViewMode,
 setActionMessage,
+handleQuickFix,
 img,
   printScore,
   hasTransparency,
@@ -133,6 +135,12 @@ img,
   </div>
 
   <div
+  style={{
+    display: 'grid',
+    gap: 8,
+  }}
+>
+  <div
     style={{
       display: 'flex',
       gap: 8,
@@ -145,27 +153,38 @@ img,
     </span>
 
     <button
-  onClick={() => {
-    setViewMode('pod');
-    setActionMessage('POD Canvas view selected.');
-  }}
-  style={{ opacity: viewMode === 'pod' ? 1 : 0.85 }}
-  disabled={!img}
->
-  POD Canvas
-</button>
+      onClick={() => {
+        setViewMode('pod');
+        setActionMessage('POD Canvas view selected.');
+      }}
+      style={{ opacity: viewMode === 'pod' ? 1 : 0.85 }}
+      disabled={!img}
+    >
+      POD Canvas
+    </button>
 
-<button
-  onClick={() => {
-    setViewMode('design');
-    setActionMessage('Design view selected.');
-  }}
-  style={{ opacity: viewMode === 'design' ? 1 : 0.85 }}
-  disabled={!img}
->
-  Design
-</button>
+    <button
+      onClick={() => {
+        setViewMode('design');
+        setActionMessage('Design view selected.');
+      }}
+      style={{ opacity: viewMode === 'design' ? 1 : 0.85 }}
+      disabled={!img}
+    >
+      Design
+    </button>
   </div>
+
+  <button
+    onClick={handleQuickFix}
+    disabled={!img}
+    style={{
+      background: '#2563eb',
+    }}
+  >
+    Auto Fix
+  </button>
+</div>
 </div>
 
   <div>
