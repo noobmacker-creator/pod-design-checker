@@ -931,11 +931,14 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
 gap: 16,
           }}
         >
-          <ScanResultsPanel
+         <ScanResultsPanel
   file={file}
   actionMessage={actionMessage}
   downloadMessage={downloadMessage}
   handleFileChange={handleFileChange}
+  viewMode={viewMode}
+  setViewMode={setViewMode}
+  setActionMessage={setActionMessage}
   img={img}
   checks={checks}
   printScore={printScore}

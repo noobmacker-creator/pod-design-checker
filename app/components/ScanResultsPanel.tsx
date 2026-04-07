@@ -14,6 +14,9 @@ type ScanResultsPanelProps = {
   actionMessage: string;
   downloadMessage: string;
   handleFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  viewMode: 'pod' | 'design';
+setViewMode: React.Dispatch<React.SetStateAction<'pod' | 'design'>>;
+setActionMessage: React.Dispatch<React.SetStateAction<string>>;
   img: HTMLImageElement | null;
   checks: any[];
   printScore: number;
@@ -35,7 +38,10 @@ export default function ScanResultsPanel({
   actionMessage,
   downloadMessage,
   handleFileChange,
-  img,
+viewMode,
+setViewMode,
+setActionMessage,
+img,
   printScore,
   hasTransparency,
   thinLinePercent,
@@ -106,12 +112,69 @@ export default function ScanResultsPanel({
         gap: 14,
       }}
     >
-      <div>
-        <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800 }}>Summary</h2>
-        <p style={{ marginTop: 6, marginBottom: 0, color: '#cbd5e1', lineHeight: 1.5, fontSize: 14 }}>
-          Upload your design, review the result, then fix issues before export.
-        </p>
-      </div>
+      <div style={{ display: 'grid', gap: 10 }}>
+      <div
+  style={{
+    padding: 12,
+    borderRadius: 16,
+    background: 'rgba(15,23,42,0.72)',
+    border: '1px solid rgba(255,255,255,0.08)',
+    display: 'grid',
+    gap: 10,
+  }}
+>
+  <div>
+    <div style={{ fontSize: 20, fontWeight: 800, lineHeight: 1.1 }}>
+      POD Design Checker™
+    </div>
+    <div style={{ marginTop: 4, color: '#cbd5e1', fontSize: 13 }}>
+      Fast print-readiness actions
+    </div>
+  </div>
+
+  <div
+    style={{
+      display: 'flex',
+      gap: 8,
+      flexWrap: 'wrap',
+      alignItems: 'center',
+    }}
+  >
+    <span style={{ fontWeight: 800, color: '#bae6fd', fontSize: 13 }}>
+      View
+    </span>
+
+    <button
+  onClick={() => {
+    setViewMode('pod');
+    setActionMessage('POD Canvas view selected.');
+  }}
+  style={{ opacity: viewMode === 'pod' ? 1 : 0.85 }}
+  disabled={!img}
+>
+  POD Canvas
+</button>
+
+<button
+  onClick={() => {
+    setViewMode('design');
+    setActionMessage('Design view selected.');
+  }}
+  style={{ opacity: viewMode === 'design' ? 1 : 0.85 }}
+  disabled={!img}
+>
+  Design
+</button>
+  </div>
+</div>
+
+  <div>
+    <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800 }}>Summary</h2>
+    <p style={{ marginTop: 6, marginBottom: 0, color: '#cbd5e1', lineHeight: 1.5, fontSize: 14 }}>
+      Upload your design, review the result, then fix issues before export.
+    </p>
+  </div>
+</div>
 
       <div style={{ display: 'grid', gap: 10 }}>
         <input
