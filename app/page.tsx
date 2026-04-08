@@ -972,7 +972,12 @@ gap: 16,
   setInspectZoom={setInspectZoom}
   setActionMessage={setActionMessage}
 />
-<IssueBucketsPanel checks={checks} isScanning={isScanning} />
+<IssueBucketsPanel
+  checks={checks}
+  isScanning={isScanning}
+  img={img}
+  handleDownloadFixedPng={handleDownloadFixedPng}
+/>
         </div>
         
       <canvas ref={analysisCanvasRef} style={{ display: 'none' }} />

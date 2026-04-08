@@ -7,6 +7,8 @@ import { statusColor, statusIcon } from '../lib/podCheckerUtils';
 type IssueBucketsPanelProps = {
   checks: CheckItem[];
   isScanning: boolean;
+  img: HTMLImageElement | null;
+  handleDownloadFixedPng: () => void;
 };
 
 type SectionProps = {
@@ -68,16 +70,6 @@ function Section({ title, items, emptyText, headingColor }: SectionProps) {
               <div style={{ color: '#e5e7eb', fontSize: 12, lineHeight: 1.4 }}>
                 {item.message}
               </div>
-
-              {item.status === 'fail' || item.status === 'warn' ? (
-  <div style={{ marginTop: 5, color: '#94a3b8', fontSize: 11, lineHeight: 1.35 }}>
-    {item.status === 'fail'
-      ? item.label === 'Fake Transparency Background'
-        ? 'Recommended: remove background and re-upload.'
-        : 'Fix: Use Quick Fix (Auto) or correct this issue before printing.'
-      : 'Fix: Improve this for better print quality.'}
-  </div>
-) : null}
             </div>
           ))}
 
@@ -92,7 +84,12 @@ function Section({ title, items, emptyText, headingColor }: SectionProps) {
   );
 }
 
-export default function IssueBucketsPanel({ checks, isScanning }: IssueBucketsPanelProps) {
+export default function IssueBucketsPanel({
+  checks,
+  isScanning,
+  img,
+  handleDownloadFixedPng,
+}: IssueBucketsPanelProps) {
   const criticalItems = checks.filter((item) => item.status === 'fail');
   const warningItems = checks.filter((item) => item.status === 'warn');
   const passedItems = checks.filter(
@@ -114,23 +111,37 @@ export default function IssueBucketsPanel({ checks, isScanning }: IssueBucketsPa
       <h2 style={{ margin: 0, marginBottom: 14, fontSize: 20, fontWeight: 800 }}>
         Issue Buckets
       </h2>
+
       {isScanning && (
-  <div
-    style={{
-      marginBottom: 14,
-      padding: '8px 12px',
-      borderRadius: 14,
-      background: 'rgba(59,130,246,0.14)',
-      border: '1px solid rgba(59,130,246,0.35)',
-      color: '#dbeafe',
-      fontWeight: 700,
-      fontSize: 13,
-      lineHeight: 1.4,
-    }}
-  >
-    Scanning design...
-  </div>
-)}
+        <div
+          style={{
+            marginBottom: 14,
+            padding: '8px 12px',
+            borderRadius: 14,
+            background: 'rgba(59,130,246,0.14)',
+            border: '1px solid rgba(59,130,246,0.35)',
+            color: '#dbeafe',
+            fontWeight: 700,
+            fontSize: 13,
+            lineHeight: 1.4,
+          }}
+        >
+          Scanning design...
+        </div>
+      )}
+
+      <div style={{ marginBottom: 14 }}>
+        <button
+          onClick={handleDownloadFixedPng}
+          disabled={!img}
+          style={{
+            width: '100%',
+            background: '#2563eb',
+          }}
+        >
+          Download PNG
+        </button>
+      </div>
 
       <Section
         title="Critical Issues"
