@@ -931,30 +931,32 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
 gap: 16,
           }}
         >
-         <ScanResultsPanel
-  file={file}
-  actionMessage={actionMessage}
-  downloadMessage={downloadMessage}
-  handleFileChange={handleFileChange}
-  viewMode={viewMode}
-  setViewMode={setViewMode}
-  setActionMessage={setActionMessage}
-  handleQuickFix={handleQuickFix} 
-  img={img}
-  checks={checks}
-  printScore={printScore}
-  hasTransparency={hasTransparency}
-  thinLinePercent={thinLinePercent}
-  specks={specks}
-  imgW={imgW}
-  imgH={imgH}
-  effectiveBounds={effectiveBounds}
-  coverage={coverage}
-  transform={transform}
-  previewSize={previewSize}
-  inspectZoom={inspectZoom}
-  practicalPrintDpi={practicalPrintDpi}
-/>
+         <div style={{ minWidth: 0, width: '100%', maxWidth: '100%' }}>
+  <ScanResultsPanel
+    file={file}
+    actionMessage={actionMessage}
+    downloadMessage={downloadMessage}
+    handleFileChange={handleFileChange}
+    viewMode={viewMode}
+    setViewMode={setViewMode}
+    setActionMessage={setActionMessage}
+    handleQuickFix={handleQuickFix}
+    img={img}
+    checks={checks}
+    printScore={printScore}
+    hasTransparency={hasTransparency}
+    thinLinePercent={thinLinePercent}
+    specks={specks}
+    imgW={imgW}
+    imgH={imgH}
+    effectiveBounds={effectiveBounds}
+    coverage={coverage}
+    transform={transform}
+    previewSize={previewSize}
+    inspectZoom={inspectZoom}
+    practicalPrintDpi={practicalPrintDpi}
+  />
+</div>
 
           <DesignPreviewPanel
   previewCanvasRef={previewCanvasRef}

@@ -15,9 +15,9 @@ type ScanResultsPanelProps = {
   downloadMessage: string;
   handleFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   viewMode: 'pod' | 'design';
-setViewMode: React.Dispatch<React.SetStateAction<'pod' | 'design'>>;
-setActionMessage: React.Dispatch<React.SetStateAction<string>>;
-handleQuickFix: () => void;
+  setViewMode: React.Dispatch<React.SetStateAction<'pod' | 'design'>>;
+  setActionMessage: React.Dispatch<React.SetStateAction<string>>;
+  handleQuickFix: () => void;
   img: HTMLImageElement | null;
   checks: any[];
   printScore: number;
@@ -39,11 +39,11 @@ export default function ScanResultsPanel({
   actionMessage,
   downloadMessage,
   handleFileChange,
-viewMode,
-setViewMode,
-setActionMessage,
-handleQuickFix,
-img,
+  viewMode,
+  setViewMode,
+  setActionMessage,
+  handleQuickFix,
+  img,
   printScore,
   hasTransparency,
   thinLinePercent,
@@ -108,133 +108,167 @@ img,
         borderRadius: 20,
         padding: 16,
         background: 'rgba(255,255,255,0.04)',
-        boxShadow: '0 20px 60px rgba(0,0,0,0.28)',
+        boxShadow: '0 8px 24px rgba(0,0,0,0.18)',
         alignSelf: 'start',
         display: 'grid',
         gap: 14,
+        width: '100%',
+        maxWidth: '100%',
+        minWidth: 0,
+        boxSizing: 'border-box',
       }}
     >
       <div style={{ display: 'grid', gap: 10 }}>
-      <div
-  style={{
-    padding: 12,
-    borderRadius: 16,
-    background: 'rgba(15,23,42,0.72)',
-    border: '1px solid rgba(255,255,255,0.08)',
-    display: 'grid',
-    gap: 10,
-  }}
->
-  <div>
-    <div style={{ fontSize: 20, fontWeight: 800, lineHeight: 1.1 }}>
-      POD Design Checker™
-    </div>
-    <div style={{ marginTop: 4, color: '#cbd5e1', fontSize: 13 }}>
-      Fast print-readiness actions
-    </div>
-  </div>
+        <div
+          style={{
+            padding: 12,
+            borderRadius: 16,
+            background: 'rgba(15,23,42,0.72)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            display: 'grid',
+            gap: 10,
+          }}
+        >
+          <div>
+            <div style={{ fontSize: 20, fontWeight: 800, lineHeight: 1.1 }}>
+              POD Design Checker™
+            </div>
+            <div style={{ marginTop: 4, color: '#cbd5e1', fontSize: 13 }}>
+              Fast print-readiness actions
+            </div>
+          </div>
 
-  <div
-  style={{
-    display: 'grid',
-    gap: 8,
-  }}
->
-  <div
-    style={{
-      display: 'flex',
-      gap: 8,
-      flexWrap: 'wrap',
-      alignItems: 'center',
-    }}
-  >
-    <span style={{ fontWeight: 800, color: '#bae6fd', fontSize: 13 }}>
-      View
-    </span>
+          <div
+            style={{
+              display: 'grid',
+              gap: 8,
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                gap: 8,
+                flexWrap: 'wrap',
+                alignItems: 'center',
+              }}
+            >
+              <span style={{ fontWeight: 800, color: '#bae6fd', fontSize: 13 }}>
+                View
+              </span>
 
-    <button
-      onClick={() => {
-        setViewMode('pod');
-        setActionMessage('POD Canvas view selected.');
-      }}
-      style={{ opacity: viewMode === 'pod' ? 1 : 0.85 }}
-      disabled={!img}
-    >
-      POD Canvas
-    </button>
+              <button
+                onClick={() => {
+                  setViewMode('pod');
+                  setActionMessage('POD Canvas view selected.');
+                }}
+                style={{ opacity: viewMode === 'pod' ? 1 : 0.85 }}
+                disabled={!img}
+              >
+                POD Canvas
+              </button>
 
-    <button
-      onClick={() => {
-        setViewMode('design');
-        setActionMessage('Design view selected.');
-      }}
-      style={{ opacity: viewMode === 'design' ? 1 : 0.85 }}
-      disabled={!img}
-    >
-      Design
-    </button>
-  </div>
+              <button
+                onClick={() => {
+                  setViewMode('design');
+                  setActionMessage('Design view selected.');
+                }}
+                style={{ opacity: viewMode === 'design' ? 1 : 0.85 }}
+                disabled={!img}
+              >
+                Design
+              </button>
+            </div>
 
-  <button
-    onClick={handleQuickFix}
-    disabled={!img}
-    style={{
-      background: '#2563eb',
-    }}
-  >
-    Auto Fix
-  </button>
-</div>
-</div>
+            <button
+              onClick={handleQuickFix}
+              disabled={!img}
+              style={{
+                background: '#2563eb',
+              }}
+            >
+              Auto Fix
+            </button>
+          </div>
+        </div>
 
-  <div>
-    <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800 }}>Summary</h2>
-    <p style={{ marginTop: 6, marginBottom: 0, color: '#cbd5e1', lineHeight: 1.5, fontSize: 14 }}>
-      Upload your design, review the result, then fix issues before export.
-    </p>
-  </div>
-</div>
+        <div>
+          <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800 }}>Summary</h2>
+          <p
+            style={{
+              marginTop: 6,
+              marginBottom: 0,
+              color: '#cbd5e1',
+              lineHeight: 1.5,
+              fontSize: 14,
+            }}
+          >
+            Upload your design, review the result, then fix issues before export.
+          </p>
+        </div>
+      </div>
 
       <div style={{ display: 'grid', gap: 10 }}>
+        <label
+          htmlFor="design-upload"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '100%',
+            padding: 12,
+            borderRadius: 12,
+            background: '#2563eb',
+            color: '#fff',
+            fontWeight: 700,
+            cursor: 'pointer',
+            boxSizing: 'border-box',
+          }}
+        >
+          Upload design
+        </label>
+
         <input
+          id="design-upload"
           type="file"
           accept="image/png,image/jpeg,image/jpg,image/webp"
           onChange={handleFileChange}
-          style={{
-            background: 'rgba(15,23,42,0.85)',
-            color: '#fff',
-            padding: 12,
-            borderRadius: 12,
-            border: '1px solid rgba(255,255,255,0.12)',
-          }}
+          style={{ display: 'none' }}
         />
 
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        <div style={{ display: 'grid', gap: 8, minWidth: 0 }}>
           {file ? (
             <div
               style={{
                 padding: '6px 10px',
-                borderRadius: 999,
+                borderRadius: 12,
                 background: 'rgba(15,23,42,0.82)',
                 border: '1px solid rgba(255,255,255,0.08)',
                 color: '#fdba74',
                 fontSize: 12,
                 fontWeight: 700,
+                width: '100%',
+                boxSizing: 'border-box',
+                overflow: 'hidden',
+                whiteSpace: 'nowrap',
+                textOverflow: 'ellipsis',
               }}
+              title={file.name}
             >
-              File: {file.name}
+              {file.name}
             </div>
           ) : null}
 
           <div
             style={{
               padding: '6px 10px',
-              borderRadius: 999,
+              borderRadius: 12,
               background: 'rgba(15,23,42,0.82)',
               border: '1px solid rgba(255,255,255,0.08)',
               color: '#cbd5e1',
               fontSize: 12,
               fontWeight: 700,
+              width: '100%',
+              boxSizing: 'border-box',
             }}
           >
             Status: {actionMessage}
@@ -244,12 +278,14 @@ img,
             <div
               style={{
                 padding: '6px 10px',
-                borderRadius: 999,
+                borderRadius: 12,
                 background: 'rgba(8,47,73,0.72)',
                 border: '1px solid rgba(56,189,248,0.25)',
                 color: '#7dd3fc',
                 fontSize: 12,
                 fontWeight: 700,
+                width: '100%',
+                boxSizing: 'border-box',
               }}
             >
               {downloadMessage}
@@ -298,11 +334,7 @@ img,
             fontSize: 36,
             fontWeight: 800,
             color:
-              printScore >= 80
-                ? '#22c55e'
-                : printScore >= 50
-                ? '#f59e0b'
-                : '#ef4444',
+              printScore >= 80 ? '#22c55e' : printScore >= 50 ? '#f59e0b' : '#ef4444',
             lineHeight: 1,
             marginBottom: 10,
           }}
@@ -327,11 +359,7 @@ img,
               height: '100%',
               borderRadius: 999,
               background:
-                printScore >= 80
-                  ? '#22c55e'
-                  : printScore >= 50
-                  ? '#f59e0b'
-                  : '#ef4444',
+                printScore >= 80 ? '#22c55e' : printScore >= 50 ? '#f59e0b' : '#ef4444',
               transition: 'width 0.5s ease',
             }}
           />
@@ -381,13 +409,27 @@ img,
           }}
         >
           <div style={{ fontWeight: 800, color: '#86efac' }}>Artwork Info</div>
-          <div>Width fill: <strong>{((effectiveBounds.w / 4200) * 100).toFixed(1)}%</strong></div>
-          <div>Height fill: <strong>{((effectiveBounds.h / 4800) * 100).toFixed(1)}%</strong></div>
-          <div>Coverage: <strong>{coverage.toFixed(1)}%</strong></div>
-          <div>Scale: <strong>{(transform.scale * 100).toFixed(1)}%</strong></div>
-          <div>Preview: <strong>{Math.round(previewSize * 100)}%</strong></div>
-          <div>Inspect Zoom: <strong>{inspectZoom * 100}%</strong></div>
-          <div>Practical DPI: <strong>{practicalPrintDpi || '-'}</strong></div>
+          <div>
+            Width fill: <strong>{((effectiveBounds.w / 4200) * 100).toFixed(1)}%</strong>
+          </div>
+          <div>
+            Height fill: <strong>{((effectiveBounds.h / 4800) * 100).toFixed(1)}%</strong>
+          </div>
+          <div>
+            Coverage: <strong>{coverage.toFixed(1)}%</strong>
+          </div>
+          <div>
+            Scale: <strong>{(transform.scale * 100).toFixed(1)}%</strong>
+          </div>
+          <div>
+            Preview: <strong>{Math.round(previewSize * 100)}%</strong>
+          </div>
+          <div>
+            Inspect Zoom: <strong>{inspectZoom * 100}%</strong>
+          </div>
+          <div>
+            Practical DPI: <strong>{practicalPrintDpi || '-'}</strong>
+          </div>
         </div>
       ) : null}
     </div>
