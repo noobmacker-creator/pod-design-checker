@@ -261,13 +261,13 @@ canvas.height = img.naturalHeight;
     if (widthRatio >= 0.38 && heightRatio >= 0.38 && areaRatio >= 0.1) {
       return {
         status: 'warn' as CheckStatus,
-        message: `Design may print a bit small. Width ${(widthRatio * 100).toFixed(0)}% • Height ${(heightRatio * 100).toFixed(0)}%`,
+        message: 'Design may print a bit small. Please press Auto Fix top left, then download 4200×4800 PNG top right.',
       };
     }
 
     return {
       status: 'fail' as CheckStatus,
-      message: `Design looks too small and may print tiny. Width ${(widthRatio * 100).toFixed(0)}% • Height ${(heightRatio * 100).toFixed(0)}%`,
+      message: 'Design looks too small and may print tiny. Please press Auto Fix top left, then download 4200×4800 PNG top right.',
     };
   }, [effectiveBounds]);
 
@@ -306,13 +306,13 @@ canvas.height = img.naturalHeight;
     if (absX <= 120 && absY <= 120) {
       return {
         status: 'warn' as CheckStatus,
-        message: `Artwork is slightly off-center. It is ${horizontal} and ${vertical}.`,
+        message: 'Artwork is slightly off-center. Please press Auto Fix top left.',
       };
     }
 
     return {
       status: 'fail' as CheckStatus,
-      message: `Artwork is noticeably off-center. It is ${horizontal} and ${vertical}.`,
+      message: 'Artwork is noticeably off-center. Please press Auto Fix top left.',
     };
   }, [effectiveBounds]);
 
@@ -342,13 +342,13 @@ canvas.height = img.naturalHeight;
         
       
 status: 'warn' as CheckStatus,
-message: "Safe but close to edge. For best results, use quick fix Auto ."
+message: "Safe but close to edge. For best results, use quick fix Auto Fix top left."
       };
     }
 
     return {
       status: 'fail' as CheckStatus,
-      message: `Artwork is touching or very close to the ${SAFE_BORDER}px safety edge.`,
+      message: 'Artwork is touching or very close to the safety edge. Please press Auto Fix top left.',
     };
   }, [effectiveBounds]);
 
@@ -368,15 +368,15 @@ message: "Safe but close to edge. For best results, use quick fix Auto ."
         message: exactSize
           ? `Correct size: ${imgW} × ${imgH}`
           : largeEnough
-          ? `Larger than recommended. Consider resizing canvas to ${CANVAS_W} × ${CANVAS_H}.`
-          : `Incorrect size. Recommended: ${CANVAS_W} × ${CANVAS_H}`,
+          ? 'Canvas is larger than recommended. Please download the 4200×4800 PNG file top right.'
+          : 'Canvas is smaller than recommended. Please download the 4200×4800 PNG file top right.',
       },
       {
         label: 'Aspect Ratio',
         status: aspectClose ? 'pass' : 'fail',
         message: aspectClose
           ? `Good aspect ratio: ${aspect.toFixed(3)}`
-          : `Aspect ratio mismatch. Current: ${aspect.toFixed(3)}, recommended: ${CANVAS_ASPECT.toFixed(3)}`,
+          : 'Aspect ratio mismatch. Please download the 4200×4800 PNG file top right.',
       },
       {
         label: 'Transparency',
