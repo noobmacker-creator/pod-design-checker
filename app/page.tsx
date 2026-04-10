@@ -113,33 +113,6 @@ const [mockupScale, setMockupScale] = useState(1);
   const [coverage, setCoverage] = useState(0);
   const [specks, setSpecks] = useState(0);
   const [thinLinePercent, setThinLinePercent] = useState(0);
-  let printScore = 0;
-
-if (img) {
-  printScore = 100;
-
-  if (imgW !== CANVAS_W || imgH !== CANVAS_H) {
-    printScore -= 20;
-  }
-
-  if (hasTransparency === false) {
-    printScore -= 25;
-  }
-
-  if (specks > 0) {
-    printScore -= 8;
-  }
-
-  if (thinLinePercent >= 18) {
-    printScore -= 12;
-  } else if (thinLinePercent >= 8) {
-    printScore -= 5;
-  }
-
-  if (printScore < 0) {
-    printScore = 0;
-  }
-}
 
 const [fakeTransparencyDetected, setFakeTransparencyDetected] = useState(false);
 const [viewMode, setViewMode] = useState<ViewMode>('pod');
@@ -193,7 +166,7 @@ canvas.height = img.naturalHeight;
     const res = detectBoundsAndCoverage(imageData, 10);
     setOriginalBounds(res.bounds);
     setCoverage(res.coverage);
-    setSpecks(detectSpecks(imageData, 120, 3));
+    setSpecks(detectSpecks(imageData, 160, 2));
     setThinLinePercent(estimateThinLines(imageData));
     const fakeTransparency = detectFakeTransparencyBackground(imageData);
     setFakeTransparencyDetected(fakeTransparency.detected);
@@ -351,6 +324,65 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
       message: 'Artwork is touching or very close to the safety edge. Please press Auto Fix top left.',
     };
   }, [effectiveBounds]);
+
+  const printScore = useMemo(() => {
+    if (!img) return 0;
+
+    let score = 100;
+
+    if (imgW !== CANVAS_W || imgH !== CANVAS_H) {
+      score -= 20;
+    }
+
+    if (hasTransparency === false) {
+      score -= 25;
+    }
+
+    if (fakeTransparencyDetected) {
+      score -= 15;
+    }
+
+    if (designTooSmallStatus.status === 'fail') {
+      score -= 15;
+    } else if (designTooSmallStatus.status === 'warn') {
+      score -= 8;
+    }
+
+    if (offCenterStatus.status === 'fail') {
+      score -= 10;
+    } else if (offCenterStatus.status === 'warn') {
+      score -= 5;
+    }
+
+    if (safetyBorderStatus.status === 'fail') {
+      score -= 15;
+    } else if (safetyBorderStatus.status === 'warn') {
+      score -= 8;
+    }
+
+    if (specks > 0) {
+      score -= 8;
+    }
+
+    if (thinLinePercent >= 18) {
+      score -= 12;
+    } else if (thinLinePercent >= 8) {
+      score -= 5;
+    }
+
+    return Math.max(0, score);
+  }, [
+    img,
+    imgW,
+    imgH,
+    hasTransparency,
+    fakeTransparencyDetected,
+    designTooSmallStatus.status,
+    offCenterStatus.status,
+    safetyBorderStatus.status,
+    specks,
+    thinLinePercent,
+  ]);
 
   const checks: CheckItem[] = useMemo(() => {
     if (!imgW || !imgH) return [];

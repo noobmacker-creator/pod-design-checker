@@ -30,36 +30,47 @@ export function statusColor(status: 'pass' | 'warn' | 'fail' | 'info') {
     return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
   }
   
-  export function detectFakeTransparencyBackground(imageData: ImageData) {
-    const { data } = imageData;
-  
-    let darkA = 0;
-    let darkB = 0;
-    let checked = 0;
-  
-    for (let i = 0; i < data.length; i += 16) {
-      const r = data[i];
-      const g = data[i + 1];
+export function detectFakeTransparencyBackground(imageData: ImageData) {
+  const { data } = imageData;
+
+  let checkerToneA = 0;
+  let checkerToneB = 0;
+  let checked = 0;
+
+  for (let i = 0; i < data.length; i += 16) {
+    const r = data[i];
+    const g = data[i + 1];
       const b = data[i + 2];
       const a = data[i + 3];
-  
-      if (a !== 255) continue;
-  
-      checked++;
-  
-      if (r === 31 && g === 31 && b === 31) darkA++;
-      if (r === 42 && g === 42 && b === 42) darkB++;
-    }
-  
-    const checkerPixels = darkA + darkB;
-    const ratio = checked === 0 ? 0 : checkerPixels / checked;
-  
-    return {
-      checkerPixels,
-      ratio,
-      detected: ratio > 0.05,
-    };
+
+    if (a !== 255) continue;
+
+    checked++;
+
+    const maxChannel = Math.max(r, g, b);
+    const minChannel = Math.min(r, g, b);
+    const average = (r + g + b) / 3;
+    const isNeutralGray = maxChannel - minChannel <= 10;
+
+    if (!isNeutralGray) continue;
+
+    if (average >= 22 && average <= 40) checkerToneA++;
+    if (average >= 41 && average <= 68) checkerToneB++;
   }
+
+  const checkerPixels = checkerToneA + checkerToneB;
+  const ratio = checked === 0 ? 0 : checkerPixels / checked;
+  const balancedPattern =
+    checkerToneA >= 20 &&
+    checkerToneB >= 20 &&
+    Math.min(checkerToneA, checkerToneB) / Math.max(checkerToneA, checkerToneB) >= 0.35;
+
+  return {
+    checkerPixels,
+    ratio,
+    detected: ratio > 0.08 && balancedPattern,
+  };
+}
   
   function parsePngDpi(arrayBuffer: ArrayBuffer): number | null {
     try {
