@@ -2,8 +2,6 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  statusColor,
-  statusIcon,
   formatBytes,
   detectFakeTransparencyBackground,
   getImageDpi,
@@ -20,8 +18,6 @@ import DesignPreviewPanel from './components/DesignPreviewPanel';
 import IssueBucketsPanel from './components/IssueBucketsPanel';
 import ScanResultsPanel from './components/ScanResultsPanel';
 
-
-
 type Bounds = {
   x: number;
   y: number;
@@ -35,72 +31,24 @@ const CANVAS_ASPECT = CANVAS_W / CANVAS_H;
 
 const SAFE_BORDER = 6;
 const SAFE_BOX = 180;
-const AUTO_FIX_MARGIN = 60;
-
-const VIEWPORT_W = 1100;
-const VIEWPORT_H = 1100;
 
 const DEFAULT_PREVIEW_SIZE = 0.2;
 
-  const SHIRT_W = 1900;
-  const SHIRT_H = 2250;
+const SHIRT_W = 1900;
+const SHIRT_H = 2250;
 const SHIRT_PRINT_X = 400;
 const SHIRT_PRINT_Y = 420;
 const SHIRT_PRINT_W = 800;
 const SHIRT_PRINT_H = 1000;
 
-
-
-function resizeImage(file: File) {
-  return new Promise<HTMLImageElement>((resolve) => {
-    const img = new Image();
-    const url = URL.createObjectURL(file);
-
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d')!;
-
-      let w = img.width;
-      let h = img.height;
-
-      const max = 1200;
-
-      if (w > max || h > max) {
-        if (w > h) {
-          h = h * (max / w);
-          w = max;
-        } else {
-          w = w * (max / h);
-          h = max;
-        }
-      }
-
-      canvas.width = w;
-      canvas.height = h;
-
-      ctx.drawImage(img, 0, 0, w, h);
-
-      const newImg = new Image();
-      newImg.onload = () => resolve(newImg);
-      newImg.src = canvas.toDataURL('image/png');
-    };
-
-    img.src = url;
-  });
-}
-
-
 export default function Page() {
-  
   const [file, setFile] = useState<File | null>(null);
-  const [showMoreFixes, setShowMoreFixes] = useState(false);
   const [fileUrl, setFileUrl] = useState('');
   const [img, setImg] = useState<HTMLImageElement | null>(null);
   const [shirtImg, setShirtImg] = useState<HTMLImageElement | null>(null);
   const [mockupOffsetX, setMockupOffsetX] = useState(0);
-const [mockupOffsetY, setMockupOffsetY] = useState(0);
-const [mockupScale, setMockupScale] = useState(1);
-
+  const [mockupOffsetY, setMockupOffsetY] = useState(0);
+  const [mockupScale, setMockupScale] = useState(1);
 
   const [imgW, setImgW] = useState(0);
   const [imgH, setImgH] = useState(0);
@@ -114,31 +62,32 @@ const [mockupScale, setMockupScale] = useState(1);
   const [specks, setSpecks] = useState(0);
   const [thinLinePercent, setThinLinePercent] = useState(0);
 
-const [fakeTransparencyDetected, setFakeTransparencyDetected] = useState(false);
-const [viewMode, setViewMode] = useState<ViewMode>('pod');
-const [previewSize, setPreviewSize] = useState<PreviewSize>(DEFAULT_PREVIEW_SIZE);
-const [inspectZoom, setInspectZoom] = useState(1);
+  const [fakeTransparencyDetected, setFakeTransparencyDetected] = useState(false);
+  const [viewMode, setViewMode] = useState<ViewMode>('pod');
+  const [previewSize, setPreviewSize] = useState<PreviewSize>(DEFAULT_PREVIEW_SIZE);
+  const [inspectZoom, setInspectZoom] = useState(1);
 
-const [transform, setTransform] = useState({
-  scale: 1,
-  offsetX: 0,
-  offsetY: 0,
-});
+  const [transform, setTransform] = useState({
+    scale: 1,
+    offsetX: 0,
+    offsetY: 0,
+  });
 
-const [actionMessage, setActionMessage] = useState('Upload a design to begin.');
-const [downloadMessage, setDownloadMessage] = useState('');
-const [isScanning, setIsScanning] = useState(false);
+  const [actionMessage, setActionMessage] = useState('Upload a design to begin.');
+  const [downloadMessage, setDownloadMessage] = useState('');
+  const [isScanning, setIsScanning] = useState(false);
 
-const previewCanvasRef = useRef<HTMLCanvasElement | null>(null);
-const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
-useEffect(() => {
-  const shirt = new Image();
-  shirt.src = '/mockups/shirt-front.png';
+  const previewCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  shirt.onload = () => {
-    setShirtImg(shirt);
-  };
-}, []);
+  useEffect(() => {
+    const shirt = new Image();
+    shirt.src = '/mockups/shirt-front.png';
+
+    shirt.onload = () => {
+      setShirtImg(shirt);
+    };
+  }, []);
 
 
   useEffect(() => {
@@ -390,7 +339,6 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
     const exactSize = imgW === CANVAS_W && imgH === CANVAS_H;
     const aspect = imgW / imgH;
     const aspectClose = Math.abs(aspect - CANVAS_ASPECT) < 0.01;
-    const practicalGood = practicalPrintDpi >= 300;
     const largeEnough = imgW >= CANVAS_W && imgH >= CANVAS_H;
 
     return [
@@ -510,7 +458,6 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
     imgH,
     hasTransparency,
     fileSize,
-    practicalPrintDpi,
     effectiveBounds,
     designTooSmallStatus,
     offCenterStatus,
@@ -586,7 +533,7 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
     ctx.stroke();
   }
 
-  function drawPreview() {
+  useEffect(() => {
     if (!img) return;
 
     const canvas = previewCanvasRef.current;
@@ -689,10 +636,6 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
         );
       }
     }
-  }
-
-  useEffect(() => {
-    drawPreview();
   }, [img, shirtImg, transform, effectiveBounds, viewMode, designCanvasSize, mockupOffsetX, mockupOffsetY, mockupScale]);
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -754,88 +697,6 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
     image.src = url;
   }
 
-  function handleFixCanvas() {
-    if (!img) return;
-
-    setViewMode('pod');
-    setTransform((prev) => ({
-      ...prev,
-      offsetX: Math.round((CANVAS_W - img.naturalWidth * prev.scale) / 2),
-      offsetY: Math.round((CANVAS_H - img.naturalHeight * prev.scale) / 2),
-    }));
-    setActionMessage('Fix Canvas applied.');
-  }
-
-  function handleCenterArtwork() {
-    if (!img || !originalBounds) return;
-  
-    setViewMode('pod');
-  
-    const scaledW = originalBounds.w * transform.scale;
-    const scaledH = originalBounds.h * transform.scale;
-  
-    const x = (CANVAS_W - scaledW) / 2 - originalBounds.x * transform.scale;
-    const y = (CANVAS_H - scaledH) / 2 - originalBounds.y * transform.scale;
-  
-    setTransform((prev) => ({
-      ...prev,
-      offsetX: Math.round(x),
-      offsetY: Math.round(y),
-    }));
-  
-    setActionMessage('Artwork centered using detected artwork bounds.');
-  }
-
-  function handleAutoFixSafetyBorder() {
-    if (!originalBounds) return;
-  
-    setViewMode('pod');
-  
-    const availableW = CANVAS_W - AUTO_FIX_MARGIN * 2;
-    const availableH = CANVAS_H - AUTO_FIX_MARGIN * 2;
-    const scaleX = availableW / originalBounds.w;
-    const scaleY = availableH / originalBounds.h;
-    const nextScale = Math.min(scaleX, scaleY, 1);
-  
-    const scaledW = originalBounds.w * nextScale;
-    const scaledH = originalBounds.h * nextScale;
-  
-    const x = (CANVAS_W - scaledW) / 2 - originalBounds.x * nextScale;
-    const y = (CANVAS_H - scaledH) / 2 - originalBounds.y * nextScale;
-  
-    setTransform({
-      scale: nextScale,
-      offsetX: Math.round(x),
-      offsetY: Math.round(y),
-    });
-    setActionMessage('Auto Fix Safety Border applied.');
-  }
-  
-  function handleAutoFixTooSmall() {
-    if (!originalBounds) return;
-  
-    setViewMode('pod');
-  
-    const availableW = CANVAS_W - SAFE_BOX * 2;
-    const availableH = CANVAS_H - SAFE_BOX * 2;
-    const scaleX = availableW / originalBounds.w;
-    const scaleY = availableH / originalBounds.h;
-    const nextScale = Math.min(scaleX, scaleY);
-  
-    const scaledW = originalBounds.w * nextScale;
-    const scaledH = originalBounds.h * nextScale;
-  
-    const x = (CANVAS_W - scaledW) / 2 - originalBounds.x * nextScale;
-    const y = (CANVAS_H - scaledH) / 2 - originalBounds.y * nextScale;
-  
-    setTransform({
-      scale: Math.round(nextScale * 1000) / 1000,
-      offsetX: Math.round(x),
-      offsetY: Math.round(y),
-    });
-    setActionMessage('Auto Fix Design Too Small applied.');
-  }
-  
   function handleQuickFix() {
     if (!originalBounds) return;
   
@@ -866,20 +727,6 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
     });
   
     setActionMessage('Auto Fix applied: artwork centered and fitted to a safer print area.');
-  }
-  
-  function resetToOriginalView() {
-    if (!img) return;
-  
-    setTransform({
-      scale: 1,
-      offsetX: Math.round((CANVAS_W - img.naturalWidth) / 2),
-      offsetY: Math.round((CANVAS_H - img.naturalHeight) / 2),
-    });
-    setPreviewSize(DEFAULT_PREVIEW_SIZE);
-    setInspectZoom(1);
-    setViewMode('shirt');
-    setActionMessage('View reset to original centered POD canvas.');
   }
   
   function handleDownloadFixedPng() {

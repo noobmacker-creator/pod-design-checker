@@ -285,35 +285,46 @@ export function detectFakeTransparencyBackground(imageData: ImageData) {
     return specks;
   }
   
-  export function estimateThinLines(imageData: ImageData) {
-    const { width, height, data } = imageData;
-    let thinHits = 0;
-    let checked = 0;
+export function estimateThinLines(imageData: ImageData) {
+  const { width, height, data } = imageData;
+  let thinHits = 0;
+  let checked = 0;
   
-    for (let y = 2; y < height - 2; y += 4) {
+  for (let y = 2; y < height - 2; y += 4) {
       for (let x = 2; x < width - 2; x += 4) {
         const i = (y * width + x) * 4;
         const a = data[i + 3];
   
-        if (a > 40) {
-          checked++;
+      if (a > 120) {
+        checked++;
   
-          let horizontal = 0;
-          for (let nx = -2; nx <= 2; nx++) {
-            const ni = (y * width + (x + nx)) * 4;
+        let horizontal = 0;
+        for (let nx = -2; nx <= 2; nx++) {
+          const ni = (y * width + (x + nx)) * 4;
             if (data[ni + 3] > 40) horizontal++;
           }
   
           let vertical = 0;
-          for (let ny = -2; ny <= 2; ny++) {
-            const ni = ((y + ny) * width + x) * 4;
-            if (data[ni + 3] > 40) vertical++;
-          }
-  
-          if (horizontal <= 2 || vertical <= 2) thinHits++;
+        for (let ny = -2; ny <= 2; ny++) {
+          const ni = ((y + ny) * width + x) * 4;
+          if (data[ni + 3] > 40) vertical++;
         }
+  
+        let nearbySolid = 0;
+        for (let sy = -1; sy <= 1; sy++) {
+          for (let sx = -1; sx <= 1; sx++) {
+            const ni = ((y + sy) * width + (x + sx)) * 4;
+            if (data[ni + 3] > 120) nearbySolid++;
+          }
+        }
+
+        // Skip tiny isolated bits so rough texture does not look like thin line risk.
+        if (nearbySolid < 3) continue;
+
+        if (horizontal <= 2 || vertical <= 2) thinHits++;
       }
     }
+  }
   
     if (checked === 0) return 0;
     return (thinHits / checked) * 100;

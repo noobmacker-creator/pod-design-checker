@@ -30,5 +30,21 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules",
+    "app/page-save.tsx",
+    "app/page-WORKING.tsx",
+    "app/page15 copy.tsx",
+    "app/page15.tsx",
+    "app/page16.tsx",
+    "app/page17.tsx",
+    "app/page18.tsx",
+    "app/pod check.tsx",
+    "app/working pod checker 11.tsx",
+    "app/working pod checker 12.tsx",
+    "app/working pod checker 13.tsx",
+    "app/working pod checker 14.tsx",
+    "app/components/ScanResultsPanel-save.tsx",
+    "app/components/TopControlsPanel-save.tsx"
+  ]
 }

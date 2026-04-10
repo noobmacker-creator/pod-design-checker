@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import type { CheckItem, ViewMode } from '../lib/podCheckerTypes';
 
 type Bounds = {
   x: number;
@@ -14,12 +15,12 @@ type ScanResultsPanelProps = {
   actionMessage: string;
   downloadMessage: string;
   handleFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  viewMode: 'pod' | 'design';
-  setViewMode: React.Dispatch<React.SetStateAction<'pod' | 'design'>>;
+  viewMode: ViewMode;
+  setViewMode: React.Dispatch<React.SetStateAction<ViewMode>>;
   setActionMessage: React.Dispatch<React.SetStateAction<string>>;
   handleQuickFix: () => void;
   img: HTMLImageElement | null;
-  checks: any[];
+  checks: CheckItem[];
   printScore: number;
   hasTransparency: boolean | null;
   thinLinePercent: number;

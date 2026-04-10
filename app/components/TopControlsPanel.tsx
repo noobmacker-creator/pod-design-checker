@@ -9,7 +9,6 @@ type TopControlsPanelProps = {
   originalBounds: { x: number; y: number; w: number; h: number } | null;
   showMoreFixes: boolean;
   setShowMoreFixes: React.Dispatch<React.SetStateAction<boolean>>;
-  viewMode: ViewMode;
   setViewMode: React.Dispatch<React.SetStateAction<ViewMode>>;
   previewSize: number;
   setPreviewSize: React.Dispatch<React.SetStateAction<number>>;
@@ -38,9 +37,7 @@ export default function TopControlsPanel({
   originalBounds,
   showMoreFixes,
   setShowMoreFixes,
-  viewMode,
   setViewMode,
-  setPreviewSize,
   actionMessage,
   isScanning,
   handleQuickFix,
