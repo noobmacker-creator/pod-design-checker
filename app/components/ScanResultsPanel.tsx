@@ -18,8 +18,9 @@ type ScanResultsPanelProps = {
   setViewMode: React.Dispatch<React.SetStateAction<'pod' | 'design'>>;
   setActionMessage: React.Dispatch<React.SetStateAction<string>>;
   handleQuickFix: () => void;
+  handleRemoveWhiteBackground: () => void;
   img: HTMLImageElement | null;
-  checks: any[];
+  checks: unknown[];
   printScore: number;
   hasTransparency: boolean | null;
   thinLinePercent: number;
@@ -43,6 +44,7 @@ export default function ScanResultsPanel({
   setViewMode,
   setActionMessage,
   handleQuickFix,
+  handleRemoveWhiteBackground,
   img,
   printScore,
   hasTransparency,
@@ -179,14 +181,42 @@ export default function ScanResultsPanel({
               </button>
             </div>
 
-            <button
-              onClick={handleQuickFix}
-              disabled={!img}
+            <div
               style={{
-                background: '#2563eb',
+                display: 'grid',
+                gap: 8,
+                background: 'rgba(37,99,235,0.18)',
+                border: '1px solid rgba(96,165,250,0.45)',
+                borderRadius: 12,
+                padding: 10,
               }}
             >
-              Auto Fix
+              <button
+                onClick={handleQuickFix}
+                disabled={!img}
+                style={{
+                  background: '#2563eb',
+                  width: '100%',
+                  minHeight: 54,
+                  fontSize: 15,
+                }}
+              >
+                Auto Fix
+              </button>
+              <div style={{ fontSize: 12, color: '#bfdbfe', lineHeight: 1.4 }}>
+                Fits and centers your design into a safer print area.
+              </div>
+            </div>
+
+            <button
+              onClick={handleRemoveWhiteBackground}
+              disabled={!img}
+              style={{
+                background: '#0ea5e9',
+                width: '100%',
+              }}
+            >
+              Remove White BG
             </button>
           </div>
         </div>
