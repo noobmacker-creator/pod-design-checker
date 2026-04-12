@@ -69,24 +69,31 @@ function formatBytes(bytes: number) {
   return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 }
 function detectFakeTransparencyBackground(imageData: ImageData) {
-  const { data } = imageData;
+  const { width, height, data } = imageData;
+
+  if (width === 0 || height === 0) {
+    return { detected: false, ratio: 0, checkerPixels: 0 };
+  }
 
   let darkA = 0;
   let darkB = 0;
   let checked = 0;
 
-  for (let i = 0; i < data.length; i += 16) {
-    const r = data[i];
-    const g = data[i + 1];
-    const b = data[i + 2];
-    const a = data[i + 3];
+  for (let y = 0; y < height; y += 4) {
+    for (let x = 0; x < width; x += 4) {
+      const i = (y * width + x) * 4;
+      const r = data[i];
+      const g = data[i + 1];
+      const b = data[i + 2];
+      const a = data[i + 3];
 
-    if (a !== 255) continue;
+      if (a !== 255) continue;
 
-    checked++;
+      checked++;
 
-    if (r === 31 && g === 31 && b === 31) darkA++;
-    if (r === 42 && g === 42 && b === 42) darkB++;
+      if (r === 31 && g === 31 && b === 31) darkA++;
+      if (r === 42 && g === 42 && b === 42) darkB++;
+    }
   }
 
   const checkerPixels = darkA + darkB;
@@ -196,8 +203,7 @@ function getImageDpi(file: File, arrayBuffer: ArrayBuffer): number | null {
 
 function detectBoundsAndCoverage(
   imageData: ImageData,
-  coverageSampleStep = 8,
-  alphaThreshold = 20
+  sampleStep = 8
 ): { bounds: Bounds | null; coverage: number } {
   const { width, height, data } = imageData;
 
@@ -205,27 +211,21 @@ function detectBoundsAndCoverage(
   let minY = height;
   let maxX = -1;
   let maxY = -1;
-
   let solid = 0;
   let sampled = 0;
 
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
+  for (let y = 0; y < height; y += sampleStep) {
+    for (let x = 0; x < width; x += sampleStep) {
       const i = (y * width + x) * 4;
       const alpha = data[i + 3];
+      sampled++;
 
-      if (alpha > alphaThreshold) {
+      if (alpha > 20) {
+        solid++;
         if (x < minX) minX = x;
         if (y < minY) minY = y;
         if (x > maxX) maxX = x;
         if (y > maxY) maxY = y;
-      }
-
-      if (x % coverageSampleStep === 0 && y % coverageSampleStep === 0) {
-        sampled++;
-        if (alpha > alphaThreshold) {
-          solid++;
-        }
       }
     }
   }
@@ -238,10 +238,10 @@ function detectBoundsAndCoverage(
     bounds: {
       x: minX,
       y: minY,
-      w: Math.max(1, maxX - minX + 1),
-      h: Math.max(1, maxY - minY + 1),
+      w: Math.max(1, maxX - minX),
+      h: Math.max(1, maxY - minY),
     },
-    coverage: sampled === 0 ? 0 : (solid / sampled) * 100,
+    coverage: (solid / sampled) * 100,
   };
 }
 
@@ -307,10 +307,6 @@ function estimateThinLines(imageData: ImageData) {
   return (thinHits / checked) * 100;
 }
 
-
-
-
-
 function getEffectiveArtBounds(
   originalBounds: Bounds | null,
   transform: { scale: number; offsetX: number; offsetY: number }
@@ -359,7 +355,7 @@ export default function Page() {
   const [coverage, setCoverage] = useState(0);
   const [specks, setSpecks] = useState(0);
   const [thinLinePercent, setThinLinePercent] = useState(0);
- const [fakeTransparencyDetected, setFakeTransparencyDetected] = useState(false); 
+  const [fakeTransparencyDetected, setFakeTransparencyDetected] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('pod');
   const [previewSize, setPreviewSize] = useState<PreviewSize>(0.25);
   const [inspectZoom, setInspectZoom] = useState(1);
@@ -404,7 +400,7 @@ export default function Page() {
     setSpecks(detectSpecks(imageData, 40, 2));
     setThinLinePercent(estimateThinLines(imageData));
     const fakeTransparency = detectFakeTransparencyBackground(imageData);
-setFakeTransparencyDetected(fakeTransparency.detected);
+    setFakeTransparencyDetected(fakeTransparency.detected);
     let transparentFound = false;
     for (let i = 3; i < imageData.data.length; i += 4) {
       if (imageData.data[i] < 255) {
@@ -573,9 +569,8 @@ setFakeTransparencyDetected(fakeTransparency.detected);
         message: exactSize
           ? `Correct size: ${imgW} × ${imgH}`
           : largeEnough
-          ? `Larger than recommended. Consider resizing canvas to ${CANVAS_W} × ${CANVAS_H}.`
-          : `Incorrect size. Recommended: ${CANVAS_W} × ${CANVAS_H}
-Fix: Click "Fix Canvas" to correct the size before printing.`,
+            ? `Larger than recommended. Consider resizing canvas to ${CANVAS_W} × ${CANVAS_H}.`
+            : `Incorrect size. Recommended: ${CANVAS_W} × ${CANVAS_H}`,
       },
       {
         label: 'Aspect Ratio',
@@ -591,51 +586,9 @@ Fix: Click "Fix Canvas" to correct the size before printing.`,
           hasTransparency === null
             ? 'Not checked yet.'
             : hasTransparency
-            ? 'Transparency detected.'
-            : 'No transparency detected. PNG with transparent background is preferred for POD.',
+              ? 'Transparency detected.'
+              : 'No transparency detected. PNG with transparent background is preferred for POD.',
       },
-    {
-  label: 'Fake Transparency Background',
-  status: fakeTransparencyDetected ? 'fail' : 'pass',
-  message: fakeTransparencyDetected
-    ? 'Possible fake transparency background detected.'
-    : 'No fake transparency background detected.',
-},  
-
-
-
-
-
-
-function detectWhiteBackground(imageData: ImageData) {
-  const { data } = imageData;
-
-  let whitePixels = 0;
-  let checked = 0;
-
-  for (let i = 0; i < data.length; i += 16) {
-    const r = data[i];
-    const g = data[i + 1];
-    const b = data[i + 2];
-    const a = data[i + 3];
-
-    if (a !== 255) continue;
-
-    checked++;
-
-    if (r > 240 && g > 240 && b > 240) {
-      whitePixels++;
-    }
-  }
-
-  const ratio = checked === 0 ? 0 : whitePixels / checked;
-
-  return {
-    detected: ratio > 0.5,
-    ratio,
-  };
-
-}, 
       {
         label: 'File Size',
         status: fileSize <= 10 * 1024 * 1024 ? 'pass' : 'warn',
@@ -657,8 +610,8 @@ function detectWhiteBackground(imageData: ImageData) {
         message: practicalGood
           ? `Practical print resolution looks good: about ${practicalPrintDpi} DPI`
           : practicalPrintDpi >= 220
-          ? `Borderline print resolution: about ${practicalPrintDpi} DPI`
-          : `Low practical print resolution: about ${practicalPrintDpi} DPI`,
+            ? `Borderline print resolution: about ${practicalPrintDpi} DPI`
+            : `Low practical print resolution: about ${practicalPrintDpi} DPI`,
       },
       {
         label: 'Artwork Size',
@@ -697,8 +650,8 @@ function detectWhiteBackground(imageData: ImageData) {
           thinLinePercent < 8
             ? 'Line thickness looks healthy for print.'
             : thinLinePercent < 18
-            ? 'Some thin line risk detected.'
-            : 'A lot of thin line risk detected.',
+              ? 'Some thin line risk detected.'
+              : 'A lot of thin line risk detected.',
       },
       {
         label: 'DPI Metadata',
@@ -763,9 +716,8 @@ function detectWhiteBackground(imageData: ImageData) {
     bx: number,
     by: number,
     bw: number,
-    bh: number,
-    ctx.strokeStyle = color;
-  ){
+    bh: number
+  ) {
     ctx.strokeStyle = '#22c55e';
     ctx.lineWidth = 3;
     ctx.setLineDash([10, 8]);
@@ -797,46 +749,23 @@ function detectWhiteBackground(imageData: ImageData) {
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    const overlayColor =
-  checks.some((item) => item.status === 'fail')
-    ? '#ef4444'
-    : checks.some((item) => item.status === 'warn')
-    ? '#f59e0b'
-    : '#22c55e';
-    const overlayColor =
-  checks.some((item) => item.status === 'fail')
-    ? '#ef4444'
-    : checks.some((item) => item.status === 'warn')
-    ? '#f59e0b'
-    : '#22c55e';
 
     if (viewMode === 'pod') {
       canvas.width = CANVAS_W;
       canvas.height = CANVAS_H;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
+
       drawPodBackground(ctx);
-    
+
       const drawW = img.naturalWidth * transform.scale;
       const drawH = img.naturalHeight * transform.scale;
       const drawX = transform.offsetX;
       const drawY = transform.offsetY;
-    
+
       ctx.drawImage(img, drawX, drawY, drawW, drawH);
-    
-      // 🔴 TEST RED BOX
-      ctx.fillStyle = 'rgba(255, 0, 0, 0.5)';
-      ctx.fillRect(0, 0, 300, 300);
-    
+
       if (effectiveBounds) {
-        drawBoundsOverlay(
-          ctx,
-          effectiveBounds.x,
-          effectiveBounds.y,
-          effectiveBounds.w,
-          effectiveBounds.h,
-          overlayColor
-        );
+        drawBoundsOverlay(ctx, effectiveBounds.x, effectiveBounds.y, effectiveBounds.w, effectiveBounds.h);
       }
     }
 
@@ -872,30 +801,11 @@ function detectWhiteBackground(imageData: ImageData) {
         const drawY = transform.offsetY + shiftY;
 
         ctx.drawImage(img, drawX, drawY, drawW, drawH);
-
-// 🔴 Unsafe border overlay
-ctx.fillStyle = 'rgba(239, 68, 68, 0.12)';
-ctx.fillRect(0, 0, SAFE_BOX, CANVAS_H);
-ctx.fillRect(CANVAS_W - SAFE_BOX, 0, SAFE_BOX, CANVAS_H);
-ctx.fillRect(0, 0, CANVAS_W, SAFE_BOX);
-ctx.fillRect(0, CANVAS_H - SAFE_BOX, CANVAS_W, SAFE_BOX);
-
-if (effectiveBounds) {
-  drawBoundsOverlay(
-    ctx,
-    effectiveBounds.x,
-    effectiveBounds.y,
-    effectiveBounds.w,
-    effectiveBounds.h,
-    '#22c55e'
-  );
-} else {
+        drawBoundsOverlay(ctx, targetX, targetY, effectiveBounds.w, effectiveBounds.h);
+      } else {
         const drawX = (canvas.width - drawW) / 2;
         const drawY = (canvas.height - drawH) / 2;
         ctx.drawImage(img, drawX, drawY, drawW, drawH);
-        // 🔴 TEST BOX
-ctx.fillStyle = 'rgba(255, 0, 0, 0.5)';
-ctx.fillRect(0, 0, 300, 300);
       }
     }
 
@@ -959,7 +869,7 @@ ctx.fillRect(0, 0, 300, 300);
 
   useEffect(() => {
     drawPreview();
-  }, [img, transform, effectiveBounds, viewMode, designCanvasSize]); 
+  }, [img, transform, effectiveBounds, viewMode, designCanvasSize]);
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const selected = e.target.files?.[0];
@@ -1010,24 +920,19 @@ ctx.fillRect(0, 0, 300, 300);
   }
 
   function handleCenterArtwork() {
-  if (!img || !originalBounds) return;
+    if (!img) return;
 
-  setViewMode('pod');
+    const scaledW = img.naturalWidth * transform.scale;
+    const scaledH = img.naturalHeight * transform.scale;
 
-  const scaledW = originalBounds.w * transform.scale;
-  const scaledH = originalBounds.h * transform.scale;
-
-  const x = (CANVAS_W - scaledW) / 2 - originalBounds.x * transform.scale;
-  const y = (CANVAS_H - scaledH) / 2 - originalBounds.y * transform.scale;
-
-  setTransform((prev) => ({
-    ...prev,
-    offsetX: Math.round(x),
-    offsetY: Math.round(y),
-  }));
-
-  setActionMessage('Artwork centered using detected artwork bounds.');
-}
+    setViewMode('pod');
+    setTransform((prev) => ({
+      ...prev,
+      offsetX: Math.round((CANVAS_W - scaledW) / 2),
+      offsetY: Math.round((CANVAS_H - scaledH) / 2),
+    }));
+    setActionMessage('Center Artwork applied.');
+  }
 
   function handleAutoFixSafetyBorder() {
     if (!originalBounds) return;
@@ -1094,33 +999,33 @@ ctx.fillRect(0, 0, 300, 300);
   }
 
   function handleDownloadFixedPng() {
-  if (!img) return;
+    if (!img) return;
 
-  const exportCanvas = document.createElement('canvas');
-  exportCanvas.width = CANVAS_W;
-  exportCanvas.height = CANVAS_H;
+    const exportCanvas = document.createElement('canvas');
+    exportCanvas.width = CANVAS_W;
+    exportCanvas.height = CANVAS_H;
 
-  const ctx = exportCanvas.getContext('2d', { alpha: true });
-  if (!ctx) return;
+    const ctx = exportCanvas.getContext('2d', { alpha: true });
+    if (!ctx) return;
 
-  ctx.clearRect(0, 0, exportCanvas.width, exportCanvas.height);
+    ctx.clearRect(0, 0, exportCanvas.width, exportCanvas.height);
 
-  const drawW = img.naturalWidth * transform.scale;
-  const drawH = img.naturalHeight * transform.scale;
-  const drawX = transform.offsetX;
-  const drawY = transform.offsetY;
+    const drawW = img.naturalWidth * transform.scale;
+    const drawH = img.naturalHeight * transform.scale;
+    const drawX = transform.offsetX;
+    const drawY = transform.offsetY;
 
-  ctx.drawImage(img, drawX, drawY, drawW, drawH);
+    ctx.drawImage(img, drawX, drawY, drawW, drawH);
 
-  const link = document.createElement('a');
-  const baseName = file?.name?.replace(/\.[^/.]+$/, '') || 'pod-design-fixed';
-  link.download = `${baseName}-fixed-transparent.png`;
-  link.href = exportCanvas.toDataURL('image/png');
-  link.click();
+    const link = document.createElement('a');
+    const baseName = file?.name?.replace(/\.[^/.]+$/, '') || 'pod-design-fixed';
+    link.download = `${baseName}-fixed-transparent.png`;
+    link.href = exportCanvas.toDataURL('image/png');
+    link.click();
 
-  setDownloadMessage(`Download started: ${baseName}-fixed-transparent.png`);
-  setActionMessage('Clean transparent PNG exported.');
-}
+    setDownloadMessage(`Download started: ${baseName}-fixed-transparent.png`);
+    setActionMessage('Clean transparent PNG exported.');
+  }
 
   return (
     <main
@@ -1132,37 +1037,7 @@ ctx.fillRect(0, 0, 300, 300);
         padding: '24px',
       }}
     >
-      <style jsx global>{`
-        button {
-          padding: 12px 16px;
-          border-radius: 12px;
-          border: none;
-          background: #0f172a;
-          color: #fff;
-          cursor: pointer;
-          font-weight: 700;
-        }
-        button:disabled {
-          background: #475569;
-          cursor: not-allowed;
-        }
-        ::-webkit-scrollbar {
-          width: 14px;
-          height: 14px;
-        }
-        ::-webkit-scrollbar-track {
-          background: #0f172a;
-          border-radius: 999px;
-        }
-        ::-webkit-scrollbar-thumb {
-          background: linear-gradient(180deg, #38bdf8, #3b82f6);
-          border-radius: 999px;
-          border: 2px solid #0f172a;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-          background: linear-gradient(180deg, #67e8f9, #60a5fa);
-        }
-      `}</style>
+
 
       <div style={{ maxWidth: 1520, margin: '0 auto' }}>
         <div
@@ -1275,21 +1150,6 @@ ctx.fillRect(0, 0, 300, 300);
             }}
           >
             <h2 style={{ marginTop: 0, marginBottom: 16, fontSize: 24 }}>Scan Results</h2>
-            {img && checks.some((c) => c.status === 'fail') && (
-  <div
-    style={{
-      marginBottom: 16,
-      padding: '12px 14px',
-      borderRadius: 12,
-      background: '#7f1d1d',
-      border: '1px solid #ef4444',
-      color: '#fff',
-      fontWeight: 700,
-    }}
-  >
-    🔴 Main Issue: {checks.find((c) => c.status === 'fail')?.label}
-  </div>
-)}
 
             {!img && (
               <div
@@ -1315,10 +1175,10 @@ ctx.fillRect(0, 0, 300, 300);
                     item.status === 'fail'
                       ? 'linear-gradient(180deg, rgba(127,29,29,0.55), rgba(15,23,42,0.92))'
                       : item.status === 'warn'
-                      ? 'linear-gradient(180deg, rgba(154,52,18,0.45), rgba(15,23,42,0.92))'
-                      : item.status === 'pass'
-                      ? 'linear-gradient(180deg, rgba(20,83,45,0.45), rgba(15,23,42,0.92))'
-                      : '#0f172a',
+                        ? 'linear-gradient(180deg, rgba(154,52,18,0.45), rgba(15,23,42,0.92))'
+                        : item.status === 'pass'
+                          ? 'linear-gradient(180deg, rgba(20,83,45,0.45), rgba(15,23,42,0.92))'
+                          : '#0f172a',
                   border: `1px solid ${statusColor(item.status)}66`,
                 }}
               >

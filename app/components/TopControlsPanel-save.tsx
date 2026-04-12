@@ -72,7 +72,7 @@ export default function TopControlsPanel({
     >
       <h1 style={{ margin: 0, fontSize: 34, fontWeight: 800 }}>POD Design Checker™</h1>
       <p style={{ marginTop: 10, color: '#cbd5e1', lineHeight: 1.6 }}>
-        Upload your design to instantly see if it's ready for print.
+        Upload your design to instantly see if it&apos;s ready for print.
       </p>
 
       <div

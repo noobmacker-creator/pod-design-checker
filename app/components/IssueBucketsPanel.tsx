@@ -9,6 +9,7 @@ type IssueBucketsPanelProps = {
   isScanning: boolean;
   img: HTMLImageElement | null;
   handleDownloadFixedPng: () => void;
+  handleRemoveWhiteBackground: () => void;
 };
 
 type SectionProps = {
@@ -89,6 +90,7 @@ export default function IssueBucketsPanel({
   isScanning,
   img,
   handleDownloadFixedPng,
+  handleRemoveWhiteBackground,
 }: IssueBucketsPanelProps) {
   const criticalItems = checks.filter((item) => item.status === 'fail');
   const warningItems = checks.filter((item) => item.status === 'warn');
@@ -131,6 +133,18 @@ export default function IssueBucketsPanel({
       )}
 
       <div style={{ marginBottom: 14 }}>
+        <button
+          onClick={handleRemoveWhiteBackground}
+          disabled={!img}
+          style={{
+            width: '100%',
+            marginBottom: 8,
+            background: '#0ea5e9',
+          }}
+        >
+          Remove White BG
+        </button>
+
         <button
           onClick={handleDownloadFixedPng}
           disabled={!img}

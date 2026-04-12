@@ -96,60 +96,6 @@ function detectFakeTransparencyBackground(imageData: ImageData) {
     }
   }
 
- function detectCheckerPattern(imageData: ImageData) {
-  const { width, height, data } = imageData;
-
-  let checked = 0;
-  let darkA = 0;
-  let darkB = 0;
-
-  for (let y = 0; y < height - 1; y++) {
-    for (let x = 0; x < width - 1; x++) {
-      const i = (y * width + x) * 4;
-      const a = data[i + 3];
-
-      if (a > 40) {
-        checked++;
-
-        const right = (y * width + (x + 1)) * 4;
-        const down = ((y + 1) * width + x) * 4;
-
-        const rightA = data[right + 3];
-        const downA = data[down + 3];
-
-        if (rightA > 40) darkA++;
-        if (downA > 40) darkB++;
-      }
-    }
-  }
-
-function detectCheckerPattern(imageData: ImageData) {
-  const { width, height, data } = imageData;
-
-  let checked = 0;
-  let darkA = 0;
-  let darkB = 0;
-
-  for (let y = 0; y < height - 1; y++) {
-    for (let x = 0; x < width - 1; x++) {
-      const i = (y * width + x) * 4;
-      const a = data[i + 3];
-
-      if (a > 40) {
-        checked++;
-
-        const right = (y * width + (x + 1)) * 4;
-        const down = ((y + 1) * width + x) * 4;
-
-        const rightA = data[right + 3];
-        const downA = data[down + 3];
-
-        if (rightA > 40) darkA++;
-        if (downA > 40) darkB++;
-      }
-    }
-  }
-
   const checkerPixels = darkA + darkB;
   const ratio = checked === 0 ? 0 : checkerPixels / checked;
 
