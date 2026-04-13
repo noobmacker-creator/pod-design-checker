@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import type { CheckItem, ViewMode } from '../lib/podCheckerTypes';
 
 type Bounds = {
   x: number;
@@ -15,12 +14,12 @@ type ScanResultsPanelProps = {
   actionMessage: string;
   downloadMessage: string;
   handleFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  viewMode: ViewMode;
-  setViewMode: React.Dispatch<React.SetStateAction<ViewMode>>;
+  viewMode: 'pod' | 'design';
+  setViewMode: React.Dispatch<React.SetStateAction<'pod' | 'design'>>;
   setActionMessage: React.Dispatch<React.SetStateAction<string>>;
   handleQuickFix: () => void;
   img: HTMLImageElement | null;
-  checks: CheckItem[];
+  checks: any[];
   printScore: number;
   hasTransparency: boolean | null;
   thinLinePercent: number;
@@ -187,9 +186,7 @@ export default function ScanResultsPanel({
                 background: '#2563eb',
               }}
             >
-              
-            <button disabled={!img}>
-              BG Remover
+              Auto Fix
             </button>
           </div>
         </div>
@@ -438,4 +435,3 @@ export default function ScanResultsPanel({
     </div>
   );
 }
-
