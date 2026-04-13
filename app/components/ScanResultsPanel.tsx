@@ -187,7 +187,9 @@ export default function ScanResultsPanel({
                 background: '#2563eb',
               }}
             >
-              Auto Fix
+              
+            <button disabled={!img}>
+              BG Remover
             </button>
           </div>
         </div>
@@ -436,3 +438,4 @@ export default function ScanResultsPanel({
     </div>
   );
 }
+
