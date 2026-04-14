@@ -758,6 +758,52 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
   setActionMessage('Clean transparent PNG exported.');
 }
 
+function handleRemoveWhiteBackground() {
+  if (!img) return;
+
+  const processCanvas = document.createElement('canvas');
+  processCanvas.width = img.naturalWidth;
+  processCanvas.height = img.naturalHeight;
+
+  const ctx = processCanvas.getContext('2d', { willReadFrequently: true });
+  if (!ctx) return;
+
+  ctx.drawImage(img, 0, 0);
+  const imageData = ctx.getImageData(0, 0, processCanvas.width, processCanvas.height);
+  const pixels = imageData.data;
+
+  let removedPixels = 0;
+  const whiteThreshold = 245;
+
+  for (let i = 0; i < pixels.length; i += 4) {
+    const r = pixels[i];
+    const g = pixels[i + 1];
+    const b = pixels[i + 2];
+    const a = pixels[i + 3];
+
+    const isNearWhite =
+      a > 0 && r >= whiteThreshold && g >= whiteThreshold && b >= whiteThreshold;
+
+    if (isNearWhite) {
+      pixels[i + 3] = 0;
+      removedPixels += 1;
+    }
+  }
+
+  ctx.putImageData(imageData, 0, 0);
+
+  const nextImg = new Image();
+  nextImg.onload = () => {
+    setImg(nextImg);
+    setActionMessage(
+      removedPixels > 0
+        ? `Removed white background from ${removedPixels.toLocaleString()} pixels.`
+        : 'No near-white background pixels found to remove.'
+    );
+  };
+  nextImg.src = processCanvas.toDataURL('image/png');
+}
+
   return (
     <main
       style={{
@@ -820,6 +866,7 @@ gap: 16,
     setViewMode={setViewMode}
     setActionMessage={setActionMessage}
     handleQuickFix={handleQuickFix}
+    handleRemoveWhiteBackground={handleRemoveWhiteBackground}
     img={img}
     checks={checks}
     printScore={printScore}
@@ -856,6 +903,7 @@ gap: 16,
   isScanning={isScanning}
   img={img}
   handleDownloadFixedPng={handleDownloadFixedPng}
+  handleRemoveWhiteBackground={handleRemoveWhiteBackground}
 />
         </div>
         
