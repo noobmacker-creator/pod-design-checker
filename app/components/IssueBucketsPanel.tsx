@@ -109,7 +109,7 @@ export default function IssueBucketsPanel({
       }}
     >
       <h2 style={{ margin: 0, marginBottom: 14, fontSize: 20, fontWeight: 800 }}>
-        Issue Buckets
+        Scan Report
       </h2>
 
       {isScanning && (
