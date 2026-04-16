@@ -98,8 +98,8 @@ export default function ScanResultsPanel({
       : specks > 0
       ? 'Clean specks / noise.'
       : imgW !== 4200 || imgH !== 4800
-      ? 'Resize to 4200×4800.'
-      : 'Ready to download.';
+      ? 'Download 4200×4800 PNG top right.'
+      : 'Download 4200×4800 PNG top right.';
 
   return (
     <div
@@ -234,6 +234,22 @@ export default function ScanResultsPanel({
           onChange={handleFileChange}
           style={{ display: 'none' }}
         />
+
+        {!file ? (
+          <div
+            style={{
+              padding: '10px 12px',
+              borderRadius: 12,
+              background: 'rgba(15,23,42,0.62)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              color: '#cbd5e1',
+              fontSize: 13,
+              lineHeight: 1.45,
+            }}
+          >
+            Upload a PNG to check size, placement, transparency, and print safety.
+          </div>
+        ) : null}
 
         <div style={{ display: 'grid', gap: 8, minWidth: 0 }}>
           {file ? (
@@ -432,6 +448,20 @@ export default function ScanResultsPanel({
           </div>
         </div>
       ) : null}
+
+      <div
+        style={{
+          padding: '10px 12px',
+          borderRadius: 12,
+          background: 'rgba(15,23,42,0.45)',
+          border: '1px solid rgba(255,255,255,0.06)',
+          color: '#94a3b8',
+          fontSize: 12,
+          lineHeight: 1.45,
+        }}
+      >
+        V1 focuses on shirt-size print checks. More POD sizes coming soon.
+      </div>
     </div>
   );
 }
