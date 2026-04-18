@@ -139,7 +139,7 @@ export default function IssueBucketsPanel({
             background: '#2563eb',
           }}
         >
-          Download 4200×4800 PNG
+          Download 4200 × 4800 Apparel PNG
         </button>
       </div>
 
