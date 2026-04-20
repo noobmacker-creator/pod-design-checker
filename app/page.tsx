@@ -12,6 +12,7 @@ import {
   getDesignCanvasSize,
 } from './lib/podCheckerUtils';
 import type { CheckStatus, ViewMode, PreviewSize, CheckItem } from './lib/podCheckerTypes';
+import { redbubblePresets } from './lib/redbubblePresets';
 
 import DesignPreviewPanel from './components/DesignPreviewPanel';
 
@@ -76,6 +77,7 @@ export default function Page() {
   const [actionMessage, setActionMessage] = useState('Upload a design to begin.');
   const [downloadMessage, setDownloadMessage] = useState('');
   const [isScanning, setIsScanning] = useState(false);
+  const [selectedRedbubblePreset, setSelectedRedbubblePreset] = useState('apparel');
 
   const previewCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -160,6 +162,9 @@ canvas.height = img.naturalHeight;
     const dpiY = imgH / 16;
     return Math.round(Math.min(dpiX, dpiY));
   }, [imgW, imgH]);
+  const selectedRedbubblePresetData =
+  redbubblePresets.find((preset) => preset.id === selectedRedbubblePreset) ??
+  redbubblePresets[0];
 
   const designTooSmallStatus = useMemo(() => {
     if (!effectiveBounds) {
