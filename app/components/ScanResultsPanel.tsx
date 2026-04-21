@@ -2,6 +2,8 @@
 
 import React from 'react';
 import type { ViewMode } from '../lib/podCheckerTypes';
+import type { RedbubblePresetId } from '../lib/redbubblePresets';
+import { redbubblePresets } from '../lib/redbubblePresets';
 
 type Bounds = {
   x: number;
@@ -33,6 +35,8 @@ type ScanResultsPanelProps = {
   previewSize: number;
   inspectZoom: number;
   practicalPrintDpi: number;
+  selectedRedbubblePreset: RedbubblePresetId;
+  setSelectedRedbubblePreset: React.Dispatch<React.SetStateAction<RedbubblePresetId>>;
 };
 
 export default function ScanResultsPanel({
@@ -57,6 +61,8 @@ export default function ScanResultsPanel({
   previewSize,
   inspectZoom,
   practicalPrintDpi,
+  selectedRedbubblePreset,
+  setSelectedRedbubblePreset,
 }: ScanResultsPanelProps) {
   const riskLabel =
     !img
@@ -309,6 +315,51 @@ export default function ScanResultsPanel({
             </div>
           ) : null}
         </div>
+      </div>
+      <div
+        style={{
+          display: 'grid',
+          gap: 8,
+          padding: 12,
+          borderRadius: 12,
+          background: 'rgba(15,23,42,0.62)',
+          border: '1px solid rgba(255,255,255,0.08)',
+        }}
+      >
+        <div
+          style={{
+            fontSize: 12,
+            fontWeight: 800,
+            color: '#cbd5e1',
+          }}
+        >
+          Redbubble Export Preset
+        </div>
+
+        <select
+          value={selectedRedbubblePreset}
+          onChange={(e) =>
+            setSelectedRedbubblePreset(e.target.value as RedbubblePresetId)
+          }
+          style={{
+            width: '100%',
+            padding: '10px 12px',
+            borderRadius: 10,
+            border: '1px solid rgba(255,255,255,0.12)',
+            background: 'rgba(255,255,255,0.06)',
+            color: '#fff',
+            fontSize: 14,
+            fontWeight: 600,
+            outline: 'none',
+            boxSizing: 'border-box',
+          }}
+        >
+          {redbubblePresets.map((preset) => (
+            <option key={preset.id} value={preset.id}>
+              {preset.label} — {preset.width} × {preset.height}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div

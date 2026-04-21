@@ -816,30 +816,32 @@ gap: 16,
           }}
         >
          <div style={{ minWidth: 0, width: '100%', maxWidth: '100%' }}>
-  <ScanResultsPanel
-    file={file}
-    actionMessage={actionMessage}
-    downloadMessage={downloadMessage}
-    handleFileChange={handleFileChange}
-    viewMode={viewMode}
-    setViewMode={setViewMode}
-    setActionMessage={setActionMessage}
-    handleQuickFix={handleQuickFix}
-    img={img}
-    checks={checks}
-    printScore={printScore}
-    hasTransparency={hasTransparency}
-    thinLinePercent={thinLinePercent}
-    specks={specks}
-    imgW={imgW}
-    imgH={imgH}
-    effectiveBounds={effectiveBounds}
-    coverage={coverage}
-    transform={transform}
-    previewSize={previewSize}
-    inspectZoom={inspectZoom}
-    practicalPrintDpi={practicalPrintDpi}
-  />
+         <ScanResultsPanel
+  file={file}
+  actionMessage={actionMessage}
+  downloadMessage={downloadMessage}
+  handleFileChange={handleFileChange}
+  viewMode={viewMode}
+  setViewMode={setViewMode}
+  setActionMessage={setActionMessage}
+  handleQuickFix={handleQuickFix}
+  img={img}
+  checks={checks}
+  printScore={printScore}
+  hasTransparency={hasTransparency}
+  thinLinePercent={thinLinePercent}
+  specks={specks}
+  imgW={imgW}
+  imgH={imgH}
+  effectiveBounds={effectiveBounds}
+  coverage={coverage}
+  transform={transform}
+  previewSize={previewSize}
+  inspectZoom={inspectZoom}
+  practicalPrintDpi={practicalPrintDpi}
+  selectedRedbubblePreset={selectedRedbubblePreset}
+  setSelectedRedbubblePreset={setSelectedRedbubblePreset}
+/>
 </div>
 
           <DesignPreviewPanel
