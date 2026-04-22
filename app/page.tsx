@@ -13,6 +13,7 @@ import {
 } from './lib/podCheckerUtils';
 import type { CheckStatus, ViewMode, PreviewSize, CheckItem } from './lib/podCheckerTypes';
 import { redbubblePresets } from './lib/redbubblePresets';
+import type { RedbubblePresetId } from './lib/redbubblePresets';
 
 import DesignPreviewPanel from './components/DesignPreviewPanel';
 
@@ -77,7 +78,7 @@ export default function Page() {
   const [actionMessage, setActionMessage] = useState('Upload a design to begin.');
   const [downloadMessage, setDownloadMessage] = useState('');
   const [isScanning, setIsScanning] = useState(false);
-  const [selectedRedbubblePreset, setSelectedRedbubblePreset] = useState('apparel');
+  const [selectedRedbubblePreset, setSelectedRedbubblePreset] = useState<RedbubblePresetId>('apparel');
 
   const previewCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -738,18 +739,21 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
     if (!img) return;
 
   const exportCanvas = document.createElement('canvas');
-  exportCanvas.width = CANVAS_W;
-  exportCanvas.height = CANVAS_H;
+  exportCanvas.width = selectedRedbubblePresetData.width;
+  exportCanvas.height = selectedRedbubblePresetData.height;
 
   const ctx = exportCanvas.getContext('2d', { alpha: true });
   if (!ctx) return;
 
   ctx.clearRect(0, 0, exportCanvas.width, exportCanvas.height);
 
-  const drawW = img.naturalWidth * transform.scale;
-  const drawH = img.naturalHeight * transform.scale;
-  const drawX = transform.offsetX;
-  const drawY = transform.offsetY;
+  const scaleX = exportCanvas.width / CANVAS_W;
+  const scaleY = exportCanvas.height / CANVAS_H;
+
+  const drawW = img.naturalWidth * transform.scale * scaleX;
+  const drawH = img.naturalHeight * transform.scale * scaleY;
+  const drawX = transform.offsetX * scaleX;
+  const drawY = transform.offsetY * scaleY;
 
   ctx.drawImage(img, drawX, drawY, drawW, drawH);
 
@@ -759,7 +763,7 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
   link.href = exportCanvas.toDataURL('image/png');
   link.click();
 
-  setDownloadMessage(`Download ready: 4200×4800 transparent PNG`);
+  setDownloadMessage(`Download ready: ${selectedRedbubblePresetData.width}×${selectedRedbubblePresetData.height} transparent PNG`);
   setActionMessage('Clean transparent PNG exported.');
 }
 
