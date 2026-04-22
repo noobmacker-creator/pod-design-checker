@@ -8,7 +8,8 @@ type IssueBucketsPanelProps = {
   checks: CheckItem[];
   isScanning: boolean;
   img: HTMLImageElement | null;
-  handleDownloadFixedPng: () => void;
+  handleDownloadApparelPng: () => void;
+  handleDownloadRedbubblePng: () => void;
 };
 
 type SectionProps = {
@@ -88,7 +89,8 @@ export default function IssueBucketsPanel({
   checks,
   isScanning,
   img,
-  handleDownloadFixedPng,
+  handleDownloadApparelPng,
+  handleDownloadRedbubblePng,
 }: IssueBucketsPanelProps) {
   const criticalItems = checks.filter((item) => item.status === 'fail');
   const warningItems = checks.filter((item) => item.status === 'warn');
@@ -130,16 +132,26 @@ export default function IssueBucketsPanel({
         </div>
       )}
 
-      <div style={{ marginBottom: 14 }}>
+      <div style={{ marginBottom: 14, display: 'grid', gap: 8 }}>
         <button
-          onClick={handleDownloadFixedPng}
+          onClick={handleDownloadApparelPng}
           disabled={!img}
           style={{
             width: '100%',
             background: '#2563eb',
           }}
         >
-          Download 4200×4800 PNG
+          Download DTG/DTF Apparel PNG (4200 × 4800)
+        </button>
+        <button
+          onClick={handleDownloadRedbubblePng}
+          disabled={!img}
+          style={{
+            width: '100%',
+            background: '#1d4ed8',
+          }}
+        >
+          Download Redbubble PNG
         </button>
       </div>
 

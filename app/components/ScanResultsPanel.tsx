@@ -64,6 +64,17 @@ export default function ScanResultsPanel({
   selectedRedbubblePreset,
   setSelectedRedbubblePreset,
 }: ScanResultsPanelProps) {
+  const selectedRedbubblePresetData =
+    redbubblePresets.find((preset) => preset.id === selectedRedbubblePreset) ??
+    redbubblePresets[0];
+  const targetCanvasW =
+    selectedRedbubblePreset === 'apparel' ? 4200 : selectedRedbubblePresetData.width;
+  const targetCanvasH =
+    selectedRedbubblePreset === 'apparel' ? 4800 : selectedRedbubblePresetData.height;
+  const exactSize = imgW === targetCanvasW && imgH === targetCanvasH;
+  const largerThanTarget = imgW >= targetCanvasW && imgH >= targetCanvasH;
+  const slightlySmaller = imgW / targetCanvasW >= 0.85 && imgH / targetCanvasH >= 0.85;
+
   const riskLabel =
     !img
       ? 'UPLOAD A DESIGN'
@@ -91,9 +102,13 @@ export default function ScanResultsPanel({
       ? 'Too many thin lines'
       : specks > 0
       ? 'Specks detected'
-      : imgW !== 4200 || imgH !== 4800
-      ? 'Wrong size'
-      : 'No major issues';
+      : exactSize
+      ? 'Ready for selected target'
+      : largerThanTarget
+      ? 'Larger than selected target'
+      : slightlySmaller
+      ? 'Smaller than selected target'
+      : 'Much smaller than selected target';
 
   const nextStep =
     !img
@@ -104,9 +119,9 @@ export default function ScanResultsPanel({
       ? 'Thicken thin lines.'
       : specks > 0
       ? 'Clean specks / noise.'
-      : imgW !== 4200 || imgH !== 4800
-      ? 'Download 4200×4800 PNG top right.'
-      : 'Download 4200×4800 PNG top right.';
+      : slightlySmaller || !exactSize
+      ? `Use Auto Fix, then export for ${targetCanvasW} × ${targetCanvasH}.`
+      : `Export for ${targetCanvasW} × ${targetCanvasH}.`;
 
   return (
     <div

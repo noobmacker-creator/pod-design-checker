@@ -166,10 +166,8 @@ canvas.height = img.naturalHeight;
   const selectedRedbubblePresetData =
   redbubblePresets.find((preset) => preset.id === selectedRedbubblePreset) ??
   redbubblePresets[0];
-  const targetCanvasW =
-    selectedRedbubblePreset === 'apparel' ? CANVAS_W : selectedRedbubblePresetData.width;
-  const targetCanvasH =
-    selectedRedbubblePreset === 'apparel' ? CANVAS_H : selectedRedbubblePresetData.height;
+  const targetCanvasW = selectedRedbubblePresetData.width;
+  const targetCanvasH = selectedRedbubblePresetData.height;
   const targetCanvasAspect = targetCanvasW / targetCanvasH;
 
   const designTooSmallStatus = useMemo(() => {
@@ -757,12 +755,12 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
     setActionMessage('Auto Fix applied: artwork centered and fitted to a safer print area.');
   }
   
-  function handleDownloadFixedPng() {
+  function downloadPngForSize(width: number, height: number, label: string) {
     if (!img) return;
 
   const exportCanvas = document.createElement('canvas');
-  exportCanvas.width = selectedRedbubblePresetData.width;
-  exportCanvas.height = selectedRedbubblePresetData.height;
+  exportCanvas.width = width;
+  exportCanvas.height = height;
 
   const ctx = exportCanvas.getContext('2d', { alpha: true });
   if (!ctx) return;
@@ -786,9 +784,21 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
   link.href = exportCanvas.toDataURL('image/png');
   link.click();
 
-  setDownloadMessage(`Download ready: ${selectedRedbubblePresetData.width}×${selectedRedbubblePresetData.height} transparent PNG`);
+  setDownloadMessage(`Download ready: ${label} (${width}×${height}) transparent PNG`);
   setActionMessage('Clean transparent PNG exported.');
 }
+
+  function handleDownloadApparelPng() {
+    downloadPngForSize(CANVAS_W, CANVAS_H, 'DTG/DTF Apparel');
+  }
+
+  function handleDownloadRedbubblePng() {
+    downloadPngForSize(
+      selectedRedbubblePresetData.width,
+      selectedRedbubblePresetData.height,
+      'Redbubble'
+    );
+  }
 
   return (
     <main
@@ -889,7 +899,8 @@ gap: 16,
   checks={checks}
   isScanning={isScanning}
   img={img}
-  handleDownloadFixedPng={handleDownloadFixedPng}
+  handleDownloadApparelPng={handleDownloadApparelPng}
+  handleDownloadRedbubblePng={handleDownloadRedbubblePng}
 />
         </div>
         
