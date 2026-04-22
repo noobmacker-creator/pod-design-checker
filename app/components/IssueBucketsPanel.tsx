@@ -145,6 +145,9 @@ export default function IssueBucketsPanel({
         >
           Download DTG/DTF Apparel PNG (4200 × 4800)
         </button>
+        <div style={{ fontSize: 12, color: '#cbd5e1' }}>
+          Great for T-shirts and DTF apparel workflows, including Printful Flex-style printing.
+        </div>
         <button
           onClick={handleDownloadRedbubblePng}
           disabled={!img}
