@@ -747,13 +747,14 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
 
   ctx.clearRect(0, 0, exportCanvas.width, exportCanvas.height);
 
-  const scaleX = exportCanvas.width / CANVAS_W;
-  const scaleY = exportCanvas.height / CANVAS_H;
+  const fitScale = Math.min(exportCanvas.width / CANVAS_W, exportCanvas.height / CANVAS_H);
+  const padX = (exportCanvas.width - CANVAS_W * fitScale) / 2;
+  const padY = (exportCanvas.height - CANVAS_H * fitScale) / 2;
 
-  const drawW = img.naturalWidth * transform.scale * scaleX;
-  const drawH = img.naturalHeight * transform.scale * scaleY;
-  const drawX = transform.offsetX * scaleX;
-  const drawY = transform.offsetY * scaleY;
+  const drawW = img.naturalWidth * transform.scale * fitScale;
+  const drawH = img.naturalHeight * transform.scale * fitScale;
+  const drawX = transform.offsetX * fitScale + padX;
+  const drawY = transform.offsetY * fitScale + padY;
 
   ctx.drawImage(img, drawX, drawY, drawW, drawH);
 
