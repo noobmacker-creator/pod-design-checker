@@ -166,6 +166,11 @@ canvas.height = img.naturalHeight;
   const selectedRedbubblePresetData =
   redbubblePresets.find((preset) => preset.id === selectedRedbubblePreset) ??
   redbubblePresets[0];
+  const targetCanvasW =
+    selectedRedbubblePreset === 'apparel' ? CANVAS_W : selectedRedbubblePresetData.width;
+  const targetCanvasH =
+    selectedRedbubblePreset === 'apparel' ? CANVAS_H : selectedRedbubblePresetData.height;
+  const targetCanvasAspect = targetCanvasW / targetCanvasH;
 
   const designTooSmallStatus = useMemo(() => {
     if (!effectiveBounds) {
@@ -285,7 +290,7 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
 
     let score = 100;
 
-    if (imgW !== CANVAS_W || imgH !== CANVAS_H) {
+    if (imgW !== targetCanvasW || imgH !== targetCanvasH) {
       score -= 20;
     }
 
@@ -337,32 +342,39 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
     safetyBorderStatus.status,
     specks,
     thinLinePercent,
+    targetCanvasW,
+    targetCanvasH,
   ]);
 
   const checks: CheckItem[] = useMemo(() => {
     if (!imgW || !imgH) return [];
 
-    const exactSize = imgW === CANVAS_W && imgH === CANVAS_H;
+    const exactSize = imgW === targetCanvasW && imgH === targetCanvasH;
     const aspect = imgW / imgH;
-    const aspectClose = Math.abs(aspect - CANVAS_ASPECT) < 0.01;
-    const largeEnough = imgW >= CANVAS_W && imgH >= CANVAS_H;
+    const aspectClose = Math.abs(aspect - targetCanvasAspect) < 0.01;
+    const largerThanTarget = imgW >= targetCanvasW && imgH >= targetCanvasH;
+    const widthRatio = imgW / targetCanvasW;
+    const heightRatio = imgH / targetCanvasH;
+    const slightlySmaller = widthRatio >= 0.85 && heightRatio >= 0.85;
 
     return [
       {
         label: 'Canvas Size',
-        status: exactSize ? 'pass' : largeEnough ? 'warn' : 'fail',
+        status: exactSize ? 'pass' : largerThanTarget ? 'pass' : slightlySmaller ? 'warn' : 'fail',
         message: exactSize
-          ? `Correct size: ${imgW} × ${imgH}`
-          : largeEnough
-          ? 'Canvas is larger than recommended. Please download the 4200×4800 PNG file top right.'
-          : 'Canvas is smaller than recommended. Please download the 4200×4800 PNG file top right.',
+          ? `Ready for selected target: ${imgW} × ${imgH}`
+          : largerThanTarget
+          ? `Larger than selected target (${targetCanvasW} × ${targetCanvasH}).`
+          : slightlySmaller
+          ? `Smaller than selected target (${targetCanvasW} × ${targetCanvasH}).`
+          : `Much smaller than selected target (${targetCanvasW} × ${targetCanvasH}).`,
       },
       {
         label: 'Aspect Ratio',
-        status: aspectClose ? 'pass' : 'fail',
+        status: aspectClose ? 'pass' : 'warn',
         message: aspectClose
           ? `Good aspect ratio: ${aspect.toFixed(3)}`
-          : 'Aspect ratio mismatch. Please download the 4200×4800 PNG file top right.',
+          : `Aspect differs from selected target (${targetCanvasW} × ${targetCanvasH}) — export will add transparent padding.`,
       },
       {
         label: 'Transparency',
@@ -472,6 +484,9 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
     thinLinePercent,
     dpiMetadata,
     fakeTransparencyDetected,
+    targetCanvasW,
+    targetCanvasH,
+    targetCanvasAspect,
   ]);
 
   function drawPodBackground(ctx: CanvasRenderingContext2D) {
