@@ -710,9 +710,14 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
   
     const availableW = CANVAS_W - SAFE_BOX * 2;
     const availableH = CANVAS_H - SAFE_BOX * 2;
+    const presetAspect = selectedRedbubblePresetData.width / selectedRedbubblePresetData.height;
+    const safeAspect = availableW / availableH;
+
+    const targetW = safeAspect > presetAspect ? availableH * presetAspect : availableW;
+    const targetH = safeAspect > presetAspect ? availableH : availableW / presetAspect;
   
-    const scaleX = availableW / originalBounds.w;
-    const scaleY = availableH / originalBounds.h;
+    const scaleX = targetW / originalBounds.w;
+    const scaleY = targetH / originalBounds.h;
   
     let nextScale = Math.min(scaleX, scaleY);
   
@@ -723,8 +728,10 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
     const scaledW = originalBounds.w * nextScale;
     const scaledH = originalBounds.h * nextScale;
   
-    const x = (CANVAS_W - scaledW) / 2 - originalBounds.x * nextScale;
-    const y = (CANVAS_H - scaledH) / 2 - originalBounds.y * nextScale;
+    const targetX = (CANVAS_W - targetW) / 2;
+    const targetY = (CANVAS_H - targetH) / 2;
+    const x = targetX + (targetW - scaledW) / 2 - originalBounds.x * nextScale;
+    const y = targetY + (targetH - scaledH) / 2 - originalBounds.y * nextScale;
   
     setTransform({
       scale: Math.round(nextScale * 1000) / 1000,
