@@ -358,14 +358,14 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
     return [
       {
         label: 'Canvas Size',
-        status: exactSize ? 'pass' : largerThanTarget ? 'pass' : slightlySmaller ? 'warn' : 'fail',
+        status: exactSize ? 'pass' : largerThanTarget ? 'pass' : 'warn',
         message: exactSize
           ? `Ready for selected target: ${imgW} × ${imgH}`
           : largerThanTarget
           ? `Larger than selected target (${targetCanvasW} × ${targetCanvasH}).`
           : slightlySmaller
           ? `Smaller than selected target (${targetCanvasW} × ${targetCanvasH}).`
-          : `Much smaller than selected target (${targetCanvasW} × ${targetCanvasH}).`,
+          : `Much smaller than selected target (${targetCanvasW} × ${targetCanvasH}). Export will fit and pad, but fine detail may be limited at this size.`,
       },
       {
         label: 'Aspect Ratio',
