@@ -151,8 +151,11 @@ export default function IssueBucketsPanel({
             background: '#1d4ed8',
           }}
         >
-          Download Redbubble PNG
+          Download Selected Redbubble PNG
         </button>
+        <div style={{ fontSize: 12, color: '#cbd5e1' }}>
+          Select preset, then press Auto Fix for best centering.
+        </div>
       </div>
 
       <Section
