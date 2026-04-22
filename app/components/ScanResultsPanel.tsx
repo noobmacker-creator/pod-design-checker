@@ -4,6 +4,8 @@ import React from 'react';
 import type { ViewMode } from '../lib/podCheckerTypes';
 import type { RedbubblePresetId } from '../lib/redbubblePresets';
 import { redbubblePresets } from '../lib/redbubblePresets';
+import type { PrintfulPresetId } from '../lib/printfulPresets';
+import { printfulPresets } from '../lib/printfulPresets';
 
 type Bounds = {
   x: number;
@@ -37,6 +39,11 @@ type ScanResultsPanelProps = {
   practicalPrintDpi: number;
   selectedRedbubblePreset: RedbubblePresetId;
   setSelectedRedbubblePreset: React.Dispatch<React.SetStateAction<RedbubblePresetId>>;
+  selectedPrintfulPreset: PrintfulPresetId;
+  setSelectedPrintfulPreset: React.Dispatch<React.SetStateAction<PrintfulPresetId>>;
+  setActivePresetSystem: React.Dispatch<React.SetStateAction<'redbubble' | 'printful'>>;
+  targetCanvasW: number;
+  targetCanvasH: number;
 };
 
 export default function ScanResultsPanel({
@@ -63,14 +70,12 @@ export default function ScanResultsPanel({
   practicalPrintDpi,
   selectedRedbubblePreset,
   setSelectedRedbubblePreset,
+  selectedPrintfulPreset,
+  setSelectedPrintfulPreset,
+  setActivePresetSystem,
+  targetCanvasW,
+  targetCanvasH,
 }: ScanResultsPanelProps) {
-  const selectedRedbubblePresetData =
-    redbubblePresets.find((preset) => preset.id === selectedRedbubblePreset) ??
-    redbubblePresets[0];
-  const targetCanvasW =
-    selectedRedbubblePreset === 'apparel' ? 4200 : selectedRedbubblePresetData.width;
-  const targetCanvasH =
-    selectedRedbubblePreset === 'apparel' ? 4800 : selectedRedbubblePresetData.height;
   const exactSize = imgW === targetCanvasW && imgH === targetCanvasH;
   const largerThanTarget = imgW >= targetCanvasW && imgH >= targetCanvasH;
   const slightlySmaller = imgW / targetCanvasW >= 0.85 && imgH / targetCanvasH >= 0.85;
@@ -353,9 +358,10 @@ export default function ScanResultsPanel({
 
         <select
           value={selectedRedbubblePreset}
-          onChange={(e) =>
-            setSelectedRedbubblePreset(e.target.value as RedbubblePresetId)
-          }
+          onChange={(e) => {
+            setSelectedRedbubblePreset(e.target.value as RedbubblePresetId);
+            setActivePresetSystem('redbubble');
+          }}
           style={{
             width: '100%',
             padding: '10px 12px',
@@ -370,6 +376,52 @@ export default function ScanResultsPanel({
           }}
         >
           {redbubblePresets.map((preset) => (
+            <option key={preset.id} value={preset.id}>
+              {preset.label} — {preset.width} × {preset.height}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div
+        style={{
+          display: 'grid',
+          gap: 8,
+          padding: 12,
+          borderRadius: 12,
+          background: 'rgba(15,23,42,0.62)',
+          border: '1px solid rgba(255,255,255,0.08)',
+        }}
+      >
+        <div
+          style={{
+            fontSize: 12,
+            fontWeight: 800,
+            color: '#cbd5e1',
+          }}
+        >
+          Printful Export Preset
+        </div>
+
+        <select
+          value={selectedPrintfulPreset}
+          onChange={(e) => {
+            setSelectedPrintfulPreset(e.target.value as PrintfulPresetId);
+            setActivePresetSystem('printful');
+          }}
+          style={{
+            width: '100%',
+            padding: '10px 12px',
+            borderRadius: 10,
+            border: '1px solid rgba(255,255,255,0.12)',
+            background: 'rgba(255,255,255,0.06)',
+            color: '#fff',
+            fontSize: 14,
+            fontWeight: 600,
+            outline: 'none',
+            boxSizing: 'border-box',
+          }}
+        >
+          {printfulPresets.map((preset) => (
             <option key={preset.id} value={preset.id}>
               {preset.label} — {preset.width} × {preset.height}
             </option>

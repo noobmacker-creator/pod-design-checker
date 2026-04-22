@@ -10,6 +10,7 @@ type IssueBucketsPanelProps = {
   img: HTMLImageElement | null;
   handleDownloadApparelPng: () => void;
   handleDownloadRedbubblePng: () => void;
+  handleDownloadPrintfulPng: () => void;
 };
 
 type SectionProps = {
@@ -91,6 +92,7 @@ export default function IssueBucketsPanel({
   img,
   handleDownloadApparelPng,
   handleDownloadRedbubblePng,
+  handleDownloadPrintfulPng,
 }: IssueBucketsPanelProps) {
   const criticalItems = checks.filter((item) => item.status === 'fail');
   const warningItems = checks.filter((item) => item.status === 'warn');
@@ -152,6 +154,19 @@ export default function IssueBucketsPanel({
           }}
         >
           Download Selected Redbubble PNG
+        </button>
+        <div style={{ fontSize: 12, color: '#cbd5e1' }}>
+          Select preset, then press Auto Fix for best centering.
+        </div>
+        <button
+          onClick={handleDownloadPrintfulPng}
+          disabled={!img}
+          style={{
+            width: '100%',
+            background: '#1e40af',
+          }}
+        >
+          Download Selected Printful PNG
         </button>
         <div style={{ fontSize: 12, color: '#cbd5e1' }}>
           Select preset, then press Auto Fix for best centering.

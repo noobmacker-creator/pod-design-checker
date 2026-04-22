@@ -14,6 +14,8 @@ import {
 import type { CheckStatus, ViewMode, PreviewSize, CheckItem } from './lib/podCheckerTypes';
 import { redbubblePresets } from './lib/redbubblePresets';
 import type { RedbubblePresetId } from './lib/redbubblePresets';
+import { printfulPresets } from './lib/printfulPresets';
+import type { PrintfulPresetId } from './lib/printfulPresets';
 
 import DesignPreviewPanel from './components/DesignPreviewPanel';
 
@@ -79,6 +81,8 @@ export default function Page() {
   const [downloadMessage, setDownloadMessage] = useState('');
   const [isScanning, setIsScanning] = useState(false);
   const [selectedRedbubblePreset, setSelectedRedbubblePreset] = useState<RedbubblePresetId>('apparel');
+  const [selectedPrintfulPreset, setSelectedPrintfulPreset] = useState<PrintfulPresetId>('dtg-dtf-apparel');
+  const [activePresetSystem, setActivePresetSystem] = useState<'redbubble' | 'printful'>('redbubble');
 
   const previewCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -166,8 +170,12 @@ canvas.height = img.naturalHeight;
   const selectedRedbubblePresetData =
   redbubblePresets.find((preset) => preset.id === selectedRedbubblePreset) ??
   redbubblePresets[0];
-  const targetCanvasW = selectedRedbubblePresetData.width;
-  const targetCanvasH = selectedRedbubblePresetData.height;
+  const selectedPrintfulPresetData =
+    printfulPresets.find((preset) => preset.id === selectedPrintfulPreset) ?? printfulPresets[0];
+  const selectedTargetPresetData =
+    activePresetSystem === 'printful' ? selectedPrintfulPresetData : selectedRedbubblePresetData;
+  const targetCanvasW = selectedTargetPresetData.width;
+  const targetCanvasH = selectedTargetPresetData.height;
   const targetCanvasAspect = targetCanvasW / targetCanvasH;
 
   const designTooSmallStatus = useMemo(() => {
@@ -178,9 +186,15 @@ canvas.height = img.naturalHeight;
       };
     }
 
-    const widthRatio = effectiveBounds.w / CANVAS_W;
-    const heightRatio = effectiveBounds.h / CANVAS_H;
-    const areaRatio = (effectiveBounds.w * effectiveBounds.h) / (CANVAS_W * CANVAS_H);
+    const widthRatio = effectiveBounds.w / targetCanvasW;
+    const heightRatio = effectiveBounds.h / targetCanvasH;
+    const areaRatio = (effectiveBounds.w * effectiveBounds.h) / (targetCanvasW * targetCanvasH);
+    const exportHint =
+      activePresetSystem === 'printful'
+        ? 'Download Selected Printful PNG'
+        : activePresetSystem === 'redbubble'
+        ? 'Download Selected Redbubble PNG'
+        : 'Download DTG/DTF Apparel PNG (4200 × 4800)';
 
     if (widthRatio >= 0.55 && heightRatio >= 0.55 && areaRatio >= 0.22) {
       return {
@@ -192,15 +206,15 @@ canvas.height = img.naturalHeight;
     if (widthRatio >= 0.38 && heightRatio >= 0.38 && areaRatio >= 0.1) {
       return {
         status: 'warn' as CheckStatus,
-        message: 'Design may print a bit small. Please press Auto Fix top left, then download 4200×4800 PNG top right.',
+        message: `Design may print a bit small. Please press Auto Fix top left, then ${exportHint}.`,
       };
     }
 
     return {
       status: 'fail' as CheckStatus,
-      message: 'Design looks too small and may print tiny. Please press Auto Fix top left, then download 4200×4800 PNG top right.',
+      message: `Design looks too small and may print tiny. Please press Auto Fix top left, then ${exportHint}.`,
     };
-  }, [effectiveBounds]);
+  }, [effectiveBounds, targetCanvasW, targetCanvasH, activePresetSystem]);
 
   const offCenterStatus = useMemo(() => {
     if (!effectiveBounds) {
@@ -369,7 +383,7 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
       },
       {
         label: 'Aspect Ratio',
-        status: aspectClose ? 'pass' : 'warn',
+        status: aspectClose ? 'pass' : 'info',
         message: aspectClose
           ? `Good aspect ratio: ${aspect.toFixed(3)}`
           : `Aspect differs from selected target (${targetCanvasW} × ${targetCanvasH}) — export will add transparent padding.`,
@@ -417,13 +431,10 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
 },
       {
         label: 'Artwork Size',
-        status:
-          effectiveBounds && effectiveBounds.w >= 2400 && effectiveBounds.h >= 2400
-            ? 'pass'
-            : 'warn',
+        status: 'info',
         message: effectiveBounds
           ? `Detected artwork area: ${Math.round(effectiveBounds.w)} × ${Math.round(effectiveBounds.h)}`
-          : 'Could not detect artwork bounds clearly.',
+          : 'Artwork area measurement unavailable.',
       },
       {
         label: 'Design Too Small',
@@ -723,7 +734,7 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
   
     const availableW = CANVAS_W - SAFE_BOX * 2;
     const availableH = CANVAS_H - SAFE_BOX * 2;
-    const presetAspect = selectedRedbubblePresetData.width / selectedRedbubblePresetData.height;
+    const presetAspect = selectedTargetPresetData.width / selectedTargetPresetData.height;
     const safeAspect = availableW / availableH;
 
     const targetW = safeAspect > presetAspect ? availableH * presetAspect : availableW;
@@ -793,10 +804,20 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
   }
 
   function handleDownloadRedbubblePng() {
+    setActivePresetSystem('redbubble');
     downloadPngForSize(
       selectedRedbubblePresetData.width,
       selectedRedbubblePresetData.height,
       'Redbubble'
+    );
+  }
+
+  function handleDownloadPrintfulPng() {
+    setActivePresetSystem('printful');
+    downloadPngForSize(
+      selectedPrintfulPresetData.width,
+      selectedPrintfulPresetData.height,
+      'Printful'
     );
   }
 
@@ -878,6 +899,11 @@ gap: 16,
   practicalPrintDpi={practicalPrintDpi}
   selectedRedbubblePreset={selectedRedbubblePreset}
   setSelectedRedbubblePreset={setSelectedRedbubblePreset}
+  selectedPrintfulPreset={selectedPrintfulPreset}
+  setSelectedPrintfulPreset={setSelectedPrintfulPreset}
+  setActivePresetSystem={setActivePresetSystem}
+  targetCanvasW={targetCanvasW}
+  targetCanvasH={targetCanvasH}
 />
 </div>
 
@@ -901,6 +927,7 @@ gap: 16,
   img={img}
   handleDownloadApparelPng={handleDownloadApparelPng}
   handleDownloadRedbubblePng={handleDownloadRedbubblePng}
+  handleDownloadPrintfulPng={handleDownloadPrintfulPng}
 />
         </div>
         
