@@ -11,6 +11,7 @@ type IssueBucketsPanelProps = {
   handleDownloadApparelPng: () => void;
   handleDownloadRedbubblePng: () => void;
   handleDownloadPrintfulPng: () => void;
+  handleDownloadTeePublicPng: () => void;
 };
 
 type SectionProps = {
@@ -93,6 +94,7 @@ export default function IssueBucketsPanel({
   handleDownloadApparelPng,
   handleDownloadRedbubblePng,
   handleDownloadPrintfulPng,
+  handleDownloadTeePublicPng,
 }: IssueBucketsPanelProps) {
   const criticalItems = checks.filter((item) => item.status === 'fail');
   const warningItems = checks.filter((item) => item.status === 'warn');
@@ -173,6 +175,24 @@ export default function IssueBucketsPanel({
         </button>
         <div style={{ fontSize: 12, color: '#cbd5e1' }}>
           Select preset, then press Auto Fix for best centering.
+        </div>
+        <div style={{ fontSize: 12, color: '#cbd5e1', fontWeight: 800, marginTop: 2 }}>
+          TeePublic Export
+        </div>
+        <button
+          onClick={handleDownloadTeePublicPng}
+          disabled={!img}
+          style={{
+            width: '100%',
+            background: '#1d4ed8',
+          }}
+        >
+          Download TeePublic All Products PNG
+        </button>
+        <div style={{ fontSize: 12, color: '#cbd5e1' }}>
+          Great for TeePublic all-products uploads.
+          <br />
+          Press Auto Fix for best centering before download.
         </div>
       </div>
 

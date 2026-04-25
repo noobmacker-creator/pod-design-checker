@@ -32,6 +32,8 @@ type Bounds = {
 const CANVAS_W = 4200;
 const CANVAS_H = 4800;
 const CANVAS_ASPECT = CANVAS_W / CANVAS_H;
+const TEEPUBLIC_ALL_PRODUCTS_W = 5000;
+const TEEPUBLIC_ALL_PRODUCTS_H = 5500;
 
 const SAFE_BORDER = 6;
 const SAFE_BOX = 180;
@@ -82,7 +84,7 @@ export default function Page() {
   const [isScanning, setIsScanning] = useState(false);
   const [selectedRedbubblePreset, setSelectedRedbubblePreset] = useState<RedbubblePresetId>('apparel');
   const [selectedPrintfulPreset, setSelectedPrintfulPreset] = useState<PrintfulPresetId>('dtg-dtf-apparel');
-  const [activePresetSystem, setActivePresetSystem] = useState<'redbubble' | 'printful'>('redbubble');
+  const [activePresetSystem, setActivePresetSystem] = useState<'redbubble' | 'printful' | 'teepublic'>('redbubble');
 
   const previewCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -173,7 +175,14 @@ canvas.height = img.naturalHeight;
   const selectedPrintfulPresetData =
     printfulPresets.find((preset) => preset.id === selectedPrintfulPreset) ?? printfulPresets[0];
   const selectedTargetPresetData =
-    activePresetSystem === 'printful' ? selectedPrintfulPresetData : selectedRedbubblePresetData;
+    activePresetSystem === 'teepublic'
+      ? {
+          width: TEEPUBLIC_ALL_PRODUCTS_W,
+          height: TEEPUBLIC_ALL_PRODUCTS_H,
+        }
+      : activePresetSystem === 'printful'
+      ? selectedPrintfulPresetData
+      : selectedRedbubblePresetData;
   const targetCanvasW = selectedTargetPresetData.width;
   const targetCanvasH = selectedTargetPresetData.height;
   const targetCanvasAspect = targetCanvasW / targetCanvasH;
@@ -192,6 +201,8 @@ canvas.height = img.naturalHeight;
     const exportHint =
       activePresetSystem === 'printful'
         ? 'Download Selected Printful PNG'
+        : activePresetSystem === 'teepublic'
+        ? 'Download TeePublic All Products PNG'
         : activePresetSystem === 'redbubble'
         ? 'Download Selected Redbubble PNG'
         : 'Download DTG/DTF Apparel PNG (4200 × 4800)';
@@ -821,6 +832,15 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
     );
   }
 
+  function handleDownloadTeePublicPng() {
+    setActivePresetSystem('teepublic');
+    downloadPngForSize(
+      TEEPUBLIC_ALL_PRODUCTS_W,
+      TEEPUBLIC_ALL_PRODUCTS_H,
+      'TeePublic All Products'
+    );
+  }
+
   return (
     <main
       style={{
@@ -928,6 +948,7 @@ gap: 16,
   handleDownloadApparelPng={handleDownloadApparelPng}
   handleDownloadRedbubblePng={handleDownloadRedbubblePng}
   handleDownloadPrintfulPng={handleDownloadPrintfulPng}
+  handleDownloadTeePublicPng={handleDownloadTeePublicPng}
 />
         </div>
         

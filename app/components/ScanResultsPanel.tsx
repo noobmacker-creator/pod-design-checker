@@ -41,7 +41,9 @@ type ScanResultsPanelProps = {
   setSelectedRedbubblePreset: React.Dispatch<React.SetStateAction<RedbubblePresetId>>;
   selectedPrintfulPreset: PrintfulPresetId;
   setSelectedPrintfulPreset: React.Dispatch<React.SetStateAction<PrintfulPresetId>>;
-  setActivePresetSystem: React.Dispatch<React.SetStateAction<'redbubble' | 'printful'>>;
+  setActivePresetSystem: React.Dispatch<
+    React.SetStateAction<'redbubble' | 'printful' | 'teepublic'>
+  >;
   targetCanvasW: number;
   targetCanvasH: number;
 };
