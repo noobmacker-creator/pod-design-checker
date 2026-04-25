@@ -82,6 +82,7 @@ export default function Page() {
   const [actionMessage, setActionMessage] = useState('Upload a design to begin.');
   const [downloadMessage, setDownloadMessage] = useState('');
   const [isScanning, setIsScanning] = useState(false);
+  const [hasAutoFixApplied, setHasAutoFixApplied] = useState(false);
   const [selectedRedbubblePreset, setSelectedRedbubblePreset] = useState<RedbubblePresetId>('apparel');
   const [selectedPrintfulPreset, setSelectedPrintfulPreset] = useState<PrintfulPresetId>('dtg-dtf-apparel');
   const [activePresetSystem, setActivePresetSystem] = useState<'redbubble' | 'printful' | 'teepublic'>('redbubble');
@@ -217,15 +218,19 @@ canvas.height = img.naturalHeight;
     if (widthRatio >= 0.38 && heightRatio >= 0.38 && areaRatio >= 0.1) {
       return {
         status: 'warn' as CheckStatus,
-        message: `Design may print a bit small. Please press Auto Fix top left, then ${exportHint}.`,
+        message: hasAutoFixApplied
+          ? `Design may still be small for the selected target. Export will work, but fine detail or print size may be limited.`
+          : `Design may print a bit small. Please press Auto Fix top left, then ${exportHint}.`,
       };
     }
 
     return {
       status: 'fail' as CheckStatus,
-      message: `Design looks too small and may print tiny. Please press Auto Fix top left, then ${exportHint}.`,
+      message: hasAutoFixApplied
+        ? 'Design may still be very small for the selected target. Export will work, but quality and print size may be limited.'
+        : `Design looks too small and may print tiny. Please press Auto Fix top left, then ${exportHint}.`,
     };
-  }, [effectiveBounds, targetCanvasW, targetCanvasH, activePresetSystem]);
+  }, [effectiveBounds, targetCanvasW, targetCanvasH, activePresetSystem, hasAutoFixApplied]);
 
   const offCenterStatus = useMemo(() => {
     if (!effectiveBounds) {
@@ -684,6 +689,7 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
     if (!selected) return;
   
     setIsScanning(true);
+    setHasAutoFixApplied(false);
   
     if (fileUrl) URL.revokeObjectURL(fileUrl);
   
@@ -775,6 +781,7 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
     });
   
     setActionMessage('Auto Fix applied: artwork centered and fitted to a safer print area.');
+    setHasAutoFixApplied(true);
   }
   
   function downloadPngForSize(width: number, height: number, label: string) {
