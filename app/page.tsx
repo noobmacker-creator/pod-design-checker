@@ -190,6 +190,10 @@ canvas.height = img.naturalHeight;
   const targetCanvasW = selectedTargetPresetData.width;
   const targetCanvasH = selectedTargetPresetData.height;
   const targetCanvasAspect = targetCanvasW / targetCanvasH;
+  const standardTargetLine = `Selected target: Standard Apparel — ${CANVAS_W} × ${CANVAS_H}`;
+  const redbubbleTargetLine = `Selected target: ${selectedRedbubblePresetData.label} — ${selectedRedbubblePresetData.width} × ${selectedRedbubblePresetData.height}`;
+  const printfulTargetLine = `Selected target: ${selectedPrintfulPresetData.label} — ${selectedPrintfulPresetData.width} × ${selectedPrintfulPresetData.height}`;
+  const teePublicTargetLine = `Selected target: TeePublic — ${TEEPUBLIC_ALL_PRODUCTS_W} × ${TEEPUBLIC_ALL_PRODUCTS_H}`;
 
   const designTooSmallStatus = useMemo(() => {
     if (!effectiveBounds) {
@@ -984,6 +988,10 @@ gap: 16,
   checks={checks}
   isScanning={isScanning}
   img={img}
+  standardTargetLine={standardTargetLine}
+  redbubbleTargetLine={redbubbleTargetLine}
+  printfulTargetLine={printfulTargetLine}
+  teePublicTargetLine={teePublicTargetLine}
   selectedRedbubbleDownloadLabel={selectedRedbubbleDownloadLabel}
   selectedPrintfulDownloadLabel={selectedPrintfulDownloadLabel}
   teePublicDownloadLabel={teePublicDownloadLabel}

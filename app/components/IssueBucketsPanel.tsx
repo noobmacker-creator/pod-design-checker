@@ -8,6 +8,10 @@ type IssueBucketsPanelProps = {
   checks: CheckItem[];
   isScanning: boolean;
   img: HTMLImageElement | null;
+  standardTargetLine: string;
+  redbubbleTargetLine: string;
+  printfulTargetLine: string;
+  teePublicTargetLine: string;
   selectedRedbubbleDownloadLabel: string;
   selectedPrintfulDownloadLabel: string;
   teePublicDownloadLabel: string;
@@ -94,6 +98,10 @@ export default function IssueBucketsPanel({
   checks,
   isScanning,
   img,
+  standardTargetLine,
+  redbubbleTargetLine,
+  printfulTargetLine,
+  teePublicTargetLine,
   selectedRedbubbleDownloadLabel,
   selectedPrintfulDownloadLabel,
   teePublicDownloadLabel,
@@ -143,6 +151,9 @@ export default function IssueBucketsPanel({
       )}
 
       <div style={{ marginBottom: 14, display: 'grid', gap: 8 }}>
+        <div style={{ fontSize: 12, color: '#bae6fd', fontWeight: 800 }}>
+          {standardTargetLine}
+        </div>
         <div style={{ fontSize: 12, color: '#cbd5e1', fontWeight: 800 }}>
           Standard Export
         </div>
@@ -162,6 +173,9 @@ export default function IssueBucketsPanel({
         <div style={{ fontSize: 12, color: '#cbd5e1', fontWeight: 800, marginTop: 2 }}>
           Redbubble Export
         </div>
+        <div style={{ fontSize: 12, color: '#bae6fd', fontWeight: 800 }}>
+          {redbubbleTargetLine}
+        </div>
         <div style={{ fontSize: 12, color: '#cbd5e1' }}>
           Resized for the selected Redbubble preset.
         </div>
@@ -178,6 +192,9 @@ export default function IssueBucketsPanel({
         <div style={{ fontSize: 12, color: '#cbd5e1', fontWeight: 800, marginTop: 2 }}>
           Printful Export
         </div>
+        <div style={{ fontSize: 12, color: '#bae6fd', fontWeight: 800 }}>
+          {printfulTargetLine}
+        </div>
         <div style={{ fontSize: 12, color: '#cbd5e1' }}>
           Resized for the selected Printful preset.
         </div>
@@ -193,6 +210,9 @@ export default function IssueBucketsPanel({
         </button>
         <div style={{ fontSize: 12, color: '#cbd5e1', fontWeight: 800, marginTop: 2 }}>
           TeePublic Export
+        </div>
+        <div style={{ fontSize: 12, color: '#bae6fd', fontWeight: 800 }}>
+          {teePublicTargetLine}
         </div>
         <div style={{ fontSize: 12, color: '#cbd5e1' }}>
           Resized for TeePublic all-products export.
