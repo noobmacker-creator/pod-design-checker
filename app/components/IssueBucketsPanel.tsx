@@ -144,6 +144,12 @@ export default function IssueBucketsPanel({
         alignSelf: 'start',
       }}
     >
+      <div style={{ marginBottom: 12 }}>
+        <div style={{ margin: 0, fontSize: 20, fontWeight: 800 }}>Export & Download</div>
+        <div style={{ marginTop: 4, color: '#cbd5e1', fontSize: 13, lineHeight: 1.4 }}>
+          Choose a platform preset or download the standard apparel PNG.
+        </div>
+      </div>
       {isScanning && (
         <div
           style={{
