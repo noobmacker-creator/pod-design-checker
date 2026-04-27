@@ -143,6 +143,12 @@ export default function IssueBucketsPanel({
       )}
 
       <div style={{ marginBottom: 14, display: 'grid', gap: 8 }}>
+        <div style={{ fontSize: 12, color: '#cbd5e1', fontWeight: 800 }}>
+          Standard Export
+        </div>
+        <div style={{ fontSize: 12, color: '#cbd5e1' }}>
+          Generic 4200 × 4800 apparel PNG, not tied to one company.
+        </div>
         <button
           onClick={handleDownloadApparelPng}
           disabled={!img}
@@ -153,8 +159,11 @@ export default function IssueBucketsPanel({
         >
           Download Standard Apparel PNG — 4200 × 4800
         </button>
+        <div style={{ fontSize: 12, color: '#cbd5e1', fontWeight: 800, marginTop: 2 }}>
+          Redbubble Export
+        </div>
         <div style={{ fontSize: 12, color: '#cbd5e1' }}>
-          Great for T-shirts and DTF apparel workflows, including Printful Flex-style printing.
+          Resized for the selected Redbubble preset.
         </div>
         <button
           onClick={handleDownloadRedbubblePng}
@@ -166,8 +175,11 @@ export default function IssueBucketsPanel({
         >
           {selectedRedbubbleDownloadLabel}
         </button>
+        <div style={{ fontSize: 12, color: '#cbd5e1', fontWeight: 800, marginTop: 2 }}>
+          Printful Export
+        </div>
         <div style={{ fontSize: 12, color: '#cbd5e1' }}>
-          Select preset, then press Auto Fix for best centering.
+          Resized for the selected Printful preset.
         </div>
         <button
           onClick={handleDownloadPrintfulPng}
@@ -179,11 +191,11 @@ export default function IssueBucketsPanel({
         >
           {selectedPrintfulDownloadLabel}
         </button>
-        <div style={{ fontSize: 12, color: '#cbd5e1' }}>
-          Select preset, then press Auto Fix for best centering.
-        </div>
         <div style={{ fontSize: 12, color: '#cbd5e1', fontWeight: 800, marginTop: 2 }}>
           TeePublic Export
+        </div>
+        <div style={{ fontSize: 12, color: '#cbd5e1' }}>
+          Resized for TeePublic all-products export.
         </div>
         <button
           onClick={handleDownloadTeePublicPng}
@@ -195,11 +207,6 @@ export default function IssueBucketsPanel({
         >
           {teePublicDownloadLabel}
         </button>
-        <div style={{ fontSize: 12, color: '#cbd5e1' }}>
-          Great for TeePublic all-products uploads.
-          <br />
-          Press Auto Fix for best centering before download.
-        </div>
       </div>
 
       <Section
