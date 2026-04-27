@@ -960,11 +960,6 @@ gap: 16,
   previewSize={previewSize}
   inspectZoom={inspectZoom}
   practicalPrintDpi={practicalPrintDpi}
-  selectedRedbubblePreset={selectedRedbubblePreset}
-  setSelectedRedbubblePreset={setSelectedRedbubblePreset}
-  selectedPrintfulPreset={selectedPrintfulPreset}
-  setSelectedPrintfulPreset={setSelectedPrintfulPreset}
-  setActivePresetSystem={setActivePresetSystem}
   targetCanvasW={targetCanvasW}
   targetCanvasH={targetCanvasH}
 />
@@ -995,6 +990,11 @@ gap: 16,
   selectedRedbubbleDownloadLabel={selectedRedbubbleDownloadLabel}
   selectedPrintfulDownloadLabel={selectedPrintfulDownloadLabel}
   teePublicDownloadLabel={teePublicDownloadLabel}
+  selectedRedbubblePreset={selectedRedbubblePreset}
+  setSelectedRedbubblePreset={setSelectedRedbubblePreset}
+  selectedPrintfulPreset={selectedPrintfulPreset}
+  setSelectedPrintfulPreset={setSelectedPrintfulPreset}
+  setActivePresetSystem={setActivePresetSystem}
   handleDownloadApparelPng={handleDownloadApparelPng}
   handleDownloadRedbubblePng={handleDownloadRedbubblePng}
   handleDownloadPrintfulPng={handleDownloadPrintfulPng}

@@ -3,6 +3,10 @@
 import React from 'react';
 import type { CheckItem } from '../lib/podCheckerTypes';
 import { statusColor, statusIcon } from '../lib/podCheckerUtils';
+import type { RedbubblePresetId } from '../lib/redbubblePresets';
+import { redbubblePresets } from '../lib/redbubblePresets';
+import type { PrintfulPresetId } from '../lib/printfulPresets';
+import { printfulPresets } from '../lib/printfulPresets';
 
 type IssueBucketsPanelProps = {
   checks: CheckItem[];
@@ -15,6 +19,13 @@ type IssueBucketsPanelProps = {
   selectedRedbubbleDownloadLabel: string;
   selectedPrintfulDownloadLabel: string;
   teePublicDownloadLabel: string;
+  selectedRedbubblePreset: RedbubblePresetId;
+  setSelectedRedbubblePreset: React.Dispatch<React.SetStateAction<RedbubblePresetId>>;
+  selectedPrintfulPreset: PrintfulPresetId;
+  setSelectedPrintfulPreset: React.Dispatch<React.SetStateAction<PrintfulPresetId>>;
+  setActivePresetSystem: React.Dispatch<
+    React.SetStateAction<'redbubble' | 'printful' | 'teepublic'>
+  >;
   handleDownloadApparelPng: () => void;
   handleDownloadRedbubblePng: () => void;
   handleDownloadPrintfulPng: () => void;
@@ -105,6 +116,11 @@ export default function IssueBucketsPanel({
   selectedRedbubbleDownloadLabel,
   selectedPrintfulDownloadLabel,
   teePublicDownloadLabel,
+  selectedRedbubblePreset,
+  setSelectedRedbubblePreset,
+  selectedPrintfulPreset,
+  setSelectedPrintfulPreset,
+  setActivePresetSystem,
   handleDownloadApparelPng,
   handleDownloadRedbubblePng,
   handleDownloadPrintfulPng,
@@ -128,10 +144,6 @@ export default function IssueBucketsPanel({
         alignSelf: 'start',
       }}
     >
-      <h2 style={{ margin: 0, marginBottom: 14, fontSize: 20, fontWeight: 800 }}>
-        Scan Report
-      </h2>
-
       {isScanning && (
         <div
           style={{
@@ -173,6 +185,31 @@ export default function IssueBucketsPanel({
         <div style={{ fontSize: 12, color: '#cbd5e1', fontWeight: 800, marginTop: 2 }}>
           Redbubble Export
         </div>
+        <select
+          value={selectedRedbubblePreset}
+          onChange={(e) => {
+            setSelectedRedbubblePreset(e.target.value as RedbubblePresetId);
+            setActivePresetSystem('redbubble');
+          }}
+          style={{
+            width: '100%',
+            padding: '10px 12px',
+            borderRadius: 10,
+            border: '1px solid rgba(255,255,255,0.12)',
+            background: 'rgba(255,255,255,0.06)',
+            color: '#fff',
+            fontSize: 14,
+            fontWeight: 600,
+            outline: 'none',
+            boxSizing: 'border-box',
+          }}
+        >
+          {redbubblePresets.map((preset) => (
+            <option key={preset.id} value={preset.id}>
+              {preset.label} — {preset.width} × {preset.height}
+            </option>
+          ))}
+        </select>
         <div style={{ fontSize: 12, color: '#bae6fd', fontWeight: 800 }}>
           {redbubbleTargetLine}
         </div>
@@ -192,6 +229,31 @@ export default function IssueBucketsPanel({
         <div style={{ fontSize: 12, color: '#cbd5e1', fontWeight: 800, marginTop: 2 }}>
           Printful Export
         </div>
+        <select
+          value={selectedPrintfulPreset}
+          onChange={(e) => {
+            setSelectedPrintfulPreset(e.target.value as PrintfulPresetId);
+            setActivePresetSystem('printful');
+          }}
+          style={{
+            width: '100%',
+            padding: '10px 12px',
+            borderRadius: 10,
+            border: '1px solid rgba(255,255,255,0.12)',
+            background: 'rgba(255,255,255,0.06)',
+            color: '#fff',
+            fontSize: 14,
+            fontWeight: 600,
+            outline: 'none',
+            boxSizing: 'border-box',
+          }}
+        >
+          {printfulPresets.map((preset) => (
+            <option key={preset.id} value={preset.id}>
+              {preset.label} — {preset.width} × {preset.height}
+            </option>
+          ))}
+        </select>
         <div style={{ fontSize: 12, color: '#bae6fd', fontWeight: 800 }}>
           {printfulTargetLine}
         </div>
