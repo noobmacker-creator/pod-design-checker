@@ -184,6 +184,9 @@ canvas.height = img.naturalHeight;
       : activePresetSystem === 'printful'
       ? selectedPrintfulPresetData
       : selectedRedbubblePresetData;
+  const selectedRedbubbleDownloadLabel = `Download ${selectedRedbubblePresetData.label} PNG`;
+  const selectedPrintfulDownloadLabel = `Download ${selectedPrintfulPresetData.label} PNG`;
+  const teePublicDownloadLabel = 'Download TeePublic PNG';
   const targetCanvasW = selectedTargetPresetData.width;
   const targetCanvasH = selectedTargetPresetData.height;
   const targetCanvasAspect = targetCanvasW / targetCanvasH;
@@ -197,13 +200,17 @@ canvas.height = img.naturalHeight;
     }
 
     // Match the same fit logic used by export so "Design Too Small" reflects real output size.
+    const isSelectedTargetSizedImage = imgW === targetCanvasW && imgH === targetCanvasH;
     const exportFitScale = Math.min(targetCanvasW / CANVAS_W, targetCanvasH / CANVAS_H);
     const exportBoundsW = effectiveBounds.w * exportFitScale;
     const exportBoundsH = effectiveBounds.h * exportFitScale;
-    const widthRatio = exportBoundsW / targetCanvasW;
-    const heightRatio = exportBoundsH / targetCanvasH;
-    const areaRatio = (exportBoundsW * exportBoundsH) / (targetCanvasW * targetCanvasH);
-    const isSelectedTargetSizedImage = imgW === targetCanvasW && imgH === targetCanvasH;
+    const measuredBoundsW =
+      isSelectedTargetSizedImage && originalBounds ? originalBounds.w : exportBoundsW;
+    const measuredBoundsH =
+      isSelectedTargetSizedImage && originalBounds ? originalBounds.h : exportBoundsH;
+    const widthRatio = measuredBoundsW / targetCanvasW;
+    const heightRatio = measuredBoundsH / targetCanvasH;
+    const areaRatio = (measuredBoundsW * measuredBoundsH) / (targetCanvasW * targetCanvasH);
     const hasExportReadySizing = hasAutoFixApplied || isSelectedTargetSizedImage;
     const exportHint =
       activePresetSystem === 'printful'
@@ -236,7 +243,16 @@ canvas.height = img.naturalHeight;
         ? 'Design fill is still quite small for the selected target. Export will work, but quality and print size may be limited.'
         : `Design looks too small and may print tiny. Please press Auto Fix top left, then ${exportHint}.`,
     };
-  }, [effectiveBounds, targetCanvasW, targetCanvasH, activePresetSystem, hasAutoFixApplied, imgW, imgH]);
+  }, [
+    effectiveBounds,
+    targetCanvasW,
+    targetCanvasH,
+    activePresetSystem,
+    hasAutoFixApplied,
+    imgW,
+    imgH,
+    originalBounds,
+  ]);
 
   const offCenterStatus = useMemo(() => {
     if (!effectiveBounds) {
@@ -958,6 +974,9 @@ gap: 16,
   checks={checks}
   isScanning={isScanning}
   img={img}
+  selectedRedbubbleDownloadLabel={selectedRedbubbleDownloadLabel}
+  selectedPrintfulDownloadLabel={selectedPrintfulDownloadLabel}
+  teePublicDownloadLabel={teePublicDownloadLabel}
   handleDownloadApparelPng={handleDownloadApparelPng}
   handleDownloadRedbubblePng={handleDownloadRedbubblePng}
   handleDownloadPrintfulPng={handleDownloadPrintfulPng}

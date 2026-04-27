@@ -8,6 +8,9 @@ type IssueBucketsPanelProps = {
   checks: CheckItem[];
   isScanning: boolean;
   img: HTMLImageElement | null;
+  selectedRedbubbleDownloadLabel: string;
+  selectedPrintfulDownloadLabel: string;
+  teePublicDownloadLabel: string;
   handleDownloadApparelPng: () => void;
   handleDownloadRedbubblePng: () => void;
   handleDownloadPrintfulPng: () => void;
@@ -91,6 +94,9 @@ export default function IssueBucketsPanel({
   checks,
   isScanning,
   img,
+  selectedRedbubbleDownloadLabel,
+  selectedPrintfulDownloadLabel,
+  teePublicDownloadLabel,
   handleDownloadApparelPng,
   handleDownloadRedbubblePng,
   handleDownloadPrintfulPng,
@@ -158,7 +164,7 @@ export default function IssueBucketsPanel({
             background: '#1d4ed8',
           }}
         >
-          Download Selected Redbubble PNG
+          {selectedRedbubbleDownloadLabel}
         </button>
         <div style={{ fontSize: 12, color: '#cbd5e1' }}>
           Select preset, then press Auto Fix for best centering.
@@ -171,7 +177,7 @@ export default function IssueBucketsPanel({
             background: '#1e40af',
           }}
         >
-          Download Selected Printful PNG
+          {selectedPrintfulDownloadLabel}
         </button>
         <div style={{ fontSize: 12, color: '#cbd5e1' }}>
           Select preset, then press Auto Fix for best centering.
@@ -187,7 +193,7 @@ export default function IssueBucketsPanel({
             background: '#1d4ed8',
           }}
         >
-          Download TeePublic All Products PNG
+          {teePublicDownloadLabel}
         </button>
         <div style={{ fontSize: 12, color: '#cbd5e1' }}>
           Great for TeePublic all-products uploads.
