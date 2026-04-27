@@ -980,7 +980,6 @@ gap: 16,
   setActionMessage={setActionMessage}
 />
 <IssueBucketsPanel
-  checks={checks}
   isScanning={isScanning}
   img={img}
   standardTargetLine={standardTargetLine}
