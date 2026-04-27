@@ -196,9 +196,15 @@ canvas.height = img.naturalHeight;
       };
     }
 
-    const widthRatio = effectiveBounds.w / targetCanvasW;
-    const heightRatio = effectiveBounds.h / targetCanvasH;
-    const areaRatio = (effectiveBounds.w * effectiveBounds.h) / (targetCanvasW * targetCanvasH);
+    // Match the same fit logic used by export so "Design Too Small" reflects real output size.
+    const exportFitScale = Math.min(targetCanvasW / CANVAS_W, targetCanvasH / CANVAS_H);
+    const exportBoundsW = effectiveBounds.w * exportFitScale;
+    const exportBoundsH = effectiveBounds.h * exportFitScale;
+    const widthRatio = exportBoundsW / targetCanvasW;
+    const heightRatio = exportBoundsH / targetCanvasH;
+    const areaRatio = (exportBoundsW * exportBoundsH) / (targetCanvasW * targetCanvasH);
+    const isSelectedTargetSizedImage = imgW === targetCanvasW && imgH === targetCanvasH;
+    const hasExportReadySizing = hasAutoFixApplied || isSelectedTargetSizedImage;
     const exportHint =
       activePresetSystem === 'printful'
         ? 'Download Selected Printful PNG'
@@ -217,20 +223,20 @@ canvas.height = img.naturalHeight;
 
     if (widthRatio >= 0.38 && heightRatio >= 0.38 && areaRatio >= 0.1) {
       return {
-        status: 'warn' as CheckStatus,
-        message: hasAutoFixApplied
-          ? `Design may still be small for the selected target. Export will work, but fine detail or print size may be limited.`
+        status: isSelectedTargetSizedImage ? ('pass' as CheckStatus) : ('warn' as CheckStatus),
+        message: hasExportReadySizing
+          ? `Design fill is moderate, but this file is already sized for the selected target. Export should work, though fine detail or print size may be limited.`
           : `Design may print a bit small. Please press Auto Fix top left, then ${exportHint}.`,
       };
     }
 
     return {
-      status: 'fail' as CheckStatus,
-      message: hasAutoFixApplied
-        ? 'Design may still be very small for the selected target. Export will work, but quality and print size may be limited.'
+      status: hasExportReadySizing ? ('warn' as CheckStatus) : ('fail' as CheckStatus),
+      message: hasExportReadySizing
+        ? 'Design fill is still quite small for the selected target. Export will work, but quality and print size may be limited.'
         : `Design looks too small and may print tiny. Please press Auto Fix top left, then ${exportHint}.`,
     };
-  }, [effectiveBounds, targetCanvasW, targetCanvasH, activePresetSystem, hasAutoFixApplied]);
+  }, [effectiveBounds, targetCanvasW, targetCanvasH, activePresetSystem, hasAutoFixApplied, imgW, imgH]);
 
   const offCenterStatus = useMemo(() => {
     if (!effectiveBounds) {
