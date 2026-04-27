@@ -805,8 +805,15 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
     setActionMessage('Auto Fix applied: artwork centered and fitted to a safer print area.');
     setHasAutoFixApplied(true);
   }
+
+  function toSafeSlug(value: string) {
+    return value
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  }
   
-  function downloadPngForSize(width: number, height: number, label: string) {
+  function downloadPngForSize(width: number, height: number, label: string, filenameLabel: string) {
     if (!img) return;
 
   const exportCanvas = document.createElement('canvas');
@@ -830,8 +837,8 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
   ctx.drawImage(img, drawX, drawY, drawW, drawH);
 
   const link = document.createElement('a');
-  const baseName = file?.name?.replace(/\.[^/.]+$/, '') || 'pod-design-fixed';
-  link.download = `${baseName}-fixed-transparent.png`;
+  const safeName = toSafeSlug(filenameLabel) || 'pod-checker-export';
+  link.download = `${safeName}-${width}x${height}.png`;
   link.href = exportCanvas.toDataURL('image/png');
   link.click();
 
@@ -840,7 +847,7 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
 }
 
   function handleDownloadApparelPng() {
-    downloadPngForSize(CANVAS_W, CANVAS_H, 'DTG/DTF Apparel');
+    downloadPngForSize(CANVAS_W, CANVAS_H, 'DTG/DTF Apparel', 'pod-checker-standard-apparel');
   }
 
   function handleDownloadRedbubblePng() {
@@ -848,7 +855,8 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
     downloadPngForSize(
       selectedRedbubblePresetData.width,
       selectedRedbubblePresetData.height,
-      'Redbubble'
+      'Redbubble',
+      selectedRedbubblePresetData.label
     );
   }
 
@@ -857,7 +865,8 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
     downloadPngForSize(
       selectedPrintfulPresetData.width,
       selectedPrintfulPresetData.height,
-      'Printful'
+      'Printful',
+      selectedPrintfulPresetData.label
     );
   }
 
@@ -866,7 +875,8 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
     downloadPngForSize(
       TEEPUBLIC_ALL_PRODUCTS_W,
       TEEPUBLIC_ALL_PRODUCTS_H,
-      'TeePublic All Products'
+      'TeePublic All Products',
+      'teepublic'
     );
   }
 
