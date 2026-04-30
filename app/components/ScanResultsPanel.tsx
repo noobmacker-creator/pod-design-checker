@@ -216,6 +216,21 @@ export default function ScanResultsPanel({
             <div style={{ marginTop: 4, color: '#cbd5e1', fontSize: 13 }}>
               Fast print-readiness actions
             </div>
+            <a
+              href="https://buymeacoffee.com/poddesignchecker"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: 'inline-block',
+                marginTop: 8,
+                color: '#7dd3fc',
+                fontSize: 12,
+                fontWeight: 700,
+                textDecoration: 'none',
+              }}
+            >
+              Support POD Checker
+            </a>
           </div>
 
           <div
