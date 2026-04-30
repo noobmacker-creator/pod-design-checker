@@ -223,14 +223,20 @@ export default function ScanResultsPanel({
               style={{
                 display: 'inline-block',
                 marginTop: 8,
-                color: '#7dd3fc',
-                fontSize: 12,
+                padding: '8px 12px',
+                borderRadius: 10,
+                background: '#0284c7',
+                color: '#ffffff',
+                fontSize: 13,
                 fontWeight: 700,
                 textDecoration: 'none',
               }}
             >
               Support POD Checker
             </a>
+            <div style={{ marginTop: 6, color: '#cbd5e1', fontSize: 12, lineHeight: 1.4 }}>
+              Support POD Checker to help it grow and improve.
+            </div>
           </div>
 
           <div
