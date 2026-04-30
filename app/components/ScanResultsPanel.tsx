@@ -216,26 +216,36 @@ export default function ScanResultsPanel({
             <div style={{ marginTop: 4, color: '#cbd5e1', fontSize: 13 }}>
               Fast print-readiness actions
             </div>
-            <a
-              href="https://buymeacoffee.com/poddesignchecker"
-              target="_blank"
-              rel="noopener noreferrer"
+            <div
               style={{
-                display: 'inline-block',
                 marginTop: 8,
-                padding: '8px 12px',
-                borderRadius: 10,
-                background: '#0284c7',
-                color: '#ffffff',
-                fontSize: 13,
-                fontWeight: 700,
-                textDecoration: 'none',
+                padding: 10,
+                borderRadius: 12,
+                background: 'rgba(2,132,199,0.12)',
+                border: '1px solid rgba(125,211,252,0.35)',
               }}
             >
-              Support POD Checker
-            </a>
-            <div style={{ marginTop: 6, color: '#cbd5e1', fontSize: 12, lineHeight: 1.4 }}>
-              Support POD Checker to help it grow and improve.
+              <a
+                href="https://buymeacoffee.com/poddesignchecker"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'inline-block',
+                  padding: '8px 12px',
+                  borderRadius: 10,
+                  background: '#0284c7',
+                  color: '#ffffff',
+                  fontSize: 13,
+                  fontWeight: 700,
+                  textDecoration: 'none',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                }}
+              >
+                Support POD Checker
+              </a>
+              <div style={{ marginTop: 6, color: '#cbd5e1', fontSize: 12, lineHeight: 1.4 }}>
+                Support POD Checker to help it grow and improve.
+              </div>
             </div>
           </div>
 
