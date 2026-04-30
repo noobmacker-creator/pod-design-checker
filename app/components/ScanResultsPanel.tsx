@@ -618,7 +618,7 @@ export default function ScanResultsPanel({
           lineHeight: 1.45,
         }}
       >
-        V1 focuses on shirt-size print checks. More POD sizes coming soon.
+        V2 supports DTG/DTF apparel export, Redbubble presets, and TeePublic all-products export. More POD tools coming soon.
       </div>
     </div>
   );
