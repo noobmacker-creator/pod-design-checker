@@ -491,26 +491,51 @@ export default function ScanResultsPanel({
         </div>
       </div>
       </div>
-      <Section
-        title="Critical Issues"
-        items={criticalItems}
-        emptyText="No critical issues."
-        headingColor="#fca5a5"
-      />
+      {criticalItems.length > 0 ? (
+        <Section
+          title="Critical Issues"
+          items={criticalItems}
+          emptyText="No critical issues."
+          headingColor="#fca5a5"
+        />
+      ) : (
+        <div style={{ color: '#94a3b8', fontSize: 13 }}>No critical issues.</div>
+      )}
 
-      <Section
-        title="Warnings"
-        items={warningItems}
-        emptyText="No warnings."
-        headingColor="#fdba74"
-      />
+      {warningItems.length > 0 ? (
+        <Section
+          title="Warnings"
+          items={warningItems}
+          emptyText="No warnings."
+          headingColor="#fdba74"
+        />
+      ) : (
+        <div style={{ color: '#94a3b8', fontSize: 13 }}>No warnings.</div>
+      )}
 
-      <Section
-        title="Passed Checks"
-        items={passedItems}
-        emptyText="No passed checks yet."
-        headingColor="#86efac"
-      />
+      {passedItems.length > 0 ? (
+        <details
+          style={{
+            marginBottom: 8,
+            padding: '8px 10px',
+            borderRadius: 10,
+            background: 'rgba(15,23,42,0.55)',
+            border: '1px solid rgba(134,239,172,0.2)',
+          }}
+        >
+          <summary style={{ cursor: 'pointer', fontWeight: 700, color: '#86efac', fontSize: 13 }}>
+            Passed Checks ({passedItems.length})
+          </summary>
+          <div style={{ marginTop: 10 }}>
+            <Section
+              title="Passed Checks"
+              items={passedItems}
+              emptyText="No passed checks yet."
+              headingColor="#86efac"
+            />
+          </div>
+        </details>
+      ) : null}
 
       {img && effectiveBounds ? (
         <div
