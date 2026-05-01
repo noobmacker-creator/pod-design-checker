@@ -428,6 +428,42 @@ export default function ScanResultsPanel({
           ) : null}
         </div>
       </div>
+      <div
+        style={{
+          padding: 12,
+          borderRadius: 14,
+          background: 'rgba(15,23,42,0.7)',
+          border: '1px solid rgba(255,255,255,0.08)',
+          display: 'grid',
+          gap: 8,
+        }}
+      >
+        <h2 style={{ margin: 0, fontSize: 20, fontWeight: 800 }}>Clean Background</h2>
+        <p
+          style={{
+            margin: 0,
+            color: '#cbd5e1',
+            fontSize: 13,
+            lineHeight: 1.45,
+          }}
+        >
+          Remove unwanted backgrounds and prepare a clean transparent PNG for POD uploads.
+        </p>
+        <button
+          disabled
+          style={{
+            background: '#334155',
+            color: '#cbd5e1',
+            cursor: 'not-allowed',
+            opacity: 0.9,
+          }}
+        >
+          Remove Background
+        </button>
+        <div style={{ color: '#94a3b8', fontSize: 12, lineHeight: 1.4 }}>
+          Preserve White Details mode coming soon.
+        </div>
+      </div>
       <div style={{ display: 'grid', gap: 8 }}>
         <h2 style={{ margin: 0, fontSize: 20, fontWeight: 800 }}>Scan Report</h2>
       <div
