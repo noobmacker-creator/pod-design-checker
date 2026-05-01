@@ -229,6 +229,12 @@ export default function ScanResultsPanel({
                 href="https://buymeacoffee.com/poddesignchecker"
                 target="_blank"
                 rel="noopener noreferrer"
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.boxShadow = '0 0 0 2px rgba(186,230,253,0.3), 0 0 16px rgba(56,189,248,0.35)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.boxShadow = '0 0 0 2px rgba(186,230,253,0.22), 0 0 12px rgba(56,189,248,0.25)';
+                }}
                 style={{
                   display: 'inline-block',
                   padding: '8px 12px',
@@ -239,6 +245,8 @@ export default function ScanResultsPanel({
                   fontWeight: 700,
                   textDecoration: 'none',
                   border: '1px solid rgba(255,255,255,0.2)',
+                  boxShadow: '0 0 0 2px rgba(186,230,253,0.22), 0 0 12px rgba(56,189,248,0.25)',
+                  transition: 'box-shadow 180ms ease',
                 }}
               >
                 Support POD Checker
