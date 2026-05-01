@@ -453,11 +453,12 @@ export default function ScanResultsPanel({
           onClick={() => {
             setActionMessage('Next: connect background removal engine.');
           }}
+          disabled={!img}
           style={{
             background: '#334155',
             color: '#cbd5e1',
-            cursor: 'pointer',
-            opacity: 0.9,
+            cursor: img ? 'pointer' : 'not-allowed',
+            opacity: img ? 0.9 : 0.6,
           }}
         >
           Remove Background
