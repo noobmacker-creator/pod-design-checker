@@ -450,11 +450,13 @@ export default function ScanResultsPanel({
           Remove unwanted backgrounds and prepare a clean transparent PNG for POD uploads.
         </p>
         <button
-          disabled
+          onClick={() => {
+            setActionMessage('Next: connect background removal engine.');
+          }}
           style={{
             background: '#334155',
             color: '#cbd5e1',
-            cursor: 'not-allowed',
+            cursor: 'pointer',
             opacity: 0.9,
           }}
         >
