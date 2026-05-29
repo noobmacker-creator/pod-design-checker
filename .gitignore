@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+music-visualizer/node_modules/
+
+node_modules/
+
+.next/
