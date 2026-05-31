@@ -62,6 +62,8 @@ export default function Page() {
 
   const [dpiMetadata, setDpiMetadata] = useState<number | null>(null);
   const [hasTransparency, setHasTransparency] = useState<boolean | null>(null);
+  const [whitePixelRatio, setWhitePixelRatio] = useState(0);
+  const [whiteBackgroundCheck, setWhiteBackgroundCheck] = useState<CheckItem | null>(null);
 
   const [originalBounds, setOriginalBounds] = useState<Bounds | null>(null);
   const [coverage, setCoverage] = useState(0);
@@ -140,12 +142,59 @@ canvas.height = img.naturalHeight;
     }
     setHasTransparency(transparentFound);
 
+    // White Background Risk: calculated directly from imageData so it never depends on
+    // stale transparency state. Counts visible, near-white, and transparent pixels.
+    {
+      const wbData = imageData.data;
+      const totalPixels = wbData.length / 4;
+      let visiblePixelCount = 0;
+      let whiteVisibleCount = 0;
+      let transparentPixelCount = 0;
+
+      for (let i = 0; i < wbData.length; i += 4) {
+        const a = wbData[i + 3];
+        if (a < 40) {
+          transparentPixelCount++;
+          continue;
+        }
+        // Visible pixel (alpha > 40).
+        visiblePixelCount++;
+        const r = wbData[i];
+        const g = wbData[i + 1];
+        const b = wbData[i + 2];
+        if (r > 235 && g > 235 && b > 235 && a > 220) {
+          whiteVisibleCount++;
+        }
+      }
+
+      const whiteRatio = visiblePixelCount === 0 ? 0 : whiteVisibleCount / visiblePixelCount;
+      const transparentPixelRatio = totalPixels === 0 ? 0 : transparentPixelCount / totalPixels;
+
+      let wbStatus: CheckStatus = 'pass';
+      let wbMessage = 'No obvious white background detected.';
+
+      if (visiblePixelCount > 0 && transparentPixelRatio < 0.02 && whiteRatio > 0.6) {
+        wbStatus = 'fail';
+        wbMessage = 'White background likely detected. Use a transparent PNG for best POD results.';
+      } else if (whiteRatio > 0.35) {
+        wbStatus = 'warn';
+        wbMessage = 'Possible white background detected. Check before uploading to dark shirts.';
+      }
+
+      setWhiteBackgroundCheck({
+        label: 'White Background Risk',
+        status: wbStatus,
+        message: wbMessage,
+      });
+    }
+
     // Shirt Colour Fit: estimate if the artwork is mostly dark, mostly light, or colourful.
     // Only opaque pixels are counted so transparent areas are ignored.
     const data = imageData.data;
     let opaqueCount = 0;
     let lumaSum = 0;
     let colourfulnessSum = 0;
+    let nearWhiteCount = 0;
     for (let i = 0; i < data.length; i += 4) {
       const alpha = data[i + 3];
       if (alpha < 128) continue;
@@ -154,8 +203,15 @@ canvas.height = img.naturalHeight;
       const b = data[i + 2];
       lumaSum += 0.299 * r + 0.587 * g + 0.114 * b;
       colourfulnessSum += Math.max(r, g, b) - Math.min(r, g, b);
+      // Count solid or near-white pixels for the White Background Risk check.
+      if (r >= 240 && g >= 240 && b >= 240) {
+        nearWhiteCount++;
+      }
       opaqueCount++;
     }
+
+    // White Background Risk: ratio of visible pixels that are solid/near-white.
+    setWhitePixelRatio(opaqueCount === 0 ? 0 : nearWhiteCount / opaqueCount);
 
     if (opaqueCount === 0) {
       setShirtFitTone(null);
@@ -617,6 +673,11 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
           ? `Embedded DPI metadata: ${dpiMetadata} DPI`
           : 'No DPI metadata found. This is informational only and does not usually matter for POD if pixel size is correct.',
       },
+      whiteBackgroundCheck ?? {
+        label: 'White Background Risk',
+        status: 'info' as CheckStatus,
+        message: 'Not checked yet.',
+      },
       ...shirtFitChecks,
     ];
   }, [
@@ -633,6 +694,7 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
     dpiMetadata,
     fakeTransparencyDetected,
     shirtFitTone,
+    whiteBackgroundCheck,
     targetCanvasW,
     targetCanvasH,
     targetCanvasAspect,
