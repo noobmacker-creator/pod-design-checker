@@ -69,6 +69,7 @@ export default function Page() {
   const [thinLinePercent, setThinLinePercent] = useState(0);
 
   const [fakeTransparencyDetected, setFakeTransparencyDetected] = useState(false);
+  const [shirtFitTone, setShirtFitTone] = useState<'dark' | 'light' | 'colourful' | 'mid' | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('pod');
   const [previewSize, setPreviewSize] = useState<PreviewSize>(DEFAULT_PREVIEW_SIZE);
   const [inspectZoom, setInspectZoom] = useState(1);
@@ -138,6 +139,39 @@ canvas.height = img.naturalHeight;
       }
     }
     setHasTransparency(transparentFound);
+
+    // Shirt Colour Fit: estimate if the artwork is mostly dark, mostly light, or colourful.
+    // Only opaque pixels are counted so transparent areas are ignored.
+    const data = imageData.data;
+    let opaqueCount = 0;
+    let lumaSum = 0;
+    let colourfulnessSum = 0;
+    for (let i = 0; i < data.length; i += 4) {
+      const alpha = data[i + 3];
+      if (alpha < 128) continue;
+      const r = data[i];
+      const g = data[i + 1];
+      const b = data[i + 2];
+      lumaSum += 0.299 * r + 0.587 * g + 0.114 * b;
+      colourfulnessSum += Math.max(r, g, b) - Math.min(r, g, b);
+      opaqueCount++;
+    }
+
+    if (opaqueCount === 0) {
+      setShirtFitTone(null);
+    } else {
+      const avgLuma = lumaSum / opaqueCount;
+      const avgColourfulness = colourfulnessSum / opaqueCount;
+      if (avgColourfulness > 60) {
+        setShirtFitTone('colourful');
+      } else if (avgLuma < 90) {
+        setShirtFitTone('dark');
+      } else if (avgLuma > 170) {
+        setShirtFitTone('light');
+      } else {
+        setShirtFitTone('mid');
+      }
+    }
   }, [img]);
 
   const effectiveBounds = useMemo(() => {
@@ -411,6 +445,68 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
     const heightRatio = imgH / targetCanvasH;
     const slightlySmaller = widthRatio >= 0.85 && heightRatio >= 0.85;
 
+    // Shirt Colour Fit: compare the artwork tone against common shirt colours.
+    // Shirt tone groups: 'light' shirts, 'dark' shirts, and red (medium colourful).
+    const shirtColours: { name: string; tone: 'light' | 'dark' | 'red' }[] = [
+      { name: 'White', tone: 'light' },
+      { name: 'Black', tone: 'dark' },
+      { name: 'Dark Grey', tone: 'dark' },
+      { name: 'Navy', tone: 'dark' },
+      { name: 'Red', tone: 'red' },
+      { name: 'Pink', tone: 'light' },
+      { name: 'Light Blue', tone: 'light' },
+    ];
+
+    const shirtFitChecks: CheckItem[] = shirtColours.map((shirt) => {
+      let status: CheckStatus = 'warn';
+      let message = `Check first on ${shirt.name}. Some parts may blend into the shirt colour.`;
+
+      if (shirtFitTone === null) {
+        status = 'info';
+        message = `Could not measure artwork colours clearly for ${shirt.name}.`;
+      } else if (shirtFitTone === 'dark') {
+        if (shirt.tone === 'light') {
+          status = 'pass';
+          message = `Good fit on ${shirt.name}. Artwork should show clearly.`;
+        } else if (shirt.tone === 'dark') {
+          status = 'fail';
+          message = `Not recommended on ${shirt.name}. Dark artwork may disappear on dark shirts.`;
+        } else {
+          status = 'warn';
+          message = `Check first on ${shirt.name}. Some parts may blend into the shirt colour.`;
+        }
+      } else if (shirtFitTone === 'light') {
+        if (shirt.tone === 'dark') {
+          status = 'pass';
+          message = `Good fit on ${shirt.name}. Artwork should show clearly.`;
+        } else if (shirt.tone === 'light') {
+          status = 'fail';
+          message = `Not recommended on ${shirt.name}. Light artwork may disappear on light shirts.`;
+        } else {
+          status = 'warn';
+          message = `Check first on ${shirt.name}. Some parts may blend into the shirt colour.`;
+        }
+      } else if (shirtFitTone === 'colourful') {
+        if (shirt.tone === 'light') {
+          status = 'pass';
+          message = `Good fit on ${shirt.name}. Artwork should show clearly.`;
+        } else {
+          status = 'warn';
+          message = `Check first on ${shirt.name}. Some parts may blend into the shirt colour.`;
+        }
+      } else {
+        // 'mid' tone: not clearly dark or light, so always worth checking.
+        status = 'warn';
+        message = `Check first on ${shirt.name}. Some parts may blend into the shirt colour.`;
+      }
+
+      return {
+        label: `Shirt Fit: ${shirt.name}`,
+        status,
+        message,
+      };
+    });
+
     return [
       {
         label: 'Canvas Size',
@@ -521,6 +617,7 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
           ? `Embedded DPI metadata: ${dpiMetadata} DPI`
           : 'No DPI metadata found. This is informational only and does not usually matter for POD if pixel size is correct.',
       },
+      ...shirtFitChecks,
     ];
   }, [
     imgW,
@@ -535,6 +632,7 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
     thinLinePercent,
     dpiMetadata,
     fakeTransparencyDetected,
+    shirtFitTone,
     targetCanvasW,
     targetCanvasH,
     targetCanvasAspect,
