@@ -47,6 +47,67 @@ const SHIRT_PRINT_Y = 420;
 const SHIRT_PRINT_W = 800;
 const SHIRT_PRINT_H = 1000;
 
+// White Edge / Halo Risk: looks for near-white visible pixels that sit right next to
+// transparent pixels. These often show as a white halo around artwork on dark shirts.
+function getWhiteEdgeHaloCheck(imageData: ImageData): CheckItem {
+  const { data, width, height } = imageData;
+  let visiblePixels = 0;
+  let whiteEdgePixels = 0;
+
+  const alphaAt = (x: number, y: number) => {
+    if (x < 0 || y < 0 || x >= width || y >= height) return 255;
+    return data[(y * width + x) * 4 + 3];
+  };
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const idx = (y * width + x) * 4;
+      const a = data[idx + 3];
+      // Ignore fully transparent pixels.
+      if (a < 40) continue;
+      visiblePixels++;
+
+      const r = data[idx];
+      const g = data[idx + 1];
+      const b = data[idx + 2];
+      // Near-white visible pixel.
+      if (r >= 230 && g >= 230 && b >= 230 && a >= 120) {
+        let nearTransparent = false;
+        for (let dy = -2; dy <= 2 && !nearTransparent; dy++) {
+          for (let dx = -2; dx <= 2; dx++) {
+            if (dx === 0 && dy === 0) continue;
+            if (alphaAt(x + dx, y + dy) < 40) {
+              nearTransparent = true;
+              break;
+            }
+          }
+        }
+        if (nearTransparent) whiteEdgePixels++;
+      }
+    }
+  }
+
+  const whiteEdgeRatio = visiblePixels === 0 ? 0 : whiteEdgePixels / visiblePixels;
+
+  let status: CheckStatus = 'pass';
+  let message = 'No obvious white edge or halo detected.';
+
+  if (whiteEdgeRatio >= 0.012) {
+    status = 'fail';
+    message =
+      'White edge or halo likely detected. Clean the design edges before uploading to dark shirts.';
+  } else if (whiteEdgeRatio >= 0.003) {
+    status = 'warn';
+    message = 'Possible white edge detected. Check this design on dark shirts before upload.';
+  }
+
+  return {
+    label: 'White Edge / Halo Risk',
+    status,
+    message,
+  };
+}
+
 export default function Page() {
   const [file, setFile] = useState<File | null>(null);
   const [fileUrl, setFileUrl] = useState('');
@@ -64,6 +125,7 @@ export default function Page() {
   const [hasTransparency, setHasTransparency] = useState<boolean | null>(null);
   const [whitePixelRatio, setWhitePixelRatio] = useState(0);
   const [whiteBackgroundCheck, setWhiteBackgroundCheck] = useState<CheckItem | null>(null);
+  const [whiteEdgeCheck, setWhiteEdgeCheck] = useState<CheckItem | null>(null);
 
   const [originalBounds, setOriginalBounds] = useState<Bounds | null>(null);
   const [coverage, setCoverage] = useState(0);
@@ -187,6 +249,8 @@ canvas.height = img.naturalHeight;
         message: wbMessage,
       });
     }
+
+    setWhiteEdgeCheck(getWhiteEdgeHaloCheck(imageData));
 
     // Shirt Colour Fit: estimate if the artwork is mostly dark, mostly light, or colourful.
     // Only opaque pixels are counted so transparent areas are ignored.
@@ -678,6 +742,7 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
         status: 'info' as CheckStatus,
         message: 'Not checked yet.',
       },
+      ...(whiteEdgeCheck ? [whiteEdgeCheck] : []),
       ...shirtFitChecks,
     ];
   }, [
@@ -695,6 +760,7 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
     fakeTransparencyDetected,
     shirtFitTone,
     whiteBackgroundCheck,
+    whiteEdgeCheck,
     targetCanvasW,
     targetCanvasH,
     targetCanvasAspect,
