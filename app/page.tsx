@@ -208,6 +208,47 @@ function getCutOffEdgeRiskCheck(imageData: ImageData): CheckItem {
   };
 }
 
+// Low Contrast Risk: measures the brightness range of visible pixels. A small range
+// means the artwork is low contrast and may print muddy, flat, or hard to read.
+function getLowContrastRiskCheck(imageData: ImageData): CheckItem {
+  const { data } = imageData;
+  let visiblePixels = 0;
+  let minBrightness = 255;
+  let maxBrightness = 0;
+  let totalBrightness = 0;
+
+  for (let i = 0; i < data.length; i += 4) {
+    const a = data[i + 3];
+    // Ignore transparent pixels.
+    if (a <= 40) continue;
+    visiblePixels++;
+
+    const brightness = (data[i] + data[i + 1] + data[i + 2]) / 3;
+    if (brightness < minBrightness) minBrightness = brightness;
+    if (brightness > maxBrightness) maxBrightness = brightness;
+    totalBrightness += brightness;
+  }
+
+  const contrastRange = visiblePixels === 0 ? 0 : maxBrightness - minBrightness;
+
+  let status: CheckStatus = 'pass';
+  let message = 'Artwork contrast looks healthy for print.';
+
+  if (visiblePixels > 0 && contrastRange < 55) {
+    status = 'fail';
+    message = 'Low contrast likely detected. Artwork may print flat or hard to read.';
+  } else if (visiblePixels > 0 && contrastRange < 95) {
+    status = 'warn';
+    message = 'Possible low contrast detected. Some details may look muddy when printed.';
+  }
+
+  return {
+    label: 'Low Contrast Risk',
+    status,
+    message,
+  };
+}
+
 export default function Page() {
   const [file, setFile] = useState<File | null>(null);
   const [fileUrl, setFileUrl] = useState('');
@@ -228,6 +269,7 @@ export default function Page() {
   const [whiteEdgeCheck, setWhiteEdgeCheck] = useState<CheckItem | null>(null);
   const [semiTransparencyCheck, setSemiTransparencyCheck] = useState<CheckItem | null>(null);
   const [cutOffEdgeCheck, setCutOffEdgeCheck] = useState<CheckItem | null>(null);
+  const [lowContrastCheck, setLowContrastCheck] = useState<CheckItem | null>(null);
 
   const [originalBounds, setOriginalBounds] = useState<Bounds | null>(null);
   const [coverage, setCoverage] = useState(0);
@@ -355,6 +397,7 @@ canvas.height = img.naturalHeight;
     setWhiteEdgeCheck(getWhiteEdgeHaloCheck(imageData));
     setSemiTransparencyCheck(getSemiTransparencyRiskCheck(imageData));
     setCutOffEdgeCheck(getCutOffEdgeRiskCheck(imageData));
+    setLowContrastCheck(getLowContrastRiskCheck(imageData));
 
     // Shirt Colour Fit: estimate if the artwork is mostly dark, mostly light, or colourful.
     // Only opaque pixels are counted so transparent areas are ignored.
@@ -849,6 +892,7 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
       ...(whiteEdgeCheck ? [whiteEdgeCheck] : []),
       ...(semiTransparencyCheck ? [semiTransparencyCheck] : []),
       ...(cutOffEdgeCheck ? [cutOffEdgeCheck] : []),
+      ...(lowContrastCheck ? [lowContrastCheck] : []),
       ...shirtFitChecks,
     ];
   }, [
@@ -869,6 +913,7 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
     whiteEdgeCheck,
     semiTransparencyCheck,
     cutOffEdgeCheck,
+    lowContrastCheck,
     targetCanvasW,
     targetCanvasH,
     targetCanvasAspect,
