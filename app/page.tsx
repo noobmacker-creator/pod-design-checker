@@ -834,6 +834,28 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
       ? `Large file size: ${formatBytes(fileSize)}. Should still be okay for many POD platforms, but check upload limits.`
       : `Very large file size: ${formatBytes(fileSize)}. This may fail on some POD platforms.`,
 },
+      // File Type Risk: PNG is ideal for POD; warn on JPG/JPEG and any other file type.
+      ...(file
+        ? [
+            file.type.includes('png')
+              ? {
+                  label: 'File Type Risk',
+                  status: 'pass' as CheckStatus,
+                  message: 'PNG detected. Good choice for transparent POD designs.',
+                }
+              : file.type.includes('jpeg') || file.type.includes('jpg')
+              ? {
+                  label: 'File Type Risk',
+                  status: 'warn' as CheckStatus,
+                  message: 'JPG detected. PNG with transparency is usually safer for POD.',
+                }
+              : {
+                  label: 'File Type Risk',
+                  status: 'warn' as CheckStatus,
+                  message: 'Unusual file type detected. PNG is recommended for most POD designs.',
+                },
+          ]
+        : []),
       {
         label: 'Artwork Size',
         status: 'info',
@@ -899,6 +921,7 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
     imgW,
     imgH,
     hasTransparency,
+    file,
     fileSize,
     effectiveBounds,
     designTooSmallStatus,
