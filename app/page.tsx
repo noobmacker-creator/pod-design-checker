@@ -310,6 +310,73 @@ function getTinyTextRiskCheck(imageData: ImageData): CheckItem {
   };
 }
 
+// Compression Artifact Risk: samples visible pixels and looks for harsh colour jumps
+// between neighbouring pixels (to the right and below). Lots of these often mean JPG
+// compression noise, blockiness, or dirty pixels that can make POD prints look messy.
+function getCompressionArtifactRiskCheck(imageData: ImageData): CheckItem {
+  const { data, width, height } = imageData;
+  let sampledVisiblePixels = 0;
+  let harshChangeCount = 0;
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const idx = (y * width + x) * 4;
+      const a = data[idx + 3];
+      // Ignore transparent pixels.
+      if (a <= 40) continue;
+      sampledVisiblePixels++;
+
+      const r1 = data[idx];
+      const g1 = data[idx + 1];
+      const b1 = data[idx + 2];
+
+      // Compare with the pixel to the right.
+      if (x + 1 < width) {
+        const ridx = (y * width + (x + 1)) * 4;
+        if (data[ridx + 3] > 40) {
+          const diff =
+            Math.abs(r1 - data[ridx]) +
+            Math.abs(g1 - data[ridx + 1]) +
+            Math.abs(b1 - data[ridx + 2]);
+          if (diff > 120) harshChangeCount++;
+        }
+      }
+
+      // Compare with the pixel below.
+      if (y + 1 < height) {
+        const didx = ((y + 1) * width + x) * 4;
+        if (data[didx + 3] > 40) {
+          const diff =
+            Math.abs(r1 - data[didx]) +
+            Math.abs(g1 - data[didx + 1]) +
+            Math.abs(b1 - data[didx + 2]);
+          if (diff > 120) harshChangeCount++;
+        }
+      }
+    }
+  }
+
+  const artifactRatio = sampledVisiblePixels === 0 ? 0 : harshChangeCount / sampledVisiblePixels;
+
+  let status: CheckStatus = 'pass';
+  let message = 'No obvious compression artifact risk detected.';
+
+  if (artifactRatio >= 0.18) {
+    status = 'fail';
+    message = 'Heavy compression artifact risk detected. Use a cleaner PNG source before uploading.';
+  } else if (artifactRatio >= 0.08) {
+    status = 'warn';
+    message =
+      'Possible compression artifacts detected. Check for blocky edges or dirty pixels before upload.';
+  }
+
+  return {
+    label: 'Compression Artifact Risk',
+    status,
+    message,
+  };
+}
+
 export default function Page() {
   const [file, setFile] = useState<File | null>(null);
   const [fileUrl, setFileUrl] = useState('');
@@ -332,6 +399,7 @@ export default function Page() {
   const [cutOffEdgeCheck, setCutOffEdgeCheck] = useState<CheckItem | null>(null);
   const [lowContrastCheck, setLowContrastCheck] = useState<CheckItem | null>(null);
   const [tinyTextCheck, setTinyTextCheck] = useState<CheckItem | null>(null);
+  const [compressionArtifactCheck, setCompressionArtifactCheck] = useState<CheckItem | null>(null);
 
   const [originalBounds, setOriginalBounds] = useState<Bounds | null>(null);
   const [coverage, setCoverage] = useState(0);
@@ -461,6 +529,7 @@ canvas.height = img.naturalHeight;
     setCutOffEdgeCheck(getCutOffEdgeRiskCheck(imageData));
     setLowContrastCheck(getLowContrastRiskCheck(imageData));
     setTinyTextCheck(getTinyTextRiskCheck(imageData));
+    setCompressionArtifactCheck(getCompressionArtifactRiskCheck(imageData));
 
     // Shirt Colour Fit: estimate if the artwork is mostly dark, mostly light, or colourful.
     // Only opaque pixels are counted so transparent areas are ignored.
@@ -919,6 +988,7 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
                 },
           ]
         : []),
+      ...(compressionArtifactCheck ? [compressionArtifactCheck] : []),
       {
         label: 'Artwork Size',
         status: 'info',
@@ -1002,6 +1072,7 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
     cutOffEdgeCheck,
     lowContrastCheck,
     tinyTextCheck,
+    compressionArtifactCheck,
     targetCanvasW,
     targetCanvasH,
     targetCanvasAspect,
