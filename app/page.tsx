@@ -108,6 +108,47 @@ function getWhiteEdgeHaloCheck(imageData: ImageData): CheckItem {
   };
 }
 
+// Semi-Transparency Risk: counts partly transparent pixels (alpha between 20 and 220).
+// Lots of these can print as faded or ghosted edges on POD products.
+function getSemiTransparencyRiskCheck(imageData: ImageData): CheckItem {
+  const { data } = imageData;
+  let transparentPixels = 0;
+  let solidPixels = 0;
+  let semiTransparentPixels = 0;
+
+  for (let i = 0; i < data.length; i += 4) {
+    const a = data[i + 3];
+    if (a < 20) {
+      transparentPixels++;
+    } else if (a >= 220) {
+      solidPixels++;
+    } else {
+      semiTransparentPixels++;
+    }
+  }
+
+  const visiblePixels = solidPixels + semiTransparentPixels;
+  const semiTransparentRatio = visiblePixels === 0 ? 0 : semiTransparentPixels / visiblePixels;
+
+  let status: CheckStatus = 'pass';
+  let message = 'No major semi-transparency risk detected.';
+
+  if (semiTransparentRatio >= 0.12) {
+    status = 'fail';
+    message =
+      'Heavy semi-transparency detected. Faded areas may print unpredictably on POD products.';
+  } else if (semiTransparentRatio >= 0.03) {
+    status = 'warn';
+    message = 'Some semi-transparent pixels detected. Check soft edges before upload.';
+  }
+
+  return {
+    label: 'Semi-Transparency Risk',
+    status,
+    message,
+  };
+}
+
 export default function Page() {
   const [file, setFile] = useState<File | null>(null);
   const [fileUrl, setFileUrl] = useState('');
@@ -126,6 +167,7 @@ export default function Page() {
   const [whitePixelRatio, setWhitePixelRatio] = useState(0);
   const [whiteBackgroundCheck, setWhiteBackgroundCheck] = useState<CheckItem | null>(null);
   const [whiteEdgeCheck, setWhiteEdgeCheck] = useState<CheckItem | null>(null);
+  const [semiTransparencyCheck, setSemiTransparencyCheck] = useState<CheckItem | null>(null);
 
   const [originalBounds, setOriginalBounds] = useState<Bounds | null>(null);
   const [coverage, setCoverage] = useState(0);
@@ -251,6 +293,7 @@ canvas.height = img.naturalHeight;
     }
 
     setWhiteEdgeCheck(getWhiteEdgeHaloCheck(imageData));
+    setSemiTransparencyCheck(getSemiTransparencyRiskCheck(imageData));
 
     // Shirt Colour Fit: estimate if the artwork is mostly dark, mostly light, or colourful.
     // Only opaque pixels are counted so transparent areas are ignored.
@@ -743,6 +786,7 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
         message: 'Not checked yet.',
       },
       ...(whiteEdgeCheck ? [whiteEdgeCheck] : []),
+      ...(semiTransparencyCheck ? [semiTransparencyCheck] : []),
       ...shirtFitChecks,
     ];
   }, [
@@ -761,6 +805,7 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
     shirtFitTone,
     whiteBackgroundCheck,
     whiteEdgeCheck,
+    semiTransparencyCheck,
     targetCanvasW,
     targetCanvasH,
     targetCanvasAspect,
