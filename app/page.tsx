@@ -149,6 +149,65 @@ function getSemiTransparencyRiskCheck(imageData: ImageData): CheckItem {
   };
 }
 
+// Cut-Off Edge Risk: looks for visible artwork sitting in a small band around the
+// outside of the uploaded file. That often means the design is cropped too tight.
+function getCutOffEdgeRiskCheck(imageData: ImageData): CheckItem {
+  const { data, width, height } = imageData;
+  const band = 8;
+  let visiblePixels = 0;
+  let edgeVisiblePixels = 0;
+  let topTouched = false;
+  let bottomTouched = false;
+  let leftTouched = false;
+  let rightTouched = false;
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const a = data[(y * width + x) * 4 + 3];
+      // Ignore transparent pixels.
+      if (a <= 40) continue;
+      visiblePixels++;
+
+      const inTop = y < band;
+      const inBottom = y >= height - band;
+      const inLeft = x < band;
+      const inRight = x >= width - band;
+
+      if (inTop || inBottom || inLeft || inRight) {
+        edgeVisiblePixels++;
+        if (inTop) topTouched = true;
+        if (inBottom) bottomTouched = true;
+        if (inLeft) leftTouched = true;
+        if (inRight) rightTouched = true;
+      }
+    }
+  }
+
+  const touchedSides =
+    (topTouched ? 1 : 0) +
+    (bottomTouched ? 1 : 0) +
+    (leftTouched ? 1 : 0) +
+    (rightTouched ? 1 : 0);
+  const edgeRatio = visiblePixels === 0 ? 0 : edgeVisiblePixels / visiblePixels;
+
+  let status: CheckStatus = 'pass';
+  let message = 'No obvious cut-off edge detected.';
+
+  if (edgeRatio >= 0.01 || touchedSides >= 3) {
+    status = 'fail';
+    message = 'Cut-off edge likely detected. The design may be cropped too tight before upload.';
+  } else if (edgeRatio >= 0.001 || touchedSides >= 1) {
+    status = 'warn';
+    message = 'Possible cut-off edge detected. Artwork touches the edge of the uploaded file.';
+  }
+
+  return {
+    label: 'Cut-Off Edge Risk',
+    status,
+    message,
+  };
+}
+
 export default function Page() {
   const [file, setFile] = useState<File | null>(null);
   const [fileUrl, setFileUrl] = useState('');
@@ -168,6 +227,7 @@ export default function Page() {
   const [whiteBackgroundCheck, setWhiteBackgroundCheck] = useState<CheckItem | null>(null);
   const [whiteEdgeCheck, setWhiteEdgeCheck] = useState<CheckItem | null>(null);
   const [semiTransparencyCheck, setSemiTransparencyCheck] = useState<CheckItem | null>(null);
+  const [cutOffEdgeCheck, setCutOffEdgeCheck] = useState<CheckItem | null>(null);
 
   const [originalBounds, setOriginalBounds] = useState<Bounds | null>(null);
   const [coverage, setCoverage] = useState(0);
@@ -294,6 +354,7 @@ canvas.height = img.naturalHeight;
 
     setWhiteEdgeCheck(getWhiteEdgeHaloCheck(imageData));
     setSemiTransparencyCheck(getSemiTransparencyRiskCheck(imageData));
+    setCutOffEdgeCheck(getCutOffEdgeRiskCheck(imageData));
 
     // Shirt Colour Fit: estimate if the artwork is mostly dark, mostly light, or colourful.
     // Only opaque pixels are counted so transparent areas are ignored.
@@ -787,6 +848,7 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
       },
       ...(whiteEdgeCheck ? [whiteEdgeCheck] : []),
       ...(semiTransparencyCheck ? [semiTransparencyCheck] : []),
+      ...(cutOffEdgeCheck ? [cutOffEdgeCheck] : []),
       ...shirtFitChecks,
     ];
   }, [
@@ -806,6 +868,7 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
     whiteBackgroundCheck,
     whiteEdgeCheck,
     semiTransparencyCheck,
+    cutOffEdgeCheck,
     targetCanvasW,
     targetCanvasH,
     targetCanvasAspect,
