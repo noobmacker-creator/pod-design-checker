@@ -377,6 +377,62 @@ function getCompressionArtifactRiskCheck(imageData: ImageData): CheckItem {
   };
 }
 
+// Empty Padding Risk: finds the visible artwork bounds (alpha > 40) and compares them to
+// the full image size. If the artwork only fills a small part of the file, there is a lot
+// of empty transparent space, which can make the design print too small or hard to place.
+function getEmptyPaddingRiskCheck(imageData: ImageData): CheckItem {
+  const { data, width, height } = imageData;
+  let minX = width;
+  let minY = height;
+  let maxX = -1;
+  let maxY = -1;
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const a = data[(y * width + x) * 4 + 3];
+      // Treat pixels with alpha > 40 as visible artwork.
+      if (a <= 40) continue;
+      if (x < minX) minX = x;
+      if (y < minY) minY = y;
+      if (x > maxX) maxX = x;
+      if (y > maxY) maxY = y;
+    }
+  }
+
+  // No visible artwork found.
+  if (maxX < 0 || maxY < 0) {
+    return {
+      label: 'Empty Padding Risk',
+      status: 'info',
+      message: 'Could not measure artwork bounds clearly.',
+    };
+  }
+
+  const artworkWidth = maxX - minX + 1;
+  const artworkHeight = maxY - minY + 1;
+  const artworkWidthRatio = width === 0 ? 0 : artworkWidth / width;
+  const artworkHeightRatio = height === 0 ? 0 : artworkHeight / height;
+
+  let status: CheckStatus = 'fail';
+  let message =
+    'Heavy empty padding detected. Crop empty space or use Auto Fix before uploading.';
+
+  if (artworkWidthRatio >= 0.55 || artworkHeightRatio >= 0.55) {
+    status = 'pass';
+    message = 'Artwork fills the uploaded file well. No major empty padding risk detected.';
+  } else if (artworkWidthRatio >= 0.35 || artworkHeightRatio >= 0.35) {
+    status = 'warn';
+    message =
+      'Some empty padding detected. Check that the artwork is not printing smaller than expected.';
+  }
+
+  return {
+    label: 'Empty Padding Risk',
+    status,
+    message,
+  };
+}
+
 export default function Page() {
   const [file, setFile] = useState<File | null>(null);
   const [fileUrl, setFileUrl] = useState('');
@@ -400,6 +456,7 @@ export default function Page() {
   const [lowContrastCheck, setLowContrastCheck] = useState<CheckItem | null>(null);
   const [tinyTextCheck, setTinyTextCheck] = useState<CheckItem | null>(null);
   const [compressionArtifactCheck, setCompressionArtifactCheck] = useState<CheckItem | null>(null);
+  const [emptyPaddingCheck, setEmptyPaddingCheck] = useState<CheckItem | null>(null);
 
   const [originalBounds, setOriginalBounds] = useState<Bounds | null>(null);
   const [coverage, setCoverage] = useState(0);
@@ -530,6 +587,7 @@ canvas.height = img.naturalHeight;
     setLowContrastCheck(getLowContrastRiskCheck(imageData));
     setTinyTextCheck(getTinyTextRiskCheck(imageData));
     setCompressionArtifactCheck(getCompressionArtifactRiskCheck(imageData));
+    setEmptyPaddingCheck(getEmptyPaddingRiskCheck(imageData));
 
     // Shirt Colour Fit: estimate if the artwork is mostly dark, mostly light, or colourful.
     // Only opaque pixels are counted so transparent areas are ignored.
@@ -996,6 +1054,7 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
           ? `Detected artwork area: ${Math.round(effectiveBounds.w)} × ${Math.round(effectiveBounds.h)}`
           : 'Artwork area measurement unavailable.',
       },
+      ...(emptyPaddingCheck ? [emptyPaddingCheck] : []),
       {
         label: 'Design Too Small',
         status: designTooSmallStatus.status,
@@ -1073,6 +1132,7 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
     lowContrastCheck,
     tinyTextCheck,
     compressionArtifactCheck,
+    emptyPaddingCheck,
     targetCanvasW,
     targetCanvasH,
     targetCanvasAspect,
