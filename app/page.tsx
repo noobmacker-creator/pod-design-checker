@@ -506,6 +506,67 @@ function getPixelationRiskCheck(imageData: ImageData): CheckItem {
   };
 }
 
+// Uneven Padding Risk: finds the visible artwork bounds (alpha > 40) and measures the
+// empty space on each side. If one side has a lot more space than the opposite side,
+// the artwork may be badly cropped or off balance.
+function getUnevenPaddingRiskCheck(imageData: ImageData): CheckItem {
+  const { data, width, height } = imageData;
+  let minX = width;
+  let minY = height;
+  let maxX = -1;
+  let maxY = -1;
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const a = data[(y * width + x) * 4 + 3];
+      // Treat pixels with alpha > 40 as visible artwork.
+      if (a <= 40) continue;
+      if (x < minX) minX = x;
+      if (y < minY) minY = y;
+      if (x > maxX) maxX = x;
+      if (y > maxY) maxY = y;
+    }
+  }
+
+  // No visible artwork found.
+  if (maxX < 0 || maxY < 0) {
+    return {
+      label: 'Uneven Padding Risk',
+      status: 'info',
+      message: 'Could not measure artwork bounds clearly.',
+    };
+  }
+
+  const leftSpace = minX;
+  const rightSpace = width - maxX - 1;
+  const topSpace = minY;
+  const bottomSpace = height - maxY - 1;
+
+  const horizontalDifference = Math.abs(leftSpace - rightSpace);
+  const verticalDifference = Math.abs(topSpace - bottomSpace);
+  const horizontalDifferenceRatio = width === 0 ? 0 : horizontalDifference / width;
+  const verticalDifferenceRatio = height === 0 ? 0 : verticalDifference / height;
+
+  let status: CheckStatus = 'pass';
+  let message = 'Padding looks balanced around the artwork.';
+
+  if (horizontalDifferenceRatio >= 0.2 || verticalDifferenceRatio >= 0.2) {
+    status = 'fail';
+    message =
+      'Heavy uneven padding detected. The uploaded file may be badly cropped or off balance.';
+  } else if (horizontalDifferenceRatio >= 0.08 || verticalDifferenceRatio >= 0.08) {
+    status = 'warn';
+    message =
+      'Uneven padding detected. Check that the artwork is cropped and centered correctly.';
+  }
+
+  return {
+    label: 'Uneven Padding Risk',
+    status,
+    message,
+  };
+}
+
 export default function Page() {
   const [file, setFile] = useState<File | null>(null);
   const [fileUrl, setFileUrl] = useState('');
@@ -531,6 +592,7 @@ export default function Page() {
   const [compressionArtifactCheck, setCompressionArtifactCheck] = useState<CheckItem | null>(null);
   const [emptyPaddingCheck, setEmptyPaddingCheck] = useState<CheckItem | null>(null);
   const [pixelationCheck, setPixelationCheck] = useState<CheckItem | null>(null);
+  const [unevenPaddingCheck, setUnevenPaddingCheck] = useState<CheckItem | null>(null);
 
   const [originalBounds, setOriginalBounds] = useState<Bounds | null>(null);
   const [coverage, setCoverage] = useState(0);
@@ -663,6 +725,7 @@ canvas.height = img.naturalHeight;
     setCompressionArtifactCheck(getCompressionArtifactRiskCheck(imageData));
     setEmptyPaddingCheck(getEmptyPaddingRiskCheck(imageData));
     setPixelationCheck(getPixelationRiskCheck(imageData));
+    setUnevenPaddingCheck(getUnevenPaddingRiskCheck(imageData));
 
     // Shirt Colour Fit: estimate if the artwork is mostly dark, mostly light, or colourful.
     // Only opaque pixels are counted so transparent areas are ignored.
@@ -1131,6 +1194,7 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
           : 'Artwork area measurement unavailable.',
       },
       ...(emptyPaddingCheck ? [emptyPaddingCheck] : []),
+      ...(unevenPaddingCheck ? [unevenPaddingCheck] : []),
       {
         label: 'Design Too Small',
         status: designTooSmallStatus.status,
@@ -1210,6 +1274,7 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
     compressionArtifactCheck,
     emptyPaddingCheck,
     pixelationCheck,
+    unevenPaddingCheck,
     targetCanvasW,
     targetCanvasH,
     targetCanvasAspect,
