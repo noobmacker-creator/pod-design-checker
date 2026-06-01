@@ -433,6 +433,79 @@ function getEmptyPaddingRiskCheck(imageData: ImageData): CheckItem {
   };
 }
 
+// Pixelation Risk: samples visible pixels every 4px and compares each one to the pixel
+// 4px to the right and 4px below. Lots of harsh blocky jumps can mean a pixelated or
+// blocky source, while too many very flat areas can mean a blurry or low-detail image.
+function getPixelationRiskCheck(imageData: ImageData): CheckItem {
+  const { data, width, height } = imageData;
+  let sampledVisiblePixels = 0;
+  let flatHits = 0;
+  let blockyHits = 0;
+
+  for (let y = 0; y < height; y += 4) {
+    for (let x = 0; x < width; x += 4) {
+      const idx = (y * width + x) * 4;
+      const a = data[idx + 3];
+      // Ignore transparent pixels.
+      if (a <= 40) continue;
+      sampledVisiblePixels++;
+
+      const r1 = data[idx];
+      const g1 = data[idx + 1];
+      const b1 = data[idx + 2];
+
+      // Compare with the pixel 4px to the right.
+      if (x + 4 < width) {
+        const ridx = (y * width + (x + 4)) * 4;
+        if (data[ridx + 3] > 40) {
+          const diff =
+            Math.abs(r1 - data[ridx]) +
+            Math.abs(g1 - data[ridx + 1]) +
+            Math.abs(b1 - data[ridx + 2]);
+          if (diff < 8) flatHits++;
+          else if (diff > 160) blockyHits++;
+        }
+      }
+
+      // Compare with the pixel 4px below.
+      if (y + 4 < height) {
+        const didx = ((y + 4) * width + x) * 4;
+        if (data[didx + 3] > 40) {
+          const diff =
+            Math.abs(r1 - data[didx]) +
+            Math.abs(g1 - data[didx + 1]) +
+            Math.abs(b1 - data[didx + 2]);
+          if (diff < 8) flatHits++;
+          else if (diff > 160) blockyHits++;
+        }
+      }
+    }
+  }
+
+  const flatRatio = sampledVisiblePixels === 0 ? 0 : flatHits / sampledVisiblePixels;
+  const blockyRatio = sampledVisiblePixels === 0 ? 0 : blockyHits / sampledVisiblePixels;
+
+  let status: CheckStatus = 'pass';
+  let message = 'No obvious pixelation or blur risk detected.';
+
+  if (blockyRatio > 0.22) {
+    status = 'fail';
+    message = 'Pixelation risk likely detected. Use a cleaner or higher-quality source image.';
+  } else if (blockyRatio > 0.12) {
+    status = 'warn';
+    message = 'Possible pixelation or blur detected. Check the design closely before upload.';
+  } else if (flatRatio > 0.75) {
+    status = 'warn';
+    message = 'Possible pixelation or blur detected. Check the design closely before upload.';
+  }
+
+  return {
+    label: 'Pixelation Risk',
+    status,
+    message,
+  };
+}
+
 export default function Page() {
   const [file, setFile] = useState<File | null>(null);
   const [fileUrl, setFileUrl] = useState('');
@@ -457,6 +530,7 @@ export default function Page() {
   const [tinyTextCheck, setTinyTextCheck] = useState<CheckItem | null>(null);
   const [compressionArtifactCheck, setCompressionArtifactCheck] = useState<CheckItem | null>(null);
   const [emptyPaddingCheck, setEmptyPaddingCheck] = useState<CheckItem | null>(null);
+  const [pixelationCheck, setPixelationCheck] = useState<CheckItem | null>(null);
 
   const [originalBounds, setOriginalBounds] = useState<Bounds | null>(null);
   const [coverage, setCoverage] = useState(0);
@@ -588,6 +662,7 @@ canvas.height = img.naturalHeight;
     setTinyTextCheck(getTinyTextRiskCheck(imageData));
     setCompressionArtifactCheck(getCompressionArtifactRiskCheck(imageData));
     setEmptyPaddingCheck(getEmptyPaddingRiskCheck(imageData));
+    setPixelationCheck(getPixelationRiskCheck(imageData));
 
     // Shirt Colour Fit: estimate if the artwork is mostly dark, mostly light, or colourful.
     // Only opaque pixels are counted so transparent areas are ignored.
@@ -1047,6 +1122,7 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
           ]
         : []),
       ...(compressionArtifactCheck ? [compressionArtifactCheck] : []),
+      ...(pixelationCheck ? [pixelationCheck] : []),
       {
         label: 'Artwork Size',
         status: 'info',
@@ -1133,6 +1209,7 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
     tinyTextCheck,
     compressionArtifactCheck,
     emptyPaddingCheck,
+    pixelationCheck,
     targetCanvasW,
     targetCanvasH,
     targetCanvasAspect,
