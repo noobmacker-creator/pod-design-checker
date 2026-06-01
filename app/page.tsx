@@ -249,6 +249,67 @@ function getLowContrastRiskCheck(imageData: ImageData): CheckItem {
   };
 }
 
+// Tiny Text Risk: samples visible pixels and looks for small detailed clusters where
+// solid and transparent pixels sit close together. Lots of these often mean tiny text
+// or fine detail that may be hard to read when printed on POD products.
+function getTinyTextRiskCheck(imageData: ImageData): CheckItem {
+  const { data, width, height } = imageData;
+  let visibleSampledPixels = 0;
+  let tinyDetailHits = 0;
+
+  const alphaAt = (x: number, y: number) => {
+    if (x < 0 || y < 0 || x >= width || y >= height) return 0;
+    return data[(y * width + x) * 4 + 3];
+  };
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const idx = (y * width + x) * 4;
+      const a = data[idx + 3];
+      // Ignore transparent pixels.
+      if (a <= 40) continue;
+
+      // Sample every 6th pixel to keep this fast on large files.
+      if ((x + y * width) % 6 !== 0) continue;
+      visibleSampledPixels++;
+
+      if (a > 120) {
+        let hasSolid = false;
+        let hasTransparent = false;
+        // Check a 5x5 area around this pixel for both solid and transparent neighbours.
+        for (let dy = -2; dy <= 2; dy++) {
+          for (let dx = -2; dx <= 2; dx++) {
+            const na = alphaAt(x + dx, y + dy);
+            if (na > 120) hasSolid = true;
+            else if (na <= 40) hasTransparent = true;
+          }
+        }
+        if (hasSolid && hasTransparent) tinyDetailHits++;
+      }
+    }
+  }
+
+  const tinyDetailRatio = visibleSampledPixels === 0 ? 0 : tinyDetailHits / visibleSampledPixels;
+
+  let status: CheckStatus = 'pass';
+  let message = 'No obvious tiny text risk detected.';
+
+  if (tinyDetailRatio >= 0.12) {
+    status = 'fail';
+    message = 'Tiny text risk likely detected. Enlarge small lettering before uploading.';
+  } else if (tinyDetailRatio >= 0.04) {
+    status = 'warn';
+    message =
+      'Possible tiny text risk detected. Small details may be hard to read when printed.';
+  }
+
+  return {
+    label: 'Tiny Text Risk',
+    status,
+    message,
+  };
+}
+
 export default function Page() {
   const [file, setFile] = useState<File | null>(null);
   const [fileUrl, setFileUrl] = useState('');
@@ -270,6 +331,7 @@ export default function Page() {
   const [semiTransparencyCheck, setSemiTransparencyCheck] = useState<CheckItem | null>(null);
   const [cutOffEdgeCheck, setCutOffEdgeCheck] = useState<CheckItem | null>(null);
   const [lowContrastCheck, setLowContrastCheck] = useState<CheckItem | null>(null);
+  const [tinyTextCheck, setTinyTextCheck] = useState<CheckItem | null>(null);
 
   const [originalBounds, setOriginalBounds] = useState<Bounds | null>(null);
   const [coverage, setCoverage] = useState(0);
@@ -398,6 +460,7 @@ canvas.height = img.naturalHeight;
     setSemiTransparencyCheck(getSemiTransparencyRiskCheck(imageData));
     setCutOffEdgeCheck(getCutOffEdgeRiskCheck(imageData));
     setLowContrastCheck(getLowContrastRiskCheck(imageData));
+    setTinyTextCheck(getTinyTextRiskCheck(imageData));
 
     // Shirt Colour Fit: estimate if the artwork is mostly dark, mostly light, or colourful.
     // Only opaque pixels are counted so transparent areas are ignored.
@@ -899,6 +962,7 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
             ? 'Some thin line risk detected.'
             : 'A lot of thin line risk detected.',
       },
+      ...(tinyTextCheck ? [tinyTextCheck] : []),
       {
         label: 'DPI Metadata',
         status: 'info',
@@ -937,6 +1001,7 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
     semiTransparencyCheck,
     cutOffEdgeCheck,
     lowContrastCheck,
+    tinyTextCheck,
     targetCanvasW,
     targetCanvasH,
     targetCanvasAspect,
