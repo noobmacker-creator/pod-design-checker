@@ -608,11 +608,12 @@ function getOversizedArtworkRiskCheck(imageData: ImageData): CheckItem {
 
   if (artworkWidthRatio >= 0.94 || artworkHeightRatio >= 0.94) {
     status = 'fail';
-    message = 'Oversized artwork likely detected. Reduce the design size before uploading.';
+    message =
+      'Artwork fills almost the whole uploaded file. Add more transparent space around it or reduce the artwork size.';
   } else if (artworkWidthRatio >= 0.82 || artworkHeightRatio >= 0.82) {
     status = 'warn';
     message =
-      'Artwork may be oversized. Check that the design has enough breathing room before upload.';
+      'Artwork may be filling too much of the uploaded file. Check that it has enough transparent space around it.';
   }
 
   return {
