@@ -634,6 +634,37 @@ export default function ScanResultsPanel({
           >
             <span style={{ fontWeight: 800 }}>Best Next Action:</span> {nextStep}
           </div>
+
+          {img &&
+          [
+            'Design Too Small',
+            'Print Safety Border',
+            'Off-Center Design',
+            'Empty Padding Risk',
+            'Uneven Padding Risk',
+            'Oversized Artwork Risk',
+            'Cut-Off Edge Risk',
+          ].includes(mainIssue) ? (
+            <button
+              onClick={() => {
+                handleQuickFix();
+                setActionMessage('Auto Fix applied from Best Next Action.');
+              }}
+              style={{
+                justifySelf: 'start',
+                padding: '8px 14px',
+                borderRadius: 10,
+                background: '#0284c7',
+                color: '#ffffff',
+                fontSize: 13,
+                fontWeight: 700,
+                border: '1px solid rgba(255,255,255,0.2)',
+                cursor: 'pointer',
+              }}
+            >
+              Run Auto Fix
+            </button>
+          ) : null}
         </div>
       </div>
       </div>
