@@ -126,60 +126,122 @@ export default function ScanResultsPanel({
   targetCanvasW,
   targetCanvasH,
 }: ScanResultsPanelProps) {
-  const exactSize = imgW === targetCanvasW && imgH === targetCanvasH;
-  const largerThanTarget = imgW >= targetCanvasW && imgH >= targetCanvasH;
-  const slightlySmaller = imgW / targetCanvasW >= 0.85 && imgH / targetCanvasH >= 0.85;
-
-  const riskLabel =
-    !img
-      ? 'UPLOAD A DESIGN'
-      : hasTransparency === false || printScore < 60
-      ? 'HIGH RISK'
-      : 100 - printScore >= 30
-      ? 'MEDIUM RISK'
-      : 'READY';
-
-  const riskBg =
-    !img
-      ? '#1e293b'
-      : hasTransparency === false || printScore < 60
-      ? '#7f1d1d'
-      : 100 - printScore >= 30
-      ? '#78350f'
-      : '#14532d';
-
-  const mainIssue =
-    !img
-      ? '—'
-      : hasTransparency === false
-      ? 'No transparency'
-      : thinLinePercent >= 18
-      ? 'Too many thin lines'
-      : specks > 0
-      ? 'Specks detected'
-      : exactSize
-      ? 'Ready for selected target'
-      : largerThanTarget
-      ? 'Larger than selected target'
-      : slightlySmaller
-      ? 'Smaller than selected target'
-      : 'Much smaller than selected target';
-
-  const nextStep =
-    !img
-      ? 'Upload a design to begin.'
-      : hasTransparency === false
-      ? 'Add transparent background.'
-      : thinLinePercent >= 18
-      ? 'Thicken thin lines.'
-      : specks > 0
-      ? 'Clean specks / noise.'
-      : slightlySmaller || !exactSize
-      ? `Use Auto Fix, then export for ${targetCanvasW} × ${targetCanvasH}.`
-      : `Export for ${targetCanvasW} × ${targetCanvasH}.`;
   const criticalItems = checks.filter((item) => item.status === 'fail');
   const warningItems = checks.filter((item) => item.status === 'warn');
   const passedItems = checks.filter((item) => item.status === 'pass' || item.status === 'info');
+
+  // Result Summary Engine: picks the single most important issue from the checks array.
+  // Info checks are ignored. Fails always win over warns. Within each group, the issue
+  // that sits highest in this priority list is chosen as the Main Issue.
+  const issuePriority = [
+    'Solid Background Box Risk',
+    'White Background Risk',
+    'Fake Transparency Background',
+    'File Type Risk',
+    'Canvas Size',
+    'Aspect Ratio',
+    'Cut-Off Edge Risk',
+    'Oversized Artwork Risk',
+    'Empty Padding Risk',
+    'Uneven Padding Risk',
+    'Design Too Small',
+    'Print Safety Border',
+    'White Edge / Halo Risk',
+    'Semi-Transparency Risk',
+    'Tiny Text Risk',
+    'Compression Artifact Risk',
+    'Pixelation Risk',
+    'Low Contrast Risk',
+    'Shirt Fit',
+    'Line Thickness',
+    'Speck Detector',
+    'Off-Center Design',
+    'Artwork Size',
+  ];
+
+  // Match a check label to its priority key. startsWith covers grouped checks like the
+  // "Shirt Fit: White" labels, which all map to the single "Shirt Fit" priority entry.
+  const matchPriorityKey = (label: string) =>
+    issuePriority.find((key) => label === key || label.startsWith(key));
+
+  const pickMainIssue = (items: CheckItem[]) => {
+    let bestKey: string | undefined;
+    let bestItem: CheckItem | null = null;
+    let bestRank = Infinity;
+    for (const item of items) {
+      const key = matchPriorityKey(item.label);
+      const rank = key ? issuePriority.indexOf(key) : Infinity;
+      if (rank < bestRank) {
+        bestRank = rank;
+        bestKey = key;
+        bestItem = item;
+      }
+    }
+    return { key: bestKey, item: bestItem };
+  };
+
+  const actionByIssue: Record<string, string> = {
+    'Solid Background Box Risk':
+      'Use a transparent PNG or remove the solid rectangle background before uploading.',
+    'White Background Risk': 'Use a transparent PNG before uploading to dark shirts.',
+    'Fake Transparency Background':
+      'Replace the fake checkerboard background with real transparency.',
+    'File Type Risk': 'Use a transparent PNG source file for best POD results.',
+    'Canvas Size': 'Use the fixed export or upload a larger source file.',
+    'Aspect Ratio': 'Use the fixed export so the design fits the POD canvas correctly.',
+    'Cut-Off Edge Risk':
+      'Use the original uncropped artwork or add transparent space around the design.',
+    'Oversized Artwork Risk': 'Reduce the artwork size or add more transparent space around it.',
+    'Empty Padding Risk': 'Crop empty space or use Auto Fix before uploading.',
+    'Uneven Padding Risk': 'Center the artwork or crop the file more evenly.',
+    'Design Too Small': 'Use Auto Fix or upload a larger artwork source.',
+    'Print Safety Border': 'Use Auto Fix to move the artwork inside the safe print area.',
+    'White Edge / Halo Risk': 'Clean the design edges before uploading to dark shirts.',
+    'Semi-Transparency Risk': 'Check soft faded areas and clean/flatten them if needed.',
+    'Tiny Text Risk': 'Enlarge small lettering before uploading.',
+    'Compression Artifact Risk': 'Use a cleaner PNG source before uploading.',
+    'Pixelation Risk': 'Use a higher-quality or less pixelated source image.',
+    'Low Contrast Risk': 'Increase contrast so details print clearly.',
+    'Shirt Fit': 'Choose shirt colours where the artwork has strong contrast.',
+    'Line Thickness': 'Thicken fine lines before printing.',
+    'Speck Detector': 'Clean stray marks or specks before upload.',
+    'Off-Center Design': 'Use Auto Fix to center the artwork.',
+    'Artwork Size': 'Check the artwork size before upload.',
+  };
+
+  const mainPick = criticalItems.length
+    ? pickMainIssue(criticalItems)
+    : warningItems.length
+    ? pickMainIssue(warningItems)
+    : { key: undefined, item: null };
+
+  const riskLabel = !img
+    ? 'UPLOAD A DESIGN'
+    : criticalItems.length
+    ? 'HIGH RISK'
+    : warningItems.length
+    ? 'NEEDS FIX'
+    : 'READY';
+
+  const riskBg = !img
+    ? '#1e293b'
+    : criticalItems.length
+    ? '#7f1d1d'
+    : warningItems.length
+    ? '#78350f'
+    : '#14532d';
+
+  const mainIssue = !img
+    ? '—'
+    : mainPick.item
+    ? mainPick.key ?? mainPick.item.label
+    : 'No major issue found.';
+
+  const nextStep = !img
+    ? 'Upload a design to begin.'
+    : mainPick.item
+    ? actionByIssue[mainPick.key ?? ''] ?? 'Review the highlighted issue before uploading.'
+    : 'Download and upload.';
 
   return (
     <div
@@ -525,7 +587,7 @@ export default function ScanResultsPanel({
               lineHeight: 1.45,
             }}
           >
-            <span style={{ fontWeight: 800 }}>Next Step:</span> {nextStep}
+            <span style={{ fontWeight: 800 }}>Best Next Action:</span> {nextStep}
           </div>
         </div>
       </div>
