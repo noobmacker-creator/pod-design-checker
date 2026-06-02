@@ -128,7 +128,8 @@ export default function ScanResultsPanel({
 }: ScanResultsPanelProps) {
   const criticalItems = checks.filter((item) => item.status === 'fail');
   const warningItems = checks.filter((item) => item.status === 'warn');
-  const passedItems = checks.filter((item) => item.status === 'pass' || item.status === 'info');
+  const passedItems = checks.filter((item) => item.status === 'pass');
+  const infoItems = checks.filter((item) => item.status === 'info');
 
   // Result Summary Engine: picks the single most important issue from the checks array.
   // Info checks are ignored. Fails always win over warns. Within each group, the issue
@@ -636,6 +637,15 @@ export default function ScanResultsPanel({
             />
           </div>
         </details>
+      ) : null}
+
+      {infoItems.length > 0 ? (
+        <Section
+          title="Info"
+          items={infoItems}
+          emptyText="No info checks."
+          headingColor="#7dd3fc"
+        />
       ) : null}
 
       {img && effectiveBounds ? (
