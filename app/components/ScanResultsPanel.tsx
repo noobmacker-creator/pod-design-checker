@@ -90,7 +90,7 @@ function Section({ title, items, emptyText, headingColor }: SectionProps) {
                 <span>{item.label}</span>
               </div>
 
-              <div style={{ color: '#e5e7eb', fontSize: 13, lineHeight: 1.55 }}>{item.message}</div>
+              <div style={{ color: '#e5e7eb', fontSize: 13, lineHeight: 1.55, whiteSpace: 'pre-line' }}>{item.message}</div>
             </div>
           ))}
 
@@ -130,6 +130,50 @@ export default function ScanResultsPanel({
   const warningItems = checks.filter((item) => item.status === 'warn');
   const passedItems = checks.filter((item) => item.status === 'pass');
   const infoItems = checks.filter((item) => item.status === 'info');
+
+  // Display grouping only: compact the many "Shirt Fit: <colour>" rows into one
+  // "Shirt Colour Fit" card. This does NOT change the checks array or the summary
+  // engine above; it only affects how the section lists are rendered.
+  const isShirtFit = (item: CheckItem) => item.label.startsWith('Shirt Fit:');
+  const shirtName = (item: CheckItem) => item.label.replace(/^Shirt Fit:\s*/, '');
+  const shirtFitItems = checks.filter(isShirtFit);
+
+  let shirtFitCard: CheckItem | null = null;
+  if (shirtFitItems.length > 0) {
+    const goodFit = shirtFitItems.filter((i) => i.status === 'pass').map(shirtName);
+    const checkFirst = shirtFitItems.filter((i) => i.status === 'warn').map(shirtName);
+    const notRecommended = shirtFitItems.filter((i) => i.status === 'fail').map(shirtName);
+
+    const combinedStatus: CheckItem['status'] = notRecommended.length
+      ? 'fail'
+      : checkFirst.length
+      ? 'warn'
+      : goodFit.length
+      ? 'pass'
+      : 'info';
+
+    shirtFitCard = {
+      label: 'Shirt Colour Fit',
+      status: combinedStatus,
+      message: [
+        `Good fit: ${goodFit.length ? goodFit.join(', ') : 'none'}`,
+        `Check first: ${checkFirst.length ? checkFirst.join(', ') : 'none'}`,
+        `Not recommended: ${notRecommended.length ? notRecommended.join(', ') : 'none'}`,
+      ].join('\n'),
+    };
+  }
+
+  const criticalDisplay = criticalItems.filter((item) => !isShirtFit(item));
+  const warningDisplay = warningItems.filter((item) => !isShirtFit(item));
+  const passedDisplay = passedItems.filter((item) => !isShirtFit(item));
+  const infoDisplay = infoItems.filter((item) => !isShirtFit(item));
+
+  if (shirtFitCard) {
+    if (shirtFitCard.status === 'fail') criticalDisplay.push(shirtFitCard);
+    else if (shirtFitCard.status === 'warn') warningDisplay.push(shirtFitCard);
+    else if (shirtFitCard.status === 'pass') passedDisplay.push(shirtFitCard);
+    else infoDisplay.push(shirtFitCard);
+  }
 
   // Result Summary Engine: picks the single most important issue from the checks array.
   // Info checks are ignored. Fails always win over warns. Within each group, the issue
@@ -593,10 +637,10 @@ export default function ScanResultsPanel({
         </div>
       </div>
       </div>
-      {criticalItems.length > 0 ? (
+      {criticalDisplay.length > 0 ? (
         <Section
           title="Critical Issues"
-          items={criticalItems}
+          items={criticalDisplay}
           emptyText="No critical issues."
           headingColor="#fca5a5"
         />
@@ -604,10 +648,10 @@ export default function ScanResultsPanel({
         <div style={{ color: '#94a3b8', fontSize: 13 }}>No critical issues.</div>
       )}
 
-      {warningItems.length > 0 ? (
+      {warningDisplay.length > 0 ? (
         <Section
           title="Warnings"
-          items={warningItems}
+          items={warningDisplay}
           emptyText="No warnings."
           headingColor="#fdba74"
         />
@@ -615,7 +659,7 @@ export default function ScanResultsPanel({
         <div style={{ color: '#94a3b8', fontSize: 13 }}>No warnings.</div>
       )}
 
-      {passedItems.length > 0 ? (
+      {passedDisplay.length > 0 ? (
         <details
           style={{
             marginBottom: 8,
@@ -626,12 +670,12 @@ export default function ScanResultsPanel({
           }}
         >
           <summary style={{ cursor: 'pointer', fontWeight: 700, color: '#86efac', fontSize: 13 }}>
-            Show Passed Checks ({passedItems.length})
+            Show Passed Checks ({passedDisplay.length})
           </summary>
           <div style={{ marginTop: 10 }}>
             <Section
               title="Passed Checks"
-              items={passedItems}
+              items={passedDisplay}
               emptyText="No passed checks yet."
               headingColor="#86efac"
             />
@@ -639,10 +683,10 @@ export default function ScanResultsPanel({
         </details>
       ) : null}
 
-      {infoItems.length > 0 ? (
+      {infoDisplay.length > 0 ? (
         <Section
           title="Info"
-          items={infoItems}
+          items={infoDisplay}
           emptyText="No info checks."
           headingColor="#7dd3fc"
         />
