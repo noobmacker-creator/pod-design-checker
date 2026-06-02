@@ -1170,7 +1170,7 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
           ? `Larger than selected target (${targetCanvasW} × ${targetCanvasH}).`
           : slightlySmaller
           ? `Smaller than selected target (${targetCanvasW} × ${targetCanvasH}).`
-          : `Artwork is smaller than the selected target (${targetCanvasW} × ${targetCanvasH}). Export will add transparent space around the design, but fine detail may be limited at this size.`,
+          : `Uploaded file is smaller than the selected target (${targetCanvasW} × ${targetCanvasH}). Export will place it on the canvas with transparent space around it, but fine detail may be limited at this size.`,
       },
       {
         label: 'Aspect Ratio',
