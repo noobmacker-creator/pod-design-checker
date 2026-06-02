@@ -623,6 +623,95 @@ function getOversizedArtworkRiskCheck(imageData: ImageData): CheckItem {
   };
 }
 
+// Solid Background Box Risk: looks for a solid rectangle/background baked into the image.
+// It measures how transparent the whole image is, then checks the outer edge band: if the
+// edge pixels are all close to one average colour and there is very little transparency,
+// the design probably has a solid background box that may print as a visible rectangle.
+function getSolidBackgroundBoxRiskCheck(imageData: ImageData): CheckItem {
+  const { data, width, height } = imageData;
+
+  // Whole-image transparency sampling.
+  let totalSampledPixels = 0;
+  let transparentPixels = 0;
+  const step = Math.max(1, Math.floor(Math.min(width, height) / 200));
+  for (let y = 0; y < height; y += step) {
+    for (let x = 0; x < width; x += step) {
+      totalSampledPixels++;
+      if (data[(y * width + x) * 4 + 3] < 40) transparentPixels++;
+    }
+  }
+
+  // Edge band around the outside of the image (corners and outer edges).
+  const band = Math.max(2, Math.floor(Math.min(width, height) * 0.04));
+  const edgeStep = Math.max(1, Math.floor(Math.min(width, height) / 200));
+  const isEdge = (x: number, y: number) =>
+    x < band || y < band || x >= width - band || y >= height - band;
+
+  let edgeCount = 0;
+  let sumR = 0;
+  let sumG = 0;
+  let sumB = 0;
+  for (let y = 0; y < height; y += edgeStep) {
+    for (let x = 0; x < width; x += edgeStep) {
+      if (!isEdge(x, y)) continue;
+      const idx = (y * width + x) * 4;
+      sumR += data[idx];
+      sumG += data[idx + 1];
+      sumB += data[idx + 2];
+      edgeCount++;
+    }
+  }
+
+  // Not enough data to judge confidently.
+  if (edgeCount === 0 || totalSampledPixels === 0) {
+    return {
+      label: 'Solid Background Box Risk',
+      status: 'info',
+      message: 'Could not measure the background edges clearly.',
+    };
+  }
+
+  const avgR = sumR / edgeCount;
+  const avgG = sumG / edgeCount;
+  const avgB = sumB / edgeCount;
+
+  // Count how many edge pixels are close to the average edge colour.
+  let matchingEdgePixels = 0;
+  for (let y = 0; y < height; y += edgeStep) {
+    for (let x = 0; x < width; x += edgeStep) {
+      if (!isEdge(x, y)) continue;
+      const idx = (y * width + x) * 4;
+      const diff =
+        Math.abs(data[idx] - avgR) +
+        Math.abs(data[idx + 1] - avgG) +
+        Math.abs(data[idx + 2] - avgB);
+      if (diff < 60) matchingEdgePixels++;
+    }
+  }
+
+  const edgeMatchRatio = matchingEdgePixels / edgeCount;
+  const transparencyRatio = transparentPixels / totalSampledPixels;
+
+  let status: CheckStatus = 'pass';
+  let message = 'No obvious solid background box detected.';
+
+  if (transparencyRatio < 0.02 && edgeMatchRatio >= 0.75) {
+    status = 'fail';
+    message =
+      'Solid background box likely detected. This may print as a visible rectangle on the product.';
+  } else if (transparencyRatio < 0.1 && edgeMatchRatio >= 0.55) {
+    status = 'warn';
+    message =
+      'Possible solid background box detected. Check that this will not print as a rectangle.';
+  }
+
+  return {
+    label: 'Solid Background Box Risk',
+    status,
+    message,
+  };
+}
+
 export default function Page() {
   const [file, setFile] = useState<File | null>(null);
   const [fileUrl, setFileUrl] = useState('');
@@ -650,6 +739,7 @@ export default function Page() {
   const [pixelationCheck, setPixelationCheck] = useState<CheckItem | null>(null);
   const [unevenPaddingCheck, setUnevenPaddingCheck] = useState<CheckItem | null>(null);
   const [oversizedArtworkCheck, setOversizedArtworkCheck] = useState<CheckItem | null>(null);
+  const [solidBackgroundBoxCheck, setSolidBackgroundBoxCheck] = useState<CheckItem | null>(null);
 
   const [originalBounds, setOriginalBounds] = useState<Bounds | null>(null);
   const [coverage, setCoverage] = useState(0);
@@ -784,6 +874,7 @@ canvas.height = img.naturalHeight;
     setPixelationCheck(getPixelationRiskCheck(imageData));
     setUnevenPaddingCheck(getUnevenPaddingRiskCheck(imageData));
     setOversizedArtworkCheck(getOversizedArtworkRiskCheck(imageData));
+    setSolidBackgroundBoxCheck(getSolidBackgroundBoxRiskCheck(imageData));
 
     // Shirt Colour Fit: estimate if the artwork is mostly dark, mostly light, or colourful.
     // Only opaque pixels are counted so transparent areas are ignored.
@@ -1303,6 +1394,7 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
         status: 'info' as CheckStatus,
         message: 'Not checked yet.',
       },
+      ...(solidBackgroundBoxCheck ? [solidBackgroundBoxCheck] : []),
       ...(whiteEdgeCheck ? [whiteEdgeCheck] : []),
       ...(semiTransparencyCheck ? [semiTransparencyCheck] : []),
       ...(cutOffEdgeCheck ? [cutOffEdgeCheck] : []),
@@ -1335,6 +1427,7 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
     pixelationCheck,
     unevenPaddingCheck,
     oversizedArtworkCheck,
+    solidBackgroundBoxCheck,
     targetCanvasW,
     targetCanvasH,
     targetCanvasAspect,
