@@ -567,6 +567,61 @@ function getUnevenPaddingRiskCheck(imageData: ImageData): CheckItem {
   };
 }
 
+// Oversized Artwork Risk: finds the visible artwork bounds (alpha > 40) and compares them
+// to the full image size. If the artwork fills almost the whole file, it may print too
+// large, feel cramped, or leave too little breathing room.
+function getOversizedArtworkRiskCheck(imageData: ImageData): CheckItem {
+  const { data, width, height } = imageData;
+  let minX = width;
+  let minY = height;
+  let maxX = -1;
+  let maxY = -1;
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const a = data[(y * width + x) * 4 + 3];
+      // Treat pixels with alpha > 40 as visible artwork.
+      if (a <= 40) continue;
+      if (x < minX) minX = x;
+      if (y < minY) minY = y;
+      if (x > maxX) maxX = x;
+      if (y > maxY) maxY = y;
+    }
+  }
+
+  // No visible artwork found.
+  if (maxX < 0 || maxY < 0) {
+    return {
+      label: 'Oversized Artwork Risk',
+      status: 'info',
+      message: 'Could not measure artwork bounds clearly.',
+    };
+  }
+
+  const artworkWidth = maxX - minX + 1;
+  const artworkHeight = maxY - minY + 1;
+  const artworkWidthRatio = width === 0 ? 0 : artworkWidth / width;
+  const artworkHeightRatio = height === 0 ? 0 : artworkHeight / height;
+
+  let status: CheckStatus = 'pass';
+  let message = 'Artwork size looks balanced. No oversized artwork risk detected.';
+
+  if (artworkWidthRatio >= 0.94 || artworkHeightRatio >= 0.94) {
+    status = 'fail';
+    message = 'Oversized artwork likely detected. Reduce the design size before uploading.';
+  } else if (artworkWidthRatio >= 0.82 || artworkHeightRatio >= 0.82) {
+    status = 'warn';
+    message =
+      'Artwork may be oversized. Check that the design has enough breathing room before upload.';
+  }
+
+  return {
+    label: 'Oversized Artwork Risk',
+    status,
+    message,
+  };
+}
+
 export default function Page() {
   const [file, setFile] = useState<File | null>(null);
   const [fileUrl, setFileUrl] = useState('');
@@ -593,6 +648,7 @@ export default function Page() {
   const [emptyPaddingCheck, setEmptyPaddingCheck] = useState<CheckItem | null>(null);
   const [pixelationCheck, setPixelationCheck] = useState<CheckItem | null>(null);
   const [unevenPaddingCheck, setUnevenPaddingCheck] = useState<CheckItem | null>(null);
+  const [oversizedArtworkCheck, setOversizedArtworkCheck] = useState<CheckItem | null>(null);
 
   const [originalBounds, setOriginalBounds] = useState<Bounds | null>(null);
   const [coverage, setCoverage] = useState(0);
@@ -726,6 +782,7 @@ canvas.height = img.naturalHeight;
     setEmptyPaddingCheck(getEmptyPaddingRiskCheck(imageData));
     setPixelationCheck(getPixelationRiskCheck(imageData));
     setUnevenPaddingCheck(getUnevenPaddingRiskCheck(imageData));
+    setOversizedArtworkCheck(getOversizedArtworkRiskCheck(imageData));
 
     // Shirt Colour Fit: estimate if the artwork is mostly dark, mostly light, or colourful.
     // Only opaque pixels are counted so transparent areas are ignored.
@@ -1112,7 +1169,7 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
           ? `Larger than selected target (${targetCanvasW} × ${targetCanvasH}).`
           : slightlySmaller
           ? `Smaller than selected target (${targetCanvasW} × ${targetCanvasH}).`
-          : `Much smaller than selected target (${targetCanvasW} × ${targetCanvasH}). Export will fit and pad, but fine detail may be limited at this size.`,
+          : `Artwork is smaller than the selected target (${targetCanvasW} × ${targetCanvasH}). Export will add transparent space around the design, but fine detail may be limited at this size.`,
       },
       {
         label: 'Aspect Ratio',
@@ -1195,6 +1252,7 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
       },
       ...(emptyPaddingCheck ? [emptyPaddingCheck] : []),
       ...(unevenPaddingCheck ? [unevenPaddingCheck] : []),
+      ...(oversizedArtworkCheck ? [oversizedArtworkCheck] : []),
       {
         label: 'Design Too Small',
         status: designTooSmallStatus.status,
@@ -1275,6 +1333,7 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
     emptyPaddingCheck,
     pixelationCheck,
     unevenPaddingCheck,
+    oversizedArtworkCheck,
     targetCanvasW,
     targetCanvasH,
     targetCanvasAspect,
