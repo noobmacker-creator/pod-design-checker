@@ -1825,7 +1825,7 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: '360px minmax(0, 1fr) 360px',
+            gridTemplateColumns: '400px minmax(0, 1fr) 360px',
 gap: 16,
           }}
         >

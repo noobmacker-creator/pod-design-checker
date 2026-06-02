@@ -69,7 +69,7 @@ function Section({ title, items, emptyText, headingColor }: SectionProps) {
             <div
               key={`${title}-${item.label}-${index}`}
               style={{
-                padding: '8px 10px',
+                padding: '11px 13px',
                 borderRadius: 10,
                 background: 'rgba(15,23,42,0.78)',
                 border: `1px solid ${statusColor(item.status)}44`,
@@ -80,7 +80,7 @@ function Section({ title, items, emptyText, headingColor }: SectionProps) {
                   display: 'flex',
                   alignItems: 'center',
                   gap: 8,
-                  marginBottom: 3,
+                  marginBottom: 5,
                   fontWeight: 700,
                   color: statusColor(item.status),
                   fontSize: 13,
@@ -90,7 +90,7 @@ function Section({ title, items, emptyText, headingColor }: SectionProps) {
                 <span>{item.label}</span>
               </div>
 
-              <div style={{ color: '#e5e7eb', fontSize: 12, lineHeight: 1.4 }}>{item.message}</div>
+              <div style={{ color: '#e5e7eb', fontSize: 13, lineHeight: 1.55 }}>{item.message}</div>
             </div>
           ))}
 
@@ -626,7 +626,7 @@ export default function ScanResultsPanel({
           }}
         >
           <summary style={{ cursor: 'pointer', fontWeight: 700, color: '#86efac', fontSize: 13 }}>
-            Passed Checks ({passedItems.length})
+            Show / hide Passed Checks ({passedItems.length})
           </summary>
           <div style={{ marginTop: 10 }}>
             <Section
