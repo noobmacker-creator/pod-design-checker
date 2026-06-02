@@ -626,7 +626,7 @@ export default function ScanResultsPanel({
           }}
         >
           <summary style={{ cursor: 'pointer', fontWeight: 700, color: '#86efac', fontSize: 13 }}>
-            Show / hide Passed Checks ({passedItems.length})
+            Show Passed Checks ({passedItems.length})
           </summary>
           <div style={{ marginTop: 10 }}>
             <Section
