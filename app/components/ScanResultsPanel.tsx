@@ -45,6 +45,38 @@ type SectionProps = {
   headingColor: string;
 };
 
+// Single check card, shared by the Section list and the collapsed Warnings list.
+function CheckCard({ item, keyHint }: { item: CheckItem; keyHint: string }) {
+  return (
+    <div
+      key={keyHint}
+      style={{
+        padding: '11px 13px',
+        borderRadius: 10,
+        background: 'rgba(15,23,42,0.78)',
+        border: `1px solid ${statusColor(item.status)}44`,
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          marginBottom: 5,
+          fontWeight: 700,
+          color: statusColor(item.status),
+          fontSize: 13,
+        }}
+      >
+        <span>{statusIcon(item.status)}</span>
+        <span>{item.label}</span>
+      </div>
+
+      <div style={{ color: '#e5e7eb', fontSize: 13, lineHeight: 1.55, whiteSpace: 'pre-line' }}>{item.message}</div>
+    </div>
+  );
+}
+
 function Section({ title, items, emptyText, headingColor }: SectionProps) {
   return (
     <div style={{ marginBottom: 18 }}>
@@ -680,12 +712,51 @@ export default function ScanResultsPanel({
       )}
 
       {warningDisplay.length > 0 ? (
-        <Section
-          title="Warnings"
-          items={warningDisplay}
-          emptyText="No warnings."
-          headingColor="#fdba74"
-        />
+        <div style={{ marginBottom: 18 }}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              gap: 10,
+              marginBottom: 8,
+            }}
+          >
+            <div style={{ fontWeight: 800, color: '#fdba74' }}>Warnings</div>
+            <div style={{ color: '#cbd5e1', fontSize: 13, fontWeight: 700 }}>{warningDisplay.length}</div>
+          </div>
+
+          <div style={{ display: 'grid', gap: 8 }}>
+            {warningDisplay.slice(0, 3).map((item, index) => (
+              <CheckCard key={`Warnings-${item.label}-${index}`} item={item} keyHint={`Warnings-${item.label}-${index}`} />
+            ))}
+          </div>
+
+          {warningDisplay.length > 3 ? (
+            <details
+              style={{
+                marginTop: 8,
+                padding: '8px 10px',
+                borderRadius: 10,
+                background: 'rgba(15,23,42,0.55)',
+                border: '1px solid rgba(253,186,116,0.25)',
+              }}
+            >
+              <summary style={{ cursor: 'pointer', fontWeight: 700, color: '#fdba74', fontSize: 13 }}>
+                Show More Warnings ({warningDisplay.length - 3})
+              </summary>
+              <div style={{ display: 'grid', gap: 8, marginTop: 10 }}>
+                {warningDisplay.slice(3).map((item, index) => (
+                  <CheckCard
+                    key={`Warnings-more-${item.label}-${index}`}
+                    item={item}
+                    keyHint={`Warnings-more-${item.label}-${index}`}
+                  />
+                ))}
+              </div>
+            </details>
+          ) : null}
+        </div>
       ) : (
         <div style={{ color: '#94a3b8', fontSize: 13 }}>No warnings.</div>
       )}
