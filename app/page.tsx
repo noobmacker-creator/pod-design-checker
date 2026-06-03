@@ -1839,6 +1839,7 @@ gap: 16,
   setViewMode={setViewMode}
   setActionMessage={setActionMessage}
   handleQuickFix={handleQuickFix}
+  handleDownloadFixedPng={handleDownloadApparelPng}
   img={img}
   checks={checks}
   printScore={printScore}

@@ -20,6 +20,7 @@ type ScanResultsPanelProps = {
   setViewMode: React.Dispatch<React.SetStateAction<ViewMode>>;
   setActionMessage: React.Dispatch<React.SetStateAction<string>>;
   handleQuickFix: () => void;
+  handleDownloadFixedPng: () => void;
   img: HTMLImageElement | null;
   checks: CheckItem[];
   printScore: number;
@@ -141,6 +142,7 @@ export default function ScanResultsPanel({
   setViewMode,
   setActionMessage,
   handleQuickFix,
+  handleDownloadFixedPng,
   img,
   checks,
   printScore,
@@ -696,6 +698,56 @@ export default function ScanResultsPanel({
             >
               Run Auto Fix
             </button>
+          ) : null}
+
+          {img && criticalItems.length === 0 && warningItems.length === 0 ? (
+            <div
+              style={{
+                padding: '10px 12px',
+                borderRadius: 12,
+                background: 'rgba(20,83,45,0.55)',
+                border: '1px solid rgba(134,239,172,0.45)',
+                display: 'grid',
+                gap: 8,
+              }}
+            >
+              <div style={{ fontWeight: 800, color: '#86efac', fontSize: 14 }}>
+                Ready for export
+              </div>
+              <button
+                onClick={handleDownloadFixedPng}
+                style={{
+                  justifySelf: 'start',
+                  padding: '8px 14px',
+                  borderRadius: 10,
+                  background: '#16a34a',
+                  color: '#ffffff',
+                  fontSize: 13,
+                  fontWeight: 700,
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  cursor: 'pointer',
+                }}
+              >
+                Download Fixed PNG
+              </button>
+            </div>
+          ) : null}
+
+          {img && criticalItems.length === 0 && warningItems.length > 0 ? (
+            <div
+              style={{
+                padding: '10px 12px',
+                borderRadius: 12,
+                background: 'rgba(120,53,15,0.45)',
+                border: '1px solid rgba(253,186,116,0.45)',
+                fontSize: 13,
+                lineHeight: 1.45,
+                color: '#fde68a',
+                fontWeight: 700,
+              }}
+            >
+              You can download, but review warnings first.
+            </div>
           ) : null}
         </div>
       </div>
