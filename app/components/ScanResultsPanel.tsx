@@ -682,7 +682,7 @@ export default function ScanResultsPanel({
             <button
               onClick={() => {
                 handleQuickFix();
-                setActionMessage('Auto Fix applied from Best Next Action.');
+                setActionMessage('Auto Fix applied. Artwork was centered and moved into a safer print area. Review the preview, then download the fixed PNG.');
               }}
               style={{
                 justifySelf: 'start',

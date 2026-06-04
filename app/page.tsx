@@ -1699,7 +1699,7 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
       offsetY: Math.round(y),
     });
   
-    setActionMessage('Auto Fix applied: artwork centered and fitted to a safer print area.');
+    setActionMessage('Auto Fix applied. Artwork was centered and moved into a safer print area. Review the preview, then download the fixed PNG.');
     setHasAutoFixApplied(true);
   }
 
