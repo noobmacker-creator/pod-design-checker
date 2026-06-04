@@ -355,6 +355,23 @@ export default function ScanResultsPanel({
   const showManualFixCard = Boolean(img) && Boolean(mainPick.item) && !autoFixableIssues.includes(mainIssue);
   const manualFixMessage = manualFixMessages[mainIssue] ?? 'This issue needs a source-file fix before upload.';
 
+  // Handled by Auto Fix: once Auto Fix has run, move the placement/size issues it
+  // resolves out of the active Critical Issues / Warnings lists and into a compact
+  // section. Non-fixable source-file issues stay where they are.
+  const autoFixApplied = Boolean(img) && actionMessage.includes('Auto Fix applied');
+  const isAutoFixableLabel = (label: string) => autoFixableIssues.includes(label);
+
+  const handledByAutoFix: CheckItem[] = [];
+  let criticalActive = criticalDisplay;
+  let warningActive = warningDisplay;
+  if (autoFixApplied) {
+    for (const item of [...criticalDisplay, ...warningDisplay]) {
+      if (isAutoFixableLabel(item.label)) handledByAutoFix.push(item);
+    }
+    criticalActive = criticalDisplay.filter((item) => !isAutoFixableLabel(item.label));
+    warningActive = warningDisplay.filter((item) => !isAutoFixableLabel(item.label));
+  }
+
   return (
     <div
       style={{
@@ -876,10 +893,10 @@ export default function ScanResultsPanel({
         </div>
       </div>
       </div>
-      {criticalDisplay.length > 0 ? (
+      {criticalActive.length > 0 ? (
         <Section
           title="Critical Issues"
-          items={criticalDisplay}
+          items={criticalActive}
           emptyText="No critical issues."
           headingColor="#fca5a5"
         />
@@ -887,7 +904,7 @@ export default function ScanResultsPanel({
         <div style={{ color: '#94a3b8', fontSize: 13 }}>No critical issues.</div>
       )}
 
-      {warningDisplay.length > 0 ? (
+      {warningActive.length > 0 ? (
         <div style={{ marginBottom: 18 }}>
           <div
             style={{
@@ -899,16 +916,16 @@ export default function ScanResultsPanel({
             }}
           >
             <div style={{ fontWeight: 800, color: '#fdba74' }}>Warnings</div>
-            <div style={{ color: '#cbd5e1', fontSize: 13, fontWeight: 700 }}>{warningDisplay.length}</div>
+            <div style={{ color: '#cbd5e1', fontSize: 13, fontWeight: 700 }}>{warningActive.length}</div>
           </div>
 
           <div style={{ display: 'grid', gap: 8 }}>
-            {warningDisplay.slice(0, 3).map((item, index) => (
+            {warningActive.slice(0, 3).map((item, index) => (
               <CheckCard key={`Warnings-${item.label}-${index}`} item={item} keyHint={`Warnings-${item.label}-${index}`} />
             ))}
           </div>
 
-          {warningDisplay.length > 3 ? (
+          {warningActive.length > 3 ? (
             <details
               style={{
                 marginTop: 8,
@@ -919,10 +936,10 @@ export default function ScanResultsPanel({
               }}
             >
               <summary style={{ cursor: 'pointer', fontWeight: 700, color: '#fdba74', fontSize: 13 }}>
-                Show More Warnings ({warningDisplay.length - 3})
+                Show More Warnings ({warningActive.length - 3})
               </summary>
               <div style={{ display: 'grid', gap: 8, marginTop: 10 }}>
-                {warningDisplay.slice(3).map((item, index) => (
+                {warningActive.slice(3).map((item, index) => (
                   <CheckCard
                     key={`Warnings-more-${item.label}-${index}`}
                     item={item}
@@ -936,6 +953,42 @@ export default function ScanResultsPanel({
       ) : (
         <div style={{ color: '#94a3b8', fontSize: 13 }}>No warnings.</div>
       )}
+
+      {handledByAutoFix.length > 0 ? (
+        <details
+          style={{
+            marginBottom: 18,
+            padding: '8px 10px',
+            borderRadius: 10,
+            background: 'rgba(8,47,73,0.55)',
+            border: '1px solid rgba(56,189,248,0.25)',
+          }}
+        >
+          <summary style={{ cursor: 'pointer', fontWeight: 800, color: '#7dd3fc', fontSize: 13 }}>
+            Handled by Auto Fix ({handledByAutoFix.length})
+          </summary>
+          <div
+            style={{
+              marginTop: 8,
+              color: '#bae6fd',
+              fontSize: 13,
+              lineHeight: 1.5,
+              marginBottom: 10,
+            }}
+          >
+            These placement/size issues were handled by Auto Fix. Review the preview, then download the fixed PNG.
+          </div>
+          <div style={{ display: 'grid', gap: 8 }}>
+            {handledByAutoFix.map((item, index) => (
+              <CheckCard
+                key={`Handled-${item.label}-${index}`}
+                item={item}
+                keyHint={`Handled-${item.label}-${index}`}
+              />
+            ))}
+          </div>
+        </details>
+      ) : null}
 
       {passedDisplay.length > 0 ? (
         <details
