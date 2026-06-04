@@ -570,6 +570,29 @@ export default function ScanResultsPanel({
             </div>
           ) : null}
 
+          <div
+            style={{
+              padding: '6px 10px',
+              borderRadius: 12,
+              background: 'rgba(15,23,42,0.82)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              color: '#a7f3d0',
+              fontSize: 12,
+              fontWeight: 700,
+              width: '100%',
+              boxSizing: 'border-box',
+            }}
+          >
+            Next Step:{' '}
+            {downloadMessage.includes('Download ready')
+              ? 'Upload this fixed PNG to your POD platform, or check another design.'
+              : actionMessage.includes('Auto Fix applied')
+              ? 'Review the preview, then download the fixed PNG.'
+              : !img
+              ? 'Upload a design to begin.'
+              : 'Review the scan results.'}
+          </div>
+
           {handleResetDesign && downloadMessage.includes('Download ready') ? (
             <button
               onClick={handleResetDesign}
