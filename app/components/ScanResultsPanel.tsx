@@ -344,12 +344,16 @@ export default function ScanResultsPanel({
     ? '—'
     : mainPick.item
     ? mainPick.key ?? mainPick.item.label
+    : autoFixApplied
+    ? 'Placement and sizing issues handled'
     : 'No major issue found.';
 
   const nextStep = !img
     ? 'Upload a design to begin.'
     : mainPick.item
     ? actionByIssue[mainPick.key ?? ''] ?? 'Review the highlighted issue before uploading.'
+    : autoFixApplied
+    ? 'Review the preview, then download the fixed PNG.'
     : 'Download and upload.';
 
   // Manual Fix Guidance: issues Auto Fix CANNOT solve need a source-file/manual fix.
