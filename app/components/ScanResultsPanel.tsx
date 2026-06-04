@@ -162,10 +162,32 @@ export default function ScanResultsPanel({
   targetCanvasW,
   targetCanvasH,
 }: ScanResultsPanelProps) {
-  const criticalItems = checks.filter((item) => item.status === 'fail');
-  const warningItems = checks.filter((item) => item.status === 'warn');
-  const passedItems = checks.filter((item) => item.status === 'pass');
-  const infoItems = checks.filter((item) => item.status === 'info');
+  // Auto Fix detection: once Auto Fix has run, the placement/size issues it resolves
+  // should disappear from the active scan report AND from the Result Summary, instead
+  // of being listed in a separate "Handled by Auto Fix" section.
+  const autoFixableIssues = [
+    'Design Too Small',
+    'Print Safety Border',
+    'Off-Center Design',
+    'Empty Padding Risk',
+    'Uneven Padding Risk',
+    'Oversized Artwork Risk',
+    'Cut-Off Edge Risk',
+  ];
+  const autoFixApplied = Boolean(img) && actionMessage.includes('Auto Fix applied');
+  const isAutoFixableLabel = (label: string) => autoFixableIssues.includes(label);
+
+  // After Auto Fix, drop the fixable labels from the working set so every downstream
+  // list (summary, critical, warnings) treats them as resolved. The original checks
+  // array is never changed; this only affects what is displayed.
+  const visibleChecks = autoFixApplied
+    ? checks.filter((item) => !isAutoFixableLabel(item.label))
+    : checks;
+
+  const criticalItems = visibleChecks.filter((item) => item.status === 'fail');
+  const warningItems = visibleChecks.filter((item) => item.status === 'warn');
+  const passedItems = visibleChecks.filter((item) => item.status === 'pass');
+  const infoItems = visibleChecks.filter((item) => item.status === 'info');
 
   // Display grouping only: compact the many "Shirt Fit: <colour>" rows into one
   // "Shirt Colour Fit" card. This does NOT change the checks array or the summary
@@ -325,17 +347,7 @@ export default function ScanResultsPanel({
     : 'Download and upload.';
 
   // Manual Fix Guidance: issues Auto Fix CANNOT solve need a source-file/manual fix.
-  // These are the same labels handled by the Run Auto Fix button below.
-  const autoFixableIssues = [
-    'Design Too Small',
-    'Print Safety Border',
-    'Off-Center Design',
-    'Empty Padding Risk',
-    'Uneven Padding Risk',
-    'Oversized Artwork Risk',
-    'Cut-Off Edge Risk',
-  ];
-
+  // (autoFixableIssues is defined near the top with the Auto Fix detection.)
   const manualFixMessages: Record<string, string> = {
     'Solid Background Box Risk': 'Remove the solid rectangle background or upload a transparent PNG.',
     'White Background Risk': 'Use a transparent PNG before uploading to dark shirts.',
@@ -355,22 +367,10 @@ export default function ScanResultsPanel({
   const showManualFixCard = Boolean(img) && Boolean(mainPick.item) && !autoFixableIssues.includes(mainIssue);
   const manualFixMessage = manualFixMessages[mainIssue] ?? 'This issue needs a source-file fix before upload.';
 
-  // Handled by Auto Fix: once Auto Fix has run, move the placement/size issues it
-  // resolves out of the active Critical Issues / Warnings lists and into a compact
-  // section. Non-fixable source-file issues stay where they are.
-  const autoFixApplied = Boolean(img) && actionMessage.includes('Auto Fix applied');
-  const isAutoFixableLabel = (label: string) => autoFixableIssues.includes(label);
-
-  const handledByAutoFix: CheckItem[] = [];
-  let criticalActive = criticalDisplay;
-  let warningActive = warningDisplay;
-  if (autoFixApplied) {
-    for (const item of [...criticalDisplay, ...warningDisplay]) {
-      if (isAutoFixableLabel(item.label)) handledByAutoFix.push(item);
-    }
-    criticalActive = criticalDisplay.filter((item) => !isAutoFixableLabel(item.label));
-    warningActive = warningDisplay.filter((item) => !isAutoFixableLabel(item.label));
-  }
+  // The fixable placement/size issues are already removed from visibleChecks above,
+  // so criticalDisplay / warningDisplay no longer contain them after Auto Fix.
+  const criticalActive = criticalDisplay;
+  const warningActive = warningDisplay;
 
   return (
     <div
@@ -954,40 +954,22 @@ export default function ScanResultsPanel({
         <div style={{ color: '#94a3b8', fontSize: 13 }}>No warnings.</div>
       )}
 
-      {handledByAutoFix.length > 0 ? (
-        <details
+      {autoFixApplied ? (
+        <div
           style={{
             marginBottom: 18,
-            padding: '8px 10px',
+            padding: '10px 12px',
             borderRadius: 10,
             background: 'rgba(8,47,73,0.55)',
             border: '1px solid rgba(56,189,248,0.25)',
+            color: '#bae6fd',
+            fontSize: 13,
+            lineHeight: 1.5,
+            fontWeight: 700,
           }}
         >
-          <summary style={{ cursor: 'pointer', fontWeight: 800, color: '#7dd3fc', fontSize: 13 }}>
-            Handled by Auto Fix ({handledByAutoFix.length})
-          </summary>
-          <div
-            style={{
-              marginTop: 8,
-              color: '#bae6fd',
-              fontSize: 13,
-              lineHeight: 1.5,
-              marginBottom: 10,
-            }}
-          >
-            These placement/size issues were handled by Auto Fix. Review the preview, then download the fixed PNG.
-          </div>
-          <div style={{ display: 'grid', gap: 8 }}>
-            {handledByAutoFix.map((item, index) => (
-              <CheckCard
-                key={`Handled-${item.label}-${index}`}
-                item={item}
-                keyHint={`Handled-${item.label}-${index}`}
-              />
-            ))}
-          </div>
-        </details>
+          Auto Fix handled placement and sizing issues. Review the preview, then download the fixed PNG.
+        </div>
       ) : null}
 
       {passedDisplay.length > 0 ? (
