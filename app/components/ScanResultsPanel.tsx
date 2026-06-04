@@ -184,6 +184,12 @@ export default function ScanResultsPanel({
     ? checks.filter((item) => !isAutoFixableLabel(item.label))
     : checks;
 
+  // The auto-fixable labels that were actually present in the original scan, so the
+  // "Auto Fix handled" confirmation under the Download Fixed PNG area lists real items.
+  const autoFixHandledLabels = autoFixableIssues.filter((label) =>
+    checks.some((item) => item.label === label),
+  );
+
   const criticalItems = visibleChecks.filter((item) => item.status === 'fail');
   const warningItems = visibleChecks.filter((item) => item.status === 'warn');
   const passedItems = visibleChecks.filter((item) => item.status === 'pass');
@@ -888,6 +894,17 @@ export default function ScanResultsPanel({
               >
                 Download Fixed PNG
               </button>
+
+              {autoFixHandledLabels.length > 0 ? (
+                <div style={{ display: 'grid', gap: 4 }}>
+                  <div style={{ fontWeight: 800, color: '#7dd3fc', fontSize: 13 }}>Auto Fix handled:</div>
+                  {autoFixHandledLabels.map((label) => (
+                    <div key={`autofix-handled-${label}`} style={{ fontSize: 13, color: '#bae6fd' }}>
+                      ✓ {label}
+                    </div>
+                  ))}
+                </div>
+              ) : null}
             </div>
           ) : null}
         </div>
@@ -953,24 +970,6 @@ export default function ScanResultsPanel({
       ) : (
         <div style={{ color: '#94a3b8', fontSize: 13 }}>No warnings.</div>
       )}
-
-      {autoFixApplied ? (
-        <div
-          style={{
-            marginBottom: 18,
-            padding: '10px 12px',
-            borderRadius: 10,
-            background: 'rgba(8,47,73,0.55)',
-            border: '1px solid rgba(56,189,248,0.25)',
-            color: '#bae6fd',
-            fontSize: 13,
-            lineHeight: 1.5,
-            fontWeight: 700,
-          }}
-        >
-          Auto Fix handled placement and sizing issues. Review the preview, then download the fixed PNG.
-        </div>
-      ) : null}
 
       {passedDisplay.length > 0 ? (
         <details
