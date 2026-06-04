@@ -1739,7 +1739,7 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
   link.href = exportCanvas.toDataURL('image/png');
   link.click();
 
-  setDownloadMessage(`Download ready: ${label} (${width}×${height}) transparent PNG`);
+  setDownloadMessage(`Download ready. Use this fixed transparent PNG (${label} ${width}×${height}) for your POD upload.`);
   setActionMessage('Clean transparent PNG exported.');
 }
 

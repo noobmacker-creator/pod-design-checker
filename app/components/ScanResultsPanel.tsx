@@ -749,6 +749,39 @@ export default function ScanResultsPanel({
               You can download, but review warnings first.
             </div>
           ) : null}
+
+          {img && actionMessage.includes('Auto Fix applied') ? (
+            <div
+              style={{
+                padding: '10px 12px',
+                borderRadius: 12,
+                background: 'rgba(8,47,73,0.72)',
+                border: '1px solid rgba(56,189,248,0.35)',
+                display: 'grid',
+                gap: 8,
+              }}
+            >
+              <div style={{ fontSize: 13, lineHeight: 1.45, color: '#7dd3fc', fontWeight: 700 }}>
+                Auto Fix applied. Review the preview, then download the fixed PNG.
+              </div>
+              <button
+                onClick={handleDownloadFixedPng}
+                style={{
+                  justifySelf: 'start',
+                  padding: '8px 14px',
+                  borderRadius: 10,
+                  background: '#0284c7',
+                  color: '#ffffff',
+                  fontSize: 13,
+                  fontWeight: 700,
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  cursor: 'pointer',
+                }}
+              >
+                Download Fixed PNG
+              </button>
+            </div>
+          ) : null}
         </div>
       </div>
       </div>
