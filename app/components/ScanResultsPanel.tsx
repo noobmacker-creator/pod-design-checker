@@ -21,6 +21,7 @@ type ScanResultsPanelProps = {
   setActionMessage: React.Dispatch<React.SetStateAction<string>>;
   handleQuickFix: () => void;
   handleDownloadFixedPng: () => void;
+  handleResetDesign?: () => void;
   img: HTMLImageElement | null;
   checks: CheckItem[];
   printScore: number;
@@ -143,6 +144,7 @@ export default function ScanResultsPanel({
   setActionMessage,
   handleQuickFix,
   handleDownloadFixedPng,
+  handleResetDesign,
   img,
   checks,
   printScore,
@@ -566,6 +568,25 @@ export default function ScanResultsPanel({
             >
               {downloadMessage}
             </div>
+          ) : null}
+
+          {handleResetDesign && downloadMessage.includes('Download ready') ? (
+            <button
+              onClick={handleResetDesign}
+              style={{
+                justifySelf: 'start',
+                padding: '8px 14px',
+                borderRadius: 10,
+                background: '#0284c7',
+                color: '#ffffff',
+                fontSize: 13,
+                fontWeight: 700,
+                border: '1px solid rgba(255,255,255,0.2)',
+                cursor: 'pointer',
+              }}
+            >
+              Check Another Design
+            </button>
           ) : null}
         </div>
       </div>

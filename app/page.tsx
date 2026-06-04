@@ -1703,6 +1703,45 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
     setHasAutoFixApplied(true);
   }
 
+  function handleResetDesign() {
+    if (fileUrl) URL.revokeObjectURL(fileUrl);
+
+    setFile(null);
+    setFileUrl('');
+    setImg(null);
+    setImgW(0);
+    setImgH(0);
+    setFileSize(0);
+    setDpiMetadata(null);
+    setHasTransparency(null);
+    setWhitePixelRatio(0);
+    setOriginalBounds(null);
+    setCoverage(0);
+    setSpecks(0);
+    setThinLinePercent(0);
+    setFakeTransparencyDetected(false);
+
+    setWhiteBackgroundCheck(null);
+    setWhiteEdgeCheck(null);
+    setSemiTransparencyCheck(null);
+    setCutOffEdgeCheck(null);
+    setLowContrastCheck(null);
+    setTinyTextCheck(null);
+    setCompressionArtifactCheck(null);
+    setEmptyPaddingCheck(null);
+    setPixelationCheck(null);
+    setUnevenPaddingCheck(null);
+    setOversizedArtworkCheck(null);
+    setSolidBackgroundBoxCheck(null);
+
+    setHasAutoFixApplied(false);
+    setInspectZoom(1);
+    setPreviewSize(DEFAULT_PREVIEW_SIZE);
+    setViewMode('pod');
+    setActionMessage('Upload a design to begin.');
+    setDownloadMessage('');
+  }
+
   function toSafeSlug(value: string) {
     return value
       .toLowerCase()
@@ -1840,6 +1879,7 @@ gap: 16,
   setActionMessage={setActionMessage}
   handleQuickFix={handleQuickFix}
   handleDownloadFixedPng={handleDownloadApparelPng}
+  handleResetDesign={handleResetDesign}
   img={img}
   checks={checks}
   printScore={printScore}
