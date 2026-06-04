@@ -324,6 +324,37 @@ export default function ScanResultsPanel({
     ? actionByIssue[mainPick.key ?? ''] ?? 'Review the highlighted issue before uploading.'
     : 'Download and upload.';
 
+  // Manual Fix Guidance: issues Auto Fix CANNOT solve need a source-file/manual fix.
+  // These are the same labels handled by the Run Auto Fix button below.
+  const autoFixableIssues = [
+    'Design Too Small',
+    'Print Safety Border',
+    'Off-Center Design',
+    'Empty Padding Risk',
+    'Uneven Padding Risk',
+    'Oversized Artwork Risk',
+    'Cut-Off Edge Risk',
+  ];
+
+  const manualFixMessages: Record<string, string> = {
+    'Solid Background Box Risk': 'Remove the solid rectangle background or upload a transparent PNG.',
+    'White Background Risk': 'Use a transparent PNG before uploading to dark shirts.',
+    'Fake Transparency Background': 'Replace the fake checkerboard background with real transparency.',
+    'File Type Risk': 'Use a PNG source file with transparency for best POD results.',
+    'Compression Artifact Risk': 'Use a cleaner PNG source before uploading.',
+    'Pixelation Risk': 'Use a higher-quality or less pixelated source image.',
+    'Tiny Text Risk': 'Enlarge small lettering before uploading.',
+    'Semi-Transparency Risk': 'Clean or flatten faded semi-transparent areas if needed.',
+    'White Edge / Halo Risk': 'Clean the design edges before uploading to dark shirts.',
+    'Low Contrast Risk': 'Increase contrast so details print clearly.',
+    // Main issue key for the grouped shirt checks is "Shirt Fit"; cover both labels.
+    'Shirt Fit': 'Choose shirt colours where the artwork has stronger contrast.',
+    'Shirt Colour Fit': 'Choose shirt colours where the artwork has stronger contrast.',
+  };
+
+  const showManualFixCard = Boolean(img) && Boolean(mainPick.item) && !autoFixableIssues.includes(mainIssue);
+  const manualFixMessage = manualFixMessages[mainIssue] ?? 'This issue needs a source-file fix before upload.';
+
   return (
     <div
       style={{
@@ -742,6 +773,22 @@ export default function ScanResultsPanel({
             >
               Run Auto Fix
             </button>
+          ) : null}
+
+          {showManualFixCard ? (
+            <div
+              style={{
+                padding: '10px 12px',
+                borderRadius: 12,
+                background: 'rgba(120,53,15,0.45)',
+                border: '1px solid rgba(253,186,116,0.45)',
+                display: 'grid',
+                gap: 4,
+              }}
+            >
+              <div style={{ fontWeight: 800, color: '#fdba74', fontSize: 14 }}>Manual Fix Needed</div>
+              <div style={{ fontSize: 13, lineHeight: 1.45, color: '#fde68a' }}>{manualFixMessage}</div>
+            </div>
           ) : null}
 
           {img && criticalItems.length === 0 && warningItems.length === 0 ? (
