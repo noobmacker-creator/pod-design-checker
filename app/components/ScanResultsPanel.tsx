@@ -914,6 +914,108 @@ export default function ScanResultsPanel({
         </div>
       </div>
       </div>
+
+      {/* Final Upload Check: beginner-friendly readiness checklist using existing scan data. */}
+      {(() => {
+        const fixedDownloaded = downloadMessage.includes('Download ready');
+        const noFailRemain = criticalItems.length === 0;
+        const hasWarnings = warningItems.length > 0;
+        const scanCompleted = Boolean(img) && checks.length > 0;
+        const autoFixNeeded = checks.some(
+          (item) => isAutoFixableLabel(item.label) && (item.status === 'fail' || item.status === 'warn'),
+        );
+
+        let finalLabel: string;
+        let finalColor: string;
+        let finalBg: string;
+        let finalMsg: string;
+        if (!img || !noFailRemain) {
+          finalLabel = 'NOT READY';
+          finalColor = '#fca5a5';
+          finalBg = 'rgba(127,29,29,0.45)';
+          finalMsg = 'Fix the main issue before uploading.';
+        } else if (fixedDownloaded && !hasWarnings) {
+          finalLabel = 'READY TO UPLOAD';
+          finalColor = '#86efac';
+          finalBg = 'rgba(20,83,45,0.55)';
+          finalMsg = 'Your fixed PNG is ready for POD upload.';
+        } else {
+          finalLabel = 'REVIEW FIRST';
+          finalColor = '#fde68a';
+          finalBg = 'rgba(120,53,15,0.45)';
+          finalMsg = 'Review the remaining warnings before uploading.';
+        }
+
+        const checklist = [
+          { label: 'Design uploaded', status: img ? 'pass' : 'fail' },
+          { label: 'Scan completed', status: scanCompleted ? 'pass' : 'fail' },
+          { label: 'Main issue reviewed', status: noFailRemain ? 'pass' : 'fail' },
+          {
+            label: 'Auto Fix applied if needed',
+            status: autoFixApplied ? 'pass' : autoFixNeeded ? 'warn' : 'pass',
+          },
+          { label: 'Warnings reviewed', status: hasWarnings ? 'warn' : 'pass' },
+          { label: 'Fixed PNG downloaded', status: fixedDownloaded ? 'pass' : 'warn' },
+        ];
+        const mark = (s: string) => (s === 'pass' ? '✓' : s === 'warn' ? '⚠' : '✕');
+        const markColor = (s: string) => (s === 'pass' ? '#86efac' : s === 'warn' ? '#fde68a' : '#fca5a5');
+
+        return (
+          <div
+            style={{
+              padding: 14,
+              borderRadius: 16,
+              background: 'rgba(2,6,23,0.92)',
+              border: '1px solid rgba(56,189,248,0.28)',
+              display: 'grid',
+              gap: 10,
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                gap: 10,
+                flexWrap: 'wrap',
+              }}
+            >
+              <div style={{ fontSize: 13, color: '#ffffff', fontWeight: 800, letterSpacing: 0.4 }}>
+                FINAL UPLOAD CHECK
+              </div>
+              <div
+                style={{
+                  padding: '6px 10px',
+                  borderRadius: 999,
+                  fontSize: 12,
+                  fontWeight: 800,
+                  color: finalColor,
+                  background: finalBg,
+                }}
+              >
+                {finalLabel}
+              </div>
+            </div>
+
+            <div style={{ fontSize: 13, lineHeight: 1.45, color: '#cbd5e1' }}>{finalMsg}</div>
+
+            <div style={{ display: 'grid', gap: 6 }}>
+              {checklist.map((c) => (
+                <div
+                  key={`final-check-${c.label}`}
+                  style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13 }}
+                >
+                  <span style={{ color: markColor(c.status), fontWeight: 800, width: 16 }}>
+                    {mark(c.status)}
+                  </span>
+                  <span style={{ color: '#e5e7eb' }}>{c.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
+
       {criticalActive.length > 0 ? (
         <Section
           title="Critical Issues"
