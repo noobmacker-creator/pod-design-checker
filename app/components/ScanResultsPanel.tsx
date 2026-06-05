@@ -934,28 +934,49 @@ export default function ScanResultsPanel({
           finalColor = '#fca5a5';
           finalBg = 'rgba(127,29,29,0.45)';
           finalMsg = 'Fix the main issue before uploading.';
-        } else if (fixedDownloaded && !hasWarnings) {
+        } else if (hasWarnings) {
+          finalLabel = 'REVIEW FIRST';
+          finalColor = '#fde68a';
+          finalBg = 'rgba(120,53,15,0.45)';
+          finalMsg = 'Review remaining warnings before upload.';
+        } else if (fixedDownloaded) {
           finalLabel = 'READY TO UPLOAD';
           finalColor = '#86efac';
           finalBg = 'rgba(20,83,45,0.55)';
           finalMsg = 'Your fixed PNG is ready for POD upload.';
         } else {
-          finalLabel = 'REVIEW FIRST';
-          finalColor = '#fde68a';
-          finalBg = 'rgba(120,53,15,0.45)';
-          finalMsg = 'Review the remaining warnings before uploading.';
+          finalLabel = 'READY TO DOWNLOAD';
+          finalColor = '#7dd3fc';
+          finalBg = 'rgba(7,89,133,0.50)';
+          finalMsg = 'No critical issues remain. Download the fixed PNG before uploading.';
         }
 
         const checklist = [
-          { label: 'Design uploaded', status: img ? 'pass' : 'fail' },
-          { label: 'Scan completed', status: scanCompleted ? 'pass' : 'fail' },
-          { label: 'Main issue reviewed', status: noFailRemain ? 'pass' : 'fail' },
+          { label: img ? 'Design uploaded' : 'Upload a design', status: img ? 'pass' : 'fail' },
           {
-            label: 'Auto Fix applied if needed',
+            label: scanCompleted ? 'Scan completed' : 'Scan not completed',
+            status: scanCompleted ? 'pass' : 'fail',
+          },
+          {
+            label: noFailRemain ? 'Main issue reviewed' : 'Fix main issue first',
+            status: noFailRemain ? 'pass' : 'fail',
+          },
+          {
+            label: autoFixApplied
+              ? 'Auto Fix applied'
+              : autoFixNeeded
+              ? 'Run Auto Fix if needed'
+              : 'Auto Fix not needed',
             status: autoFixApplied ? 'pass' : autoFixNeeded ? 'warn' : 'pass',
           },
-          { label: 'Warnings reviewed', status: hasWarnings ? 'warn' : 'pass' },
-          { label: 'Fixed PNG downloaded', status: fixedDownloaded ? 'pass' : 'warn' },
+          {
+            label: hasWarnings ? 'Review remaining warnings' : 'No warnings remaining',
+            status: hasWarnings ? 'warn' : 'pass',
+          },
+          {
+            label: fixedDownloaded ? 'Fixed PNG downloaded' : 'Download fixed PNG before upload',
+            status: fixedDownloaded ? 'pass' : img ? 'warn' : 'fail',
+          },
         ];
         const mark = (s: string) => (s === 'pass' ? '✓' : s === 'warn' ? '⚠' : '✕');
         const markColor = (s: string) => (s === 'pass' ? '#86efac' : s === 'warn' ? '#fde68a' : '#fca5a5');
