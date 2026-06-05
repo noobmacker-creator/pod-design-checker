@@ -100,6 +100,9 @@ export default function IssueBucketsPanel({
           <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 800 }}>
             Standard Apparel Export
           </div>
+          <div style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.4 }}>
+            Best for: general POD shirt uploads.
+          </div>
           <div style={{ fontSize: 12, color: '#bae6fd', fontWeight: 800 }}>
             {standardTargetLine}
           </div>
@@ -131,6 +134,9 @@ export default function IssueBucketsPanel({
         >
           <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 800 }}>
             Redbubble Export
+          </div>
+          <div style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.4 }}>
+            Best for: Redbubble apparel presets.
           </div>
           <div style={{ fontSize: 12, color: '#cbd5e1', fontWeight: 800 }}>
             Export Size
@@ -195,6 +201,9 @@ export default function IssueBucketsPanel({
           <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 800 }}>
             Printful Export
           </div>
+          <div style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.4 }}>
+            Best for: Printful DTG/DTF apparel.
+          </div>
           <div style={{ fontSize: 12, color: '#cbd5e1', fontWeight: 800 }}>
             Export Size
           </div>
@@ -257,6 +266,9 @@ export default function IssueBucketsPanel({
         >
           <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 800 }}>
             TeePublic Export
+          </div>
+          <div style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.4 }}>
+            Best for: TeePublic all-products upload.
           </div>
           <div style={{ fontSize: 12, color: '#bae6fd', fontWeight: 800 }}>
             {teePublicTargetLine}
