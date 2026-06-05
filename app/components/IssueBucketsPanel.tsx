@@ -106,7 +106,10 @@ export default function IssueBucketsPanel({
           Download Standard Apparel PNG — 4200 × 4800
         </button>
         <div style={{ fontSize: 12, color: '#cbd5e1', fontWeight: 800, marginTop: 2 }}>
-          Redbubble Export
+          Redbubble Export Size
+        </div>
+        <div style={{ fontSize: 11, color: '#94a3b8' }}>
+          Choose size, then press the blue download button.
         </div>
         <select
           value={selectedRedbubblePreset}
@@ -150,7 +153,10 @@ export default function IssueBucketsPanel({
           {selectedRedbubbleDownloadLabel}
         </button>
         <div style={{ fontSize: 12, color: '#cbd5e1', fontWeight: 800, marginTop: 2 }}>
-          Printful Export
+          Printful Export Size
+        </div>
+        <div style={{ fontSize: 11, color: '#94a3b8' }}>
+          Choose size, then press the blue download button.
         </div>
         <select
           value={selectedPrintfulPreset}
