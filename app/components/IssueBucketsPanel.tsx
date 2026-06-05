@@ -90,6 +90,26 @@ export default function IssueBucketsPanel({
     { id: 'teepublic', label: 'TeePublic' },
   ];
 
+  const uploadTargetGuidance: Record<UploadTarget, { title: string; message: string }> = {
+    standard: {
+      title: 'Standard POD Focus',
+      message:
+        'Best general export for most POD shirt uploads. Use this when you are not sure which platform preset you need.',
+    },
+    redbubble: {
+      title: 'Redbubble Focus',
+      message: 'Use the Redbubble export when uploading apparel designs to Redbubble.',
+    },
+    printful: {
+      title: 'Printful Focus',
+      message: 'Use the Printful DTG/DTF export when uploading apparel designs to Printful.',
+    },
+    teepublic: {
+      title: 'TeePublic Focus',
+      message: 'Use the TeePublic export for TeePublic all-products upload.',
+    },
+  };
+
   const baseBoxStyle: React.CSSProperties = {
     border: '1px solid rgba(148, 163, 184, 0.22)',
     borderRadius: 14,
@@ -479,6 +499,23 @@ export default function IssueBucketsPanel({
               </button>
             );
           })}
+        </div>
+        <div
+          style={{
+            marginTop: 10,
+            padding: 10,
+            borderRadius: 12,
+            background: 'rgba(37, 99, 235, 0.10)',
+            border: '1px solid rgba(147, 197, 253, 0.25)',
+            color: '#cbd5e1',
+            fontSize: 12,
+            lineHeight: 1.45,
+          }}
+        >
+          <div style={{ fontWeight: 800, color: '#bfdbfe', marginBottom: 4 }}>
+            {uploadTargetGuidance[uploadTarget].title}
+          </div>
+          <div>{uploadTargetGuidance[uploadTarget].message}</div>
         </div>
       </div>
       {isScanning && (
