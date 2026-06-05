@@ -90,6 +90,25 @@ export default function IssueBucketsPanel({
           Choose a platform preset or download the standard apparel PNG.
         </div>
       </div>
+      <div
+        style={{
+          marginBottom: 12,
+          fontSize: 12,
+          color: img ? '#86efac' : '#facc15',
+          fontWeight: 800,
+          lineHeight: 1.4,
+          padding: '8px 10px',
+          borderRadius: 10,
+          background: img ? 'rgba(22, 163, 74, 0.12)' : 'rgba(250, 204, 21, 0.12)',
+          border: img
+            ? '1px solid rgba(134, 239, 172, 0.25)'
+            : '1px solid rgba(250, 204, 21, 0.25)',
+        }}
+      >
+        {img
+          ? 'Ready to export. Choose a size, then press the blue download button.'
+          : 'Upload a design to enable downloads.'}
+      </div>
       {isScanning && (
         <div
           style={{
