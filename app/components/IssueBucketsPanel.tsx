@@ -80,6 +80,40 @@ export default function IssueBucketsPanel({
     letterSpacing: '0.04em',
   };
 
+  type UploadTarget = 'standard' | 'redbubble' | 'printful' | 'teepublic';
+  const [uploadTarget, setUploadTarget] = React.useState<UploadTarget>('standard');
+
+  const uploadTargetOptions: { id: UploadTarget; label: string }[] = [
+    { id: 'standard', label: 'Standard POD' },
+    { id: 'redbubble', label: 'Redbubble' },
+    { id: 'printful', label: 'Printful' },
+    { id: 'teepublic', label: 'TeePublic' },
+  ];
+
+  const baseBoxStyle: React.CSSProperties = {
+    border: '1px solid rgba(148, 163, 184, 0.22)',
+    borderRadius: 14,
+    padding: 12,
+    background: 'rgba(15, 23, 42, 0.55)',
+    display: 'grid',
+    gap: 8,
+  };
+
+  const selectedBoxStyle: React.CSSProperties = {
+    border: '1px solid rgba(96, 165, 250, 0.75)',
+    boxShadow: '0 0 0 2px rgba(37, 99, 235, 0.20)',
+    background: 'rgba(37, 99, 235, 0.10)',
+  };
+
+  const getBoxStyle = (target: UploadTarget): React.CSSProperties =>
+    uploadTarget === target ? { ...baseBoxStyle, ...selectedBoxStyle } : baseBoxStyle;
+
+  const recommendedLineStyle: React.CSSProperties = {
+    fontSize: 11,
+    fontWeight: 900,
+    color: '#bfdbfe',
+  };
+
   return (
     <div
       style={{
@@ -144,6 +178,44 @@ export default function IssueBucketsPanel({
           <li>TeePublic: use for TeePublic all-products upload</li>
         </ul>
       </div>
+      <div
+        style={{
+          marginBottom: 12,
+          padding: 10,
+          borderRadius: 12,
+          background: 'rgba(37, 99, 235, 0.10)',
+          border: '1px solid rgba(147, 197, 253, 0.25)',
+        }}
+      >
+        <div style={{ fontWeight: 800, color: '#bfdbfe', fontSize: 12, marginBottom: 6 }}>
+          Where are you uploading?
+        </div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+          {uploadTargetOptions.map((option) => {
+            const isSelected = uploadTarget === option.id;
+            return (
+              <button
+                key={option.id}
+                onClick={() => setUploadTarget(option.id)}
+                style={{
+                  fontSize: 12,
+                  fontWeight: 800,
+                  borderRadius: 999,
+                  padding: '6px 12px',
+                  cursor: 'pointer',
+                  color: isSelected ? '#ffffff' : '#cbd5e1',
+                  background: isSelected ? '#2563eb' : 'rgba(255,255,255,0.06)',
+                  border: isSelected
+                    ? '1px solid rgba(96, 165, 250, 0.75)'
+                    : '1px solid rgba(148, 163, 184, 0.25)',
+                }}
+              >
+                {option.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
       {isScanning && (
         <div
           style={{
@@ -164,19 +236,13 @@ export default function IssueBucketsPanel({
 
       <div style={{ marginBottom: 14, display: 'grid', gap: 12 }}>
         {/* Standard Apparel box */}
-        <div
-          style={{
-            border: '1px solid rgba(148, 163, 184, 0.22)',
-            borderRadius: 14,
-            padding: 12,
-            background: 'rgba(15, 23, 42, 0.55)',
-            display: 'grid',
-            gap: 8,
-          }}
-        >
+        <div style={getBoxStyle('standard')}>
           <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 800 }}>
             Standard Apparel Export
           </div>
+          {uploadTarget === 'standard' && (
+            <div style={recommendedLineStyle}>Recommended for your selected platform</div>
+          )}
           <div>
             <span
               style={{
@@ -230,19 +296,13 @@ export default function IssueBucketsPanel({
         </div>
 
         {/* Redbubble box */}
-        <div
-          style={{
-            border: '1px solid rgba(148, 163, 184, 0.22)',
-            borderRadius: 14,
-            padding: 12,
-            background: 'rgba(15, 23, 42, 0.55)',
-            display: 'grid',
-            gap: 8,
-          }}
-        >
+        <div style={getBoxStyle('redbubble')}>
           <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 800 }}>
             Redbubble Export
           </div>
+          {uploadTarget === 'redbubble' && (
+            <div style={recommendedLineStyle}>Recommended for your selected platform</div>
+          )}
           <div style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.4 }}>
             Best for: Redbubble apparel presets.
           </div>
@@ -309,19 +369,13 @@ export default function IssueBucketsPanel({
         </div>
 
         {/* Printful box */}
-        <div
-          style={{
-            border: '1px solid rgba(148, 163, 184, 0.22)',
-            borderRadius: 14,
-            padding: 12,
-            background: 'rgba(15, 23, 42, 0.55)',
-            display: 'grid',
-            gap: 8,
-          }}
-        >
+        <div style={getBoxStyle('printful')}>
           <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 800 }}>
             Printful Export
           </div>
+          {uploadTarget === 'printful' && (
+            <div style={recommendedLineStyle}>Recommended for your selected platform</div>
+          )}
           <div style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.4 }}>
             Best for: Printful DTG/DTF apparel.
           </div>
@@ -388,19 +442,13 @@ export default function IssueBucketsPanel({
         </div>
 
         {/* TeePublic box */}
-        <div
-          style={{
-            border: '1px solid rgba(148, 163, 184, 0.22)',
-            borderRadius: 14,
-            padding: 12,
-            background: 'rgba(15, 23, 42, 0.55)',
-            display: 'grid',
-            gap: 8,
-          }}
-        >
+        <div style={getBoxStyle('teepublic')}>
           <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 800 }}>
             TeePublic Export
           </div>
+          {uploadTarget === 'teepublic' && (
+            <div style={recommendedLineStyle}>Recommended for your selected platform</div>
+          )}
           <div style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.4 }}>
             Best for: TeePublic all-products upload.
           </div>
