@@ -49,6 +49,29 @@ export default function IssueBucketsPanel({
   handleDownloadPrintfulPng,
   handleDownloadTeePublicPng,
 }: IssueBucketsPanelProps) {
+  const toSafeSlug = (value: string) =>
+    value
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+
+  const selectedRedbubblePresetData =
+    redbubblePresets.find((preset) => preset.id === selectedRedbubblePreset) ?? redbubblePresets[0];
+  const selectedPrintfulPresetData =
+    printfulPresets.find((preset) => preset.id === selectedPrintfulPreset) ?? printfulPresets[0];
+
+  const standardFileName = 'pod-checker-standard-apparel-4200x4800.png';
+  const redbubbleFileName = `${toSafeSlug(selectedRedbubblePresetData.label) || 'pod-checker-export'}-${selectedRedbubblePresetData.width}x${selectedRedbubblePresetData.height}.png`;
+  const printfulFileName = `${toSafeSlug(selectedPrintfulPresetData.label) || 'pod-checker-export'}-${selectedPrintfulPresetData.width}x${selectedPrintfulPresetData.height}.png`;
+  const teePublicFileName = 'teepublic-5000x5500.png';
+
+  const fileNameLineStyle: React.CSSProperties = {
+    fontSize: 11,
+    color: '#94a3b8',
+    lineHeight: 1.4,
+    wordBreak: 'break-all',
+  };
+
   return (
     <div
       style={{
@@ -129,6 +152,7 @@ export default function IssueBucketsPanel({
           >
             Download Standard Apparel PNG — 4200 × 4800
           </button>
+          <div style={fileNameLineStyle}>File name: {standardFileName}</div>
         </div>
 
         {/* Redbubble box */}
@@ -205,6 +229,7 @@ export default function IssueBucketsPanel({
           >
             {selectedRedbubbleDownloadLabel}
           </button>
+          <div style={fileNameLineStyle}>File name: {redbubbleFileName}</div>
         </div>
 
         {/* Printful box */}
@@ -281,6 +306,7 @@ export default function IssueBucketsPanel({
           >
             {selectedPrintfulDownloadLabel}
           </button>
+          <div style={fileNameLineStyle}>File name: {printfulFileName}</div>
         </div>
 
         {/* TeePublic box */}
@@ -326,6 +352,7 @@ export default function IssueBucketsPanel({
           >
             {teePublicDownloadLabel}
           </button>
+          <div style={fileNameLineStyle}>File name: {teePublicFileName}</div>
         </div>
       </div>
 
