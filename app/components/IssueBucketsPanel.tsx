@@ -233,13 +233,13 @@ export default function IssueBucketsPanel({
         aria-disabled={!img}
         style={{
           width: '100%',
-          background: '#2563eb',
+          background: '#3b82f6',
           color: '#ffffff',
-          fontWeight: 800,
+          fontWeight: 900,
           borderRadius: 12,
           padding: '12px 16px',
-          opacity: img ? 1 : 0.55,
-          boxShadow: img ? '0 10px 20px rgba(37, 99, 235, 0.30)' : 'none',
+          boxShadow: '0 0 0 1px rgba(147, 197, 253, 0.35), 0 10px 22px rgba(59, 130, 246, 0.35)',
+          opacity: img ? 1 : 0.65,
           cursor: img ? 'pointer' : 'not-allowed',
         }}
       >
@@ -307,13 +307,13 @@ export default function IssueBucketsPanel({
         aria-disabled={!img}
         style={{
           width: '100%',
-          background: '#2563eb',
+          background: '#3b82f6',
           color: '#ffffff',
-          fontWeight: 800,
+          fontWeight: 900,
           borderRadius: 12,
           padding: '12px 16px',
-          opacity: img ? 1 : 0.55,
-          boxShadow: img ? '0 10px 20px rgba(37, 99, 235, 0.30)' : 'none',
+          boxShadow: '0 0 0 1px rgba(147, 197, 253, 0.35), 0 10px 22px rgba(59, 130, 246, 0.35)',
+          opacity: img ? 1 : 0.65,
           cursor: img ? 'pointer' : 'not-allowed',
         }}
       >
@@ -349,13 +349,13 @@ export default function IssueBucketsPanel({
         aria-disabled={!img}
         style={{
           width: '100%',
-          background: '#2563eb',
+          background: '#3b82f6',
           color: '#ffffff',
-          fontWeight: 800,
+          fontWeight: 900,
           borderRadius: 12,
           padding: '12px 16px',
-          opacity: img ? 1 : 0.55,
-          boxShadow: img ? '0 10px 20px rgba(37, 99, 235, 0.30)' : 'none',
+          boxShadow: '0 0 0 1px rgba(147, 197, 253, 0.35), 0 10px 22px rgba(59, 130, 246, 0.35)',
+          opacity: img ? 1 : 0.65,
           cursor: img ? 'pointer' : 'not-allowed',
         }}
       >
