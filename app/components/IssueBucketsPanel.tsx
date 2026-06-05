@@ -85,139 +85,196 @@ export default function IssueBucketsPanel({
         </div>
       )}
 
-      <div style={{ marginBottom: 14, display: 'grid', gap: 8 }}>
-        <div style={{ fontSize: 12, color: '#bae6fd', fontWeight: 800 }}>
-          {standardTargetLine}
-        </div>
-        <div style={{ fontSize: 12, color: '#cbd5e1', fontWeight: 800 }}>
-          Standard Export
-        </div>
-        <div style={{ fontSize: 12, color: '#cbd5e1' }}>
-          Generic 4200 × 4800 apparel PNG, not tied to one company.
-        </div>
-        <button
-          onClick={handleDownloadApparelPng}
-          disabled={!img}
+      <div style={{ marginBottom: 14, display: 'grid', gap: 12 }}>
+        {/* Standard Apparel box */}
+        <div
           style={{
-            width: '100%',
-            background: '#2563eb',
+            border: '1px solid rgba(148, 163, 184, 0.22)',
+            borderRadius: 14,
+            padding: 12,
+            background: 'rgba(15, 23, 42, 0.55)',
+            display: 'grid',
+            gap: 8,
           }}
         >
-          Download Standard Apparel PNG — 4200 × 4800
-        </button>
-        <div style={{ fontSize: 12, color: '#cbd5e1', fontWeight: 800, marginTop: 2 }}>
-          Redbubble Export Size
+          <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 800 }}>
+            Standard Apparel Export
+          </div>
+          <div style={{ fontSize: 12, color: '#bae6fd', fontWeight: 800 }}>
+            {standardTargetLine}
+          </div>
+          <div style={{ fontSize: 12, color: '#cbd5e1' }}>
+            Generic 4200 × 4800 apparel PNG, not tied to one company.
+          </div>
+          <button
+            onClick={handleDownloadApparelPng}
+            disabled={!img}
+            style={{
+              width: '100%',
+              background: '#2563eb',
+            }}
+          >
+            Download Standard Apparel PNG — 4200 × 4800
+          </button>
         </div>
-        <div style={{ fontSize: 11, color: '#94a3b8' }}>
-          Choose size, then press the blue download button.
-        </div>
-        <select
-          value={selectedRedbubblePreset}
-          onChange={(e) => {
-            setSelectedRedbubblePreset(e.target.value as RedbubblePresetId);
-            setActivePresetSystem('redbubble');
-          }}
+
+        {/* Redbubble box */}
+        <div
           style={{
-            width: '100%',
-            padding: '10px 12px',
-            borderRadius: 10,
-            border: '1px solid rgba(255,255,255,0.12)',
-            background: 'rgba(255,255,255,0.06)',
-            color: '#fff',
-            fontSize: 14,
-            fontWeight: 600,
-            outline: 'none',
-            boxSizing: 'border-box',
+            border: '1px solid rgba(148, 163, 184, 0.22)',
+            borderRadius: 14,
+            padding: 12,
+            background: 'rgba(15, 23, 42, 0.55)',
+            display: 'grid',
+            gap: 8,
           }}
         >
-          {redbubblePresets.map((preset) => (
-            <option key={preset.id} value={preset.id}>
-              {preset.label} — {preset.width} × {preset.height}
-            </option>
-          ))}
-        </select>
-        <div style={{ fontSize: 12, color: '#bae6fd', fontWeight: 800 }}>
-          {redbubbleTargetLine}
+          <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 800 }}>
+            Redbubble Export
+          </div>
+          <div style={{ fontSize: 12, color: '#cbd5e1', fontWeight: 800 }}>
+            Export Size
+          </div>
+          <div style={{ fontSize: 11, color: '#94a3b8' }}>
+            Choose size, then press the blue download button.
+          </div>
+          <select
+            value={selectedRedbubblePreset}
+            onChange={(e) => {
+              setSelectedRedbubblePreset(e.target.value as RedbubblePresetId);
+              setActivePresetSystem('redbubble');
+            }}
+            style={{
+              width: '100%',
+              padding: '10px 12px',
+              borderRadius: 10,
+              border: '1px solid rgba(255,255,255,0.12)',
+              background: 'rgba(255,255,255,0.06)',
+              color: '#fff',
+              fontSize: 14,
+              fontWeight: 600,
+              outline: 'none',
+              boxSizing: 'border-box',
+            }}
+          >
+            {redbubblePresets.map((preset) => (
+              <option key={preset.id} value={preset.id}>
+                {preset.label} — {preset.width} × {preset.height}
+              </option>
+            ))}
+          </select>
+          <div style={{ fontSize: 12, color: '#bae6fd', fontWeight: 800 }}>
+            {redbubbleTargetLine}
+          </div>
+          <div style={{ fontSize: 12, color: '#cbd5e1' }}>
+            Resized for the selected Redbubble preset.
+          </div>
+          <button
+            onClick={handleDownloadRedbubblePng}
+            disabled={!img}
+            style={{
+              width: '100%',
+              background: '#1d4ed8',
+            }}
+          >
+            {selectedRedbubbleDownloadLabel}
+          </button>
         </div>
-        <div style={{ fontSize: 12, color: '#cbd5e1' }}>
-          Resized for the selected Redbubble preset.
-        </div>
-        <button
-          onClick={handleDownloadRedbubblePng}
-          disabled={!img}
+
+        {/* Printful box */}
+        <div
           style={{
-            width: '100%',
-            background: '#1d4ed8',
+            border: '1px solid rgba(148, 163, 184, 0.22)',
+            borderRadius: 14,
+            padding: 12,
+            background: 'rgba(15, 23, 42, 0.55)',
+            display: 'grid',
+            gap: 8,
           }}
         >
-          {selectedRedbubbleDownloadLabel}
-        </button>
-        <div style={{ fontSize: 12, color: '#cbd5e1', fontWeight: 800, marginTop: 2 }}>
-          Printful Export Size
+          <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 800 }}>
+            Printful Export
+          </div>
+          <div style={{ fontSize: 12, color: '#cbd5e1', fontWeight: 800 }}>
+            Export Size
+          </div>
+          <div style={{ fontSize: 11, color: '#94a3b8' }}>
+            Choose size, then press the blue download button.
+          </div>
+          <select
+            value={selectedPrintfulPreset}
+            onChange={(e) => {
+              setSelectedPrintfulPreset(e.target.value as PrintfulPresetId);
+              setActivePresetSystem('printful');
+            }}
+            style={{
+              width: '100%',
+              padding: '10px 12px',
+              borderRadius: 10,
+              border: '1px solid rgba(255,255,255,0.12)',
+              background: 'rgba(255,255,255,0.06)',
+              color: '#fff',
+              fontSize: 14,
+              fontWeight: 600,
+              outline: 'none',
+              boxSizing: 'border-box',
+            }}
+          >
+            {printfulPresets.map((preset) => (
+              <option key={preset.id} value={preset.id}>
+                {preset.label} — {preset.width} × {preset.height}
+              </option>
+            ))}
+          </select>
+          <div style={{ fontSize: 12, color: '#bae6fd', fontWeight: 800 }}>
+            {printfulTargetLine}
+          </div>
+          <div style={{ fontSize: 12, color: '#cbd5e1' }}>
+            Resized for the selected Printful preset.
+          </div>
+          <button
+            onClick={handleDownloadPrintfulPng}
+            disabled={!img}
+            style={{
+              width: '100%',
+              background: '#1e40af',
+            }}
+          >
+            {selectedPrintfulDownloadLabel}
+          </button>
         </div>
-        <div style={{ fontSize: 11, color: '#94a3b8' }}>
-          Choose size, then press the blue download button.
-        </div>
-        <select
-          value={selectedPrintfulPreset}
-          onChange={(e) => {
-            setSelectedPrintfulPreset(e.target.value as PrintfulPresetId);
-            setActivePresetSystem('printful');
-          }}
+
+        {/* TeePublic box */}
+        <div
           style={{
-            width: '100%',
-            padding: '10px 12px',
-            borderRadius: 10,
-            border: '1px solid rgba(255,255,255,0.12)',
-            background: 'rgba(255,255,255,0.06)',
-            color: '#fff',
-            fontSize: 14,
-            fontWeight: 600,
-            outline: 'none',
-            boxSizing: 'border-box',
+            border: '1px solid rgba(148, 163, 184, 0.22)',
+            borderRadius: 14,
+            padding: 12,
+            background: 'rgba(15, 23, 42, 0.55)',
+            display: 'grid',
+            gap: 8,
           }}
         >
-          {printfulPresets.map((preset) => (
-            <option key={preset.id} value={preset.id}>
-              {preset.label} — {preset.width} × {preset.height}
-            </option>
-          ))}
-        </select>
-        <div style={{ fontSize: 12, color: '#bae6fd', fontWeight: 800 }}>
-          {printfulTargetLine}
+          <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 800 }}>
+            TeePublic Export
+          </div>
+          <div style={{ fontSize: 12, color: '#bae6fd', fontWeight: 800 }}>
+            {teePublicTargetLine}
+          </div>
+          <div style={{ fontSize: 12, color: '#cbd5e1' }}>
+            Resized for TeePublic all-products export.
+          </div>
+          <button
+            onClick={handleDownloadTeePublicPng}
+            disabled={!img}
+            style={{
+              width: '100%',
+              background: '#1d4ed8',
+            }}
+          >
+            {teePublicDownloadLabel}
+          </button>
         </div>
-        <div style={{ fontSize: 12, color: '#cbd5e1' }}>
-          Resized for the selected Printful preset.
-        </div>
-        <button
-          onClick={handleDownloadPrintfulPng}
-          disabled={!img}
-          style={{
-            width: '100%',
-            background: '#1e40af',
-          }}
-        >
-          {selectedPrintfulDownloadLabel}
-        </button>
-        <div style={{ fontSize: 12, color: '#cbd5e1', fontWeight: 800, marginTop: 2 }}>
-          TeePublic Export
-        </div>
-        <div style={{ fontSize: 12, color: '#bae6fd', fontWeight: 800 }}>
-          {teePublicTargetLine}
-        </div>
-        <div style={{ fontSize: 12, color: '#cbd5e1' }}>
-          Resized for TeePublic all-products export.
-        </div>
-        <button
-          onClick={handleDownloadTeePublicPng}
-          disabled={!img}
-          style={{
-            width: '100%',
-            background: '#1d4ed8',
-          }}
-        >
-          {teePublicDownloadLabel}
-        </button>
       </div>
 
     </div>
