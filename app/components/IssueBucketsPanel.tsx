@@ -142,6 +142,25 @@ export default function IssueBucketsPanel({
           <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 800 }}>
             Standard Apparel Export
           </div>
+          <div>
+            <span
+              style={{
+                display: 'inline-block',
+                fontSize: 11,
+                fontWeight: 900,
+                color: '#bbf7d0',
+                background: 'rgba(22, 163, 74, 0.18)',
+                border: '1px solid rgba(134, 239, 172, 0.30)',
+                borderRadius: 999,
+                padding: '4px 8px',
+              }}
+            >
+              Recommended first
+            </span>
+          </div>
+          <div style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.4 }}>
+            Best starting point for most POD shirt uploads.
+          </div>
           <div style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.4 }}>
             Best for: general POD shirt uploads.
           </div>
