@@ -72,6 +72,14 @@ export default function IssueBucketsPanel({
     wordBreak: 'break-all',
   };
 
+  const stepLabelStyle: React.CSSProperties = {
+    fontSize: 11,
+    fontWeight: 900,
+    color: '#93c5fd',
+    textTransform: 'uppercase',
+    letterSpacing: '0.04em',
+  };
+
   return (
     <div
       style={{
@@ -170,6 +178,7 @@ export default function IssueBucketsPanel({
           <div style={{ fontSize: 12, color: '#cbd5e1' }}>
             Generic 4200 × 4800 apparel PNG, not tied to one company.
           </div>
+          <div style={stepLabelStyle}>Download PNG</div>
           <button
             onClick={() => {
               if (!img) return;
@@ -210,6 +219,7 @@ export default function IssueBucketsPanel({
           <div style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.4 }}>
             Best for: Redbubble apparel presets.
           </div>
+          <div style={stepLabelStyle}>Step 1: Choose export size</div>
           <div style={{ fontSize: 12, color: '#cbd5e1', fontWeight: 800 }}>
             Export Size
           </div>
@@ -247,6 +257,7 @@ export default function IssueBucketsPanel({
           <div style={{ fontSize: 12, color: '#cbd5e1' }}>
             Resized for the selected Redbubble preset.
           </div>
+          <div style={stepLabelStyle}>Step 2: Download PNG</div>
           <button
             onClick={() => {
               if (!img) return;
@@ -287,6 +298,7 @@ export default function IssueBucketsPanel({
           <div style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.4 }}>
             Best for: Printful DTG/DTF apparel.
           </div>
+          <div style={stepLabelStyle}>Step 1: Choose export size</div>
           <div style={{ fontSize: 12, color: '#cbd5e1', fontWeight: 800 }}>
             Export Size
           </div>
@@ -324,6 +336,7 @@ export default function IssueBucketsPanel({
           <div style={{ fontSize: 12, color: '#cbd5e1' }}>
             Resized for the selected Printful preset.
           </div>
+          <div style={stepLabelStyle}>Step 2: Download PNG</div>
           <button
             onClick={() => {
               if (!img) return;
@@ -370,6 +383,7 @@ export default function IssueBucketsPanel({
           <div style={{ fontSize: 12, color: '#cbd5e1' }}>
             Resized for TeePublic all-products export.
           </div>
+          <div style={stepLabelStyle}>Download PNG</div>
           <button
             onClick={() => {
               if (!img) return;
