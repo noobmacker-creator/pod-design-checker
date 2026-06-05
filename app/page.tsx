@@ -1784,6 +1784,7 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
 
   function handleDownloadApparelPng() {
     downloadPngForSize(CANVAS_W, CANVAS_H, 'DTG/DTF Apparel', 'pod-checker-standard-apparel');
+    setDownloadMessage('Download ready: Standard 4200 × 4800 apparel PNG exported.');
   }
 
   function handleDownloadRedbubblePng() {
@@ -1794,6 +1795,7 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
       'Redbubble',
       selectedRedbubblePresetData.label
     );
+    setDownloadMessage('Download ready: Redbubble apparel PNG exported.');
   }
 
   function handleDownloadPrintfulPng() {
@@ -1804,6 +1806,7 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
       'Printful',
       selectedPrintfulPresetData.label
     );
+    setDownloadMessage('Download ready: Printful DTG/DTF apparel PNG exported.');
   }
 
   function handleDownloadTeePublicPng() {
@@ -1814,6 +1817,7 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
       'TeePublic All Products',
       'teepublic'
     );
+    setDownloadMessage('Download ready: TeePublic PNG exported.');
   }
 
   return (

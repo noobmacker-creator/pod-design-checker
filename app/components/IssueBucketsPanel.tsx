@@ -110,11 +110,21 @@ export default function IssueBucketsPanel({
             Generic 4200 × 4800 apparel PNG, not tied to one company.
           </div>
           <button
-            onClick={handleDownloadApparelPng}
-            disabled={!img}
+            onClick={() => {
+              if (!img) return;
+              handleDownloadApparelPng();
+            }}
+            aria-disabled={!img}
             style={{
               width: '100%',
               background: '#2563eb',
+              color: '#ffffff',
+              fontWeight: 800,
+              borderRadius: 12,
+              padding: '12px 16px',
+              opacity: img ? 1 : 0.55,
+              boxShadow: img ? '0 10px 20px rgba(37, 99, 235, 0.30)' : 'none',
+              cursor: img ? 'pointer' : 'not-allowed',
             }}
           >
             Download Standard Apparel PNG — 4200 × 4800
@@ -176,11 +186,21 @@ export default function IssueBucketsPanel({
             Resized for the selected Redbubble preset.
           </div>
           <button
-            onClick={handleDownloadRedbubblePng}
-            disabled={!img}
+            onClick={() => {
+              if (!img) return;
+              handleDownloadRedbubblePng();
+            }}
+            aria-disabled={!img}
             style={{
               width: '100%',
-              background: '#1d4ed8',
+              background: '#2563eb',
+              color: '#ffffff',
+              fontWeight: 800,
+              borderRadius: 12,
+              padding: '12px 16px',
+              opacity: img ? 1 : 0.55,
+              boxShadow: img ? '0 10px 20px rgba(37, 99, 235, 0.30)' : 'none',
+              cursor: img ? 'pointer' : 'not-allowed',
             }}
           >
             {selectedRedbubbleDownloadLabel}
@@ -242,11 +262,21 @@ export default function IssueBucketsPanel({
             Resized for the selected Printful preset.
           </div>
           <button
-            onClick={handleDownloadPrintfulPng}
-            disabled={!img}
+            onClick={() => {
+              if (!img) return;
+              handleDownloadPrintfulPng();
+            }}
+            aria-disabled={!img}
             style={{
               width: '100%',
-              background: '#1e40af',
+              background: '#2563eb',
+              color: '#ffffff',
+              fontWeight: 800,
+              borderRadius: 12,
+              padding: '12px 16px',
+              opacity: img ? 1 : 0.55,
+              boxShadow: img ? '0 10px 20px rgba(37, 99, 235, 0.30)' : 'none',
+              cursor: img ? 'pointer' : 'not-allowed',
             }}
           >
             {selectedPrintfulDownloadLabel}
@@ -277,11 +307,21 @@ export default function IssueBucketsPanel({
             Resized for TeePublic all-products export.
           </div>
           <button
-            onClick={handleDownloadTeePublicPng}
-            disabled={!img}
+            onClick={() => {
+              if (!img) return;
+              handleDownloadTeePublicPng();
+            }}
+            aria-disabled={!img}
             style={{
               width: '100%',
-              background: '#1d4ed8',
+              background: '#2563eb',
+              color: '#ffffff',
+              fontWeight: 800,
+              borderRadius: 12,
+              padding: '12px 16px',
+              opacity: img ? 1 : 0.55,
+              boxShadow: img ? '0 10px 20px rgba(37, 99, 235, 0.30)' : 'none',
+              cursor: img ? 'pointer' : 'not-allowed',
             }}
           >
             {teePublicDownloadLabel}
