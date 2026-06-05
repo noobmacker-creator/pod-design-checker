@@ -114,6 +114,271 @@ export default function IssueBucketsPanel({
     color: '#bfdbfe',
   };
 
+  const renderStandardExportBox = () => (
+    <div key="standard" style={getBoxStyle('standard')}>
+      <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 800 }}>
+        Standard Apparel Export
+      </div>
+      {uploadTarget === 'standard' && (
+        <div style={recommendedLineStyle}>Recommended for your selected platform</div>
+      )}
+      <div>
+        <span
+          style={{
+            display: 'inline-block',
+            fontSize: 11,
+            fontWeight: 900,
+            color: '#bbf7d0',
+            background: 'rgba(22, 163, 74, 0.18)',
+            border: '1px solid rgba(134, 239, 172, 0.30)',
+            borderRadius: 999,
+            padding: '4px 8px',
+          }}
+        >
+          Recommended first
+        </span>
+      </div>
+      <div style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.4 }}>
+        Best starting point for most POD shirt uploads.
+      </div>
+      <div style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.4 }}>
+        Best for: general POD shirt uploads.
+      </div>
+      <div style={{ fontSize: 12, color: '#bae6fd', fontWeight: 800 }}>
+        {standardTargetLine}
+      </div>
+      <div style={{ fontSize: 12, color: '#cbd5e1' }}>
+        Generic 4200 × 4800 apparel PNG, not tied to one company.
+      </div>
+      <div style={stepLabelStyle}>Download PNG</div>
+      <button
+        onClick={() => {
+          if (!img) return;
+          handleDownloadApparelPng();
+        }}
+        aria-disabled={!img}
+        style={{
+          width: '100%',
+          background: '#2563eb',
+          color: '#ffffff',
+          fontWeight: 800,
+          borderRadius: 12,
+          padding: '12px 16px',
+          opacity: img ? 1 : 0.55,
+          boxShadow: img ? '0 10px 20px rgba(37, 99, 235, 0.30)' : 'none',
+          cursor: img ? 'pointer' : 'not-allowed',
+        }}
+      >
+        Download Standard Apparel PNG — 4200 × 4800
+      </button>
+      <div style={fileNameLineStyle}>File name: {standardFileName}</div>
+    </div>
+  );
+
+  const renderRedbubbleExportBox = () => (
+    <div key="redbubble" style={getBoxStyle('redbubble')}>
+      <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 800 }}>
+        Redbubble Export
+      </div>
+      {uploadTarget === 'redbubble' && (
+        <div style={recommendedLineStyle}>Recommended for your selected platform</div>
+      )}
+      <div style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.4 }}>
+        Best for: Redbubble apparel presets.
+      </div>
+      <div style={stepLabelStyle}>Step 1: Choose export size</div>
+      <div style={{ fontSize: 12, color: '#cbd5e1', fontWeight: 800 }}>
+        Export Size
+      </div>
+      <div style={{ fontSize: 11, color: '#94a3b8' }}>
+        Choose size, then press the blue download button.
+      </div>
+      <select
+        value={selectedRedbubblePreset}
+        onChange={(e) => {
+          setSelectedRedbubblePreset(e.target.value as RedbubblePresetId);
+          setActivePresetSystem('redbubble');
+        }}
+        style={{
+          width: '100%',
+          padding: '10px 12px',
+          borderRadius: 10,
+          border: '1px solid rgba(255,255,255,0.12)',
+          background: 'rgba(255,255,255,0.06)',
+          color: '#fff',
+          fontSize: 14,
+          fontWeight: 600,
+          outline: 'none',
+          boxSizing: 'border-box',
+        }}
+      >
+        {redbubblePresets.map((preset) => (
+          <option key={preset.id} value={preset.id}>
+            {preset.label} — {preset.width} × {preset.height}
+          </option>
+        ))}
+      </select>
+      <div style={{ fontSize: 12, color: '#bae6fd', fontWeight: 800 }}>
+        {redbubbleTargetLine}
+      </div>
+      <div style={{ fontSize: 12, color: '#cbd5e1' }}>
+        Resized for the selected Redbubble preset.
+      </div>
+      <div style={stepLabelStyle}>Step 2: Download PNG</div>
+      <button
+        onClick={() => {
+          if (!img) return;
+          handleDownloadRedbubblePng();
+        }}
+        aria-disabled={!img}
+        style={{
+          width: '100%',
+          background: '#2563eb',
+          color: '#ffffff',
+          fontWeight: 800,
+          borderRadius: 12,
+          padding: '12px 16px',
+          opacity: img ? 1 : 0.55,
+          boxShadow: img ? '0 10px 20px rgba(37, 99, 235, 0.30)' : 'none',
+          cursor: img ? 'pointer' : 'not-allowed',
+        }}
+      >
+        {selectedRedbubbleDownloadLabel}
+      </button>
+      <div style={fileNameLineStyle}>File name: {redbubbleFileName}</div>
+    </div>
+  );
+
+  const renderPrintfulExportBox = () => (
+    <div key="printful" style={getBoxStyle('printful')}>
+      <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 800 }}>
+        Printful Export
+      </div>
+      {uploadTarget === 'printful' && (
+        <div style={recommendedLineStyle}>Recommended for your selected platform</div>
+      )}
+      <div style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.4 }}>
+        Best for: Printful DTG/DTF apparel.
+      </div>
+      <div style={stepLabelStyle}>Step 1: Choose export size</div>
+      <div style={{ fontSize: 12, color: '#cbd5e1', fontWeight: 800 }}>
+        Export Size
+      </div>
+      <div style={{ fontSize: 11, color: '#94a3b8' }}>
+        Choose size, then press the blue download button.
+      </div>
+      <select
+        value={selectedPrintfulPreset}
+        onChange={(e) => {
+          setSelectedPrintfulPreset(e.target.value as PrintfulPresetId);
+          setActivePresetSystem('printful');
+        }}
+        style={{
+          width: '100%',
+          padding: '10px 12px',
+          borderRadius: 10,
+          border: '1px solid rgba(255,255,255,0.12)',
+          background: 'rgba(255,255,255,0.06)',
+          color: '#fff',
+          fontSize: 14,
+          fontWeight: 600,
+          outline: 'none',
+          boxSizing: 'border-box',
+        }}
+      >
+        {printfulPresets.map((preset) => (
+          <option key={preset.id} value={preset.id}>
+            {preset.label} — {preset.width} × {preset.height}
+          </option>
+        ))}
+      </select>
+      <div style={{ fontSize: 12, color: '#bae6fd', fontWeight: 800 }}>
+        {printfulTargetLine}
+      </div>
+      <div style={{ fontSize: 12, color: '#cbd5e1' }}>
+        Resized for the selected Printful preset.
+      </div>
+      <div style={stepLabelStyle}>Step 2: Download PNG</div>
+      <button
+        onClick={() => {
+          if (!img) return;
+          handleDownloadPrintfulPng();
+        }}
+        aria-disabled={!img}
+        style={{
+          width: '100%',
+          background: '#2563eb',
+          color: '#ffffff',
+          fontWeight: 800,
+          borderRadius: 12,
+          padding: '12px 16px',
+          opacity: img ? 1 : 0.55,
+          boxShadow: img ? '0 10px 20px rgba(37, 99, 235, 0.30)' : 'none',
+          cursor: img ? 'pointer' : 'not-allowed',
+        }}
+      >
+        {selectedPrintfulDownloadLabel}
+      </button>
+      <div style={fileNameLineStyle}>File name: {printfulFileName}</div>
+    </div>
+  );
+
+  const renderTeePublicExportBox = () => (
+    <div key="teepublic" style={getBoxStyle('teepublic')}>
+      <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 800 }}>
+        TeePublic Export
+      </div>
+      {uploadTarget === 'teepublic' && (
+        <div style={recommendedLineStyle}>Recommended for your selected platform</div>
+      )}
+      <div style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.4 }}>
+        Best for: TeePublic all-products upload.
+      </div>
+      <div style={{ fontSize: 12, color: '#bae6fd', fontWeight: 800 }}>
+        {teePublicTargetLine}
+      </div>
+      <div style={{ fontSize: 12, color: '#cbd5e1' }}>
+        Resized for TeePublic all-products export.
+      </div>
+      <div style={stepLabelStyle}>Download PNG</div>
+      <button
+        onClick={() => {
+          if (!img) return;
+          handleDownloadTeePublicPng();
+        }}
+        aria-disabled={!img}
+        style={{
+          width: '100%',
+          background: '#2563eb',
+          color: '#ffffff',
+          fontWeight: 800,
+          borderRadius: 12,
+          padding: '12px 16px',
+          opacity: img ? 1 : 0.55,
+          boxShadow: img ? '0 10px 20px rgba(37, 99, 235, 0.30)' : 'none',
+          cursor: img ? 'pointer' : 'not-allowed',
+        }}
+      >
+        {teePublicDownloadLabel}
+      </button>
+      <div style={fileNameLineStyle}>File name: {teePublicFileName}</div>
+    </div>
+  );
+
+  const exportBoxRenderers: Record<UploadTarget, () => React.JSX.Element> = {
+    standard: renderStandardExportBox,
+    redbubble: renderRedbubbleExportBox,
+    printful: renderPrintfulExportBox,
+    teepublic: renderTeePublicExportBox,
+  };
+
+  const orderedExportTargets: UploadTarget[] = [
+    uploadTarget,
+    ...uploadTargetOptions
+      .map((option) => option.id)
+      .filter((id) => id !== uploadTarget),
+  ];
+
   return (
     <div
       style={{
@@ -235,252 +500,7 @@ export default function IssueBucketsPanel({
       )}
 
       <div style={{ marginBottom: 14, display: 'grid', gap: 12 }}>
-        {/* Standard Apparel box */}
-        <div style={getBoxStyle('standard')}>
-          <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 800 }}>
-            Standard Apparel Export
-          </div>
-          {uploadTarget === 'standard' && (
-            <div style={recommendedLineStyle}>Recommended for your selected platform</div>
-          )}
-          <div>
-            <span
-              style={{
-                display: 'inline-block',
-                fontSize: 11,
-                fontWeight: 900,
-                color: '#bbf7d0',
-                background: 'rgba(22, 163, 74, 0.18)',
-                border: '1px solid rgba(134, 239, 172, 0.30)',
-                borderRadius: 999,
-                padding: '4px 8px',
-              }}
-            >
-              Recommended first
-            </span>
-          </div>
-          <div style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.4 }}>
-            Best starting point for most POD shirt uploads.
-          </div>
-          <div style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.4 }}>
-            Best for: general POD shirt uploads.
-          </div>
-          <div style={{ fontSize: 12, color: '#bae6fd', fontWeight: 800 }}>
-            {standardTargetLine}
-          </div>
-          <div style={{ fontSize: 12, color: '#cbd5e1' }}>
-            Generic 4200 × 4800 apparel PNG, not tied to one company.
-          </div>
-          <div style={stepLabelStyle}>Download PNG</div>
-          <button
-            onClick={() => {
-              if (!img) return;
-              handleDownloadApparelPng();
-            }}
-            aria-disabled={!img}
-            style={{
-              width: '100%',
-              background: '#2563eb',
-              color: '#ffffff',
-              fontWeight: 800,
-              borderRadius: 12,
-              padding: '12px 16px',
-              opacity: img ? 1 : 0.55,
-              boxShadow: img ? '0 10px 20px rgba(37, 99, 235, 0.30)' : 'none',
-              cursor: img ? 'pointer' : 'not-allowed',
-            }}
-          >
-            Download Standard Apparel PNG — 4200 × 4800
-          </button>
-          <div style={fileNameLineStyle}>File name: {standardFileName}</div>
-        </div>
-
-        {/* Redbubble box */}
-        <div style={getBoxStyle('redbubble')}>
-          <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 800 }}>
-            Redbubble Export
-          </div>
-          {uploadTarget === 'redbubble' && (
-            <div style={recommendedLineStyle}>Recommended for your selected platform</div>
-          )}
-          <div style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.4 }}>
-            Best for: Redbubble apparel presets.
-          </div>
-          <div style={stepLabelStyle}>Step 1: Choose export size</div>
-          <div style={{ fontSize: 12, color: '#cbd5e1', fontWeight: 800 }}>
-            Export Size
-          </div>
-          <div style={{ fontSize: 11, color: '#94a3b8' }}>
-            Choose size, then press the blue download button.
-          </div>
-          <select
-            value={selectedRedbubblePreset}
-            onChange={(e) => {
-              setSelectedRedbubblePreset(e.target.value as RedbubblePresetId);
-              setActivePresetSystem('redbubble');
-            }}
-            style={{
-              width: '100%',
-              padding: '10px 12px',
-              borderRadius: 10,
-              border: '1px solid rgba(255,255,255,0.12)',
-              background: 'rgba(255,255,255,0.06)',
-              color: '#fff',
-              fontSize: 14,
-              fontWeight: 600,
-              outline: 'none',
-              boxSizing: 'border-box',
-            }}
-          >
-            {redbubblePresets.map((preset) => (
-              <option key={preset.id} value={preset.id}>
-                {preset.label} — {preset.width} × {preset.height}
-              </option>
-            ))}
-          </select>
-          <div style={{ fontSize: 12, color: '#bae6fd', fontWeight: 800 }}>
-            {redbubbleTargetLine}
-          </div>
-          <div style={{ fontSize: 12, color: '#cbd5e1' }}>
-            Resized for the selected Redbubble preset.
-          </div>
-          <div style={stepLabelStyle}>Step 2: Download PNG</div>
-          <button
-            onClick={() => {
-              if (!img) return;
-              handleDownloadRedbubblePng();
-            }}
-            aria-disabled={!img}
-            style={{
-              width: '100%',
-              background: '#2563eb',
-              color: '#ffffff',
-              fontWeight: 800,
-              borderRadius: 12,
-              padding: '12px 16px',
-              opacity: img ? 1 : 0.55,
-              boxShadow: img ? '0 10px 20px rgba(37, 99, 235, 0.30)' : 'none',
-              cursor: img ? 'pointer' : 'not-allowed',
-            }}
-          >
-            {selectedRedbubbleDownloadLabel}
-          </button>
-          <div style={fileNameLineStyle}>File name: {redbubbleFileName}</div>
-        </div>
-
-        {/* Printful box */}
-        <div style={getBoxStyle('printful')}>
-          <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 800 }}>
-            Printful Export
-          </div>
-          {uploadTarget === 'printful' && (
-            <div style={recommendedLineStyle}>Recommended for your selected platform</div>
-          )}
-          <div style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.4 }}>
-            Best for: Printful DTG/DTF apparel.
-          </div>
-          <div style={stepLabelStyle}>Step 1: Choose export size</div>
-          <div style={{ fontSize: 12, color: '#cbd5e1', fontWeight: 800 }}>
-            Export Size
-          </div>
-          <div style={{ fontSize: 11, color: '#94a3b8' }}>
-            Choose size, then press the blue download button.
-          </div>
-          <select
-            value={selectedPrintfulPreset}
-            onChange={(e) => {
-              setSelectedPrintfulPreset(e.target.value as PrintfulPresetId);
-              setActivePresetSystem('printful');
-            }}
-            style={{
-              width: '100%',
-              padding: '10px 12px',
-              borderRadius: 10,
-              border: '1px solid rgba(255,255,255,0.12)',
-              background: 'rgba(255,255,255,0.06)',
-              color: '#fff',
-              fontSize: 14,
-              fontWeight: 600,
-              outline: 'none',
-              boxSizing: 'border-box',
-            }}
-          >
-            {printfulPresets.map((preset) => (
-              <option key={preset.id} value={preset.id}>
-                {preset.label} — {preset.width} × {preset.height}
-              </option>
-            ))}
-          </select>
-          <div style={{ fontSize: 12, color: '#bae6fd', fontWeight: 800 }}>
-            {printfulTargetLine}
-          </div>
-          <div style={{ fontSize: 12, color: '#cbd5e1' }}>
-            Resized for the selected Printful preset.
-          </div>
-          <div style={stepLabelStyle}>Step 2: Download PNG</div>
-          <button
-            onClick={() => {
-              if (!img) return;
-              handleDownloadPrintfulPng();
-            }}
-            aria-disabled={!img}
-            style={{
-              width: '100%',
-              background: '#2563eb',
-              color: '#ffffff',
-              fontWeight: 800,
-              borderRadius: 12,
-              padding: '12px 16px',
-              opacity: img ? 1 : 0.55,
-              boxShadow: img ? '0 10px 20px rgba(37, 99, 235, 0.30)' : 'none',
-              cursor: img ? 'pointer' : 'not-allowed',
-            }}
-          >
-            {selectedPrintfulDownloadLabel}
-          </button>
-          <div style={fileNameLineStyle}>File name: {printfulFileName}</div>
-        </div>
-
-        {/* TeePublic box */}
-        <div style={getBoxStyle('teepublic')}>
-          <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 800 }}>
-            TeePublic Export
-          </div>
-          {uploadTarget === 'teepublic' && (
-            <div style={recommendedLineStyle}>Recommended for your selected platform</div>
-          )}
-          <div style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.4 }}>
-            Best for: TeePublic all-products upload.
-          </div>
-          <div style={{ fontSize: 12, color: '#bae6fd', fontWeight: 800 }}>
-            {teePublicTargetLine}
-          </div>
-          <div style={{ fontSize: 12, color: '#cbd5e1' }}>
-            Resized for TeePublic all-products export.
-          </div>
-          <div style={stepLabelStyle}>Download PNG</div>
-          <button
-            onClick={() => {
-              if (!img) return;
-              handleDownloadTeePublicPng();
-            }}
-            aria-disabled={!img}
-            style={{
-              width: '100%',
-              background: '#2563eb',
-              color: '#ffffff',
-              fontWeight: 800,
-              borderRadius: 12,
-              padding: '12px 16px',
-              opacity: img ? 1 : 0.55,
-              boxShadow: img ? '0 10px 20px rgba(37, 99, 235, 0.30)' : 'none',
-              cursor: img ? 'pointer' : 'not-allowed',
-            }}
-          >
-            {teePublicDownloadLabel}
-          </button>
-          <div style={fileNameLineStyle}>File name: {teePublicFileName}</div>
-        </div>
+        {orderedExportTargets.map((target) => exportBoxRenderers[target]())}
       </div>
 
     </div>
