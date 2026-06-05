@@ -117,6 +117,33 @@ export default function IssueBucketsPanel({
           ? 'Ready to export. Choose a size, then press the blue download button.'
           : 'Upload a design to enable downloads.'}
       </div>
+      <div
+        style={{
+          marginBottom: 12,
+          padding: 10,
+          borderRadius: 12,
+          background: 'rgba(37, 99, 235, 0.10)',
+          border: '1px solid rgba(147, 197, 253, 0.25)',
+          color: '#cbd5e1',
+          fontSize: 12,
+          lineHeight: 1.45,
+        }}
+      >
+        <div style={{ fontWeight: 800, color: '#bfdbfe', marginBottom: 4 }}>
+          Recommended Export
+        </div>
+        <div>
+          Start with Standard Apparel PNG for most POD shirt uploads. Use
+          Redbubble, Printful, or TeePublic exports only when uploading to those
+          platforms.
+        </div>
+        <ul style={{ margin: '6px 0 0', paddingLeft: 18 }}>
+          <li>Standard Apparel: best general starting point</li>
+          <li>Redbubble: use for Redbubble apparel upload</li>
+          <li>Printful: use for Printful DTG/DTF apparel</li>
+          <li>TeePublic: use for TeePublic all-products upload</li>
+        </ul>
+      </div>
       {isScanning && (
         <div
           style={{
