@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import type { CheckItem } from '../lib/podCheckerTypes';
 import type { RedbubblePresetId } from '../lib/redbubblePresets';
 import { redbubblePresets } from '../lib/redbubblePresets';
 import type { PrintfulPresetId } from '../lib/printfulPresets';
@@ -9,6 +10,8 @@ import { printfulPresets } from '../lib/printfulPresets';
 type IssueBucketsPanelProps = {
   isScanning: boolean;
   img: HTMLImageElement | null;
+  checks?: CheckItem[];
+  downloadMessage?: string;
   standardTargetLine: string;
   redbubbleTargetLine: string;
   printfulTargetLine: string;
@@ -32,6 +35,8 @@ type IssueBucketsPanelProps = {
 export default function IssueBucketsPanel({
   isScanning,
   img,
+  checks = [],
+  downloadMessage = '',
   standardTargetLine,
   redbubbleTargetLine,
   printfulTargetLine,
@@ -108,6 +113,100 @@ export default function IssueBucketsPanel({
       title: 'TeePublic Focus',
       message: 'Use the TeePublic export for TeePublic all-products upload.',
     },
+  };
+
+  const preUploadCheckConfig: Record<
+    UploadTarget,
+    { title: string; downloadKey: string; specificItem: string; downloadItem: string }
+  > = {
+    standard: {
+      title: 'Standard POD Pre-Upload Check',
+      downloadKey: 'Standard',
+      specificItem: 'Use 4200 × 4800 apparel PNG',
+      downloadItem: 'Download Standard Apparel PNG before upload',
+    },
+    redbubble: {
+      title: 'Redbubble Pre-Upload Check',
+      downloadKey: 'Redbubble',
+      specificItem: 'Correct Redbubble preset selected',
+      downloadItem: 'Download Redbubble PNG before upload',
+    },
+    printful: {
+      title: 'Printful Pre-Upload Check',
+      downloadKey: 'Printful',
+      specificItem: 'Correct Printful DTG/DTF preset selected',
+      downloadItem: 'Download Printful PNG before upload',
+    },
+    teepublic: {
+      title: 'TeePublic Pre-Upload Check',
+      downloadKey: 'TeePublic',
+      specificItem: 'TeePublic all-products PNG ready',
+      downloadItem: 'Download TeePublic PNG before upload',
+    },
+  };
+
+  const exportSelectedLabel: Record<UploadTarget, string> = {
+    standard: 'Standard apparel export available',
+    redbubble: 'Redbubble export selected',
+    printful: 'Printful export selected',
+    teepublic: 'TeePublic export selected',
+  };
+
+  const hasActiveWarnings = checks.some(
+    (check) => check.status === 'fail' || check.status === 'warn'
+  );
+  const currentConfig = preUploadCheckConfig[uploadTarget];
+  const platformDownloaded =
+    !!img &&
+    downloadMessage.toLowerCase().includes('download ready') &&
+    downloadMessage.toLowerCase().includes(currentConfig.downloadKey.toLowerCase());
+
+  type ItemStatus = 'pass' | 'warn' | 'fail';
+  const preUploadItems: { label: string; status: ItemStatus }[] = [
+    { label: 'Design uploaded', status: img ? 'pass' : 'fail' },
+    { label: exportSelectedLabel[uploadTarget], status: img ? 'pass' : 'warn' },
+    { label: currentConfig.specificItem, status: img ? 'pass' : 'warn' },
+    { label: 'Review remaining warnings', status: hasActiveWarnings ? 'warn' : 'pass' },
+    {
+      label: currentConfig.downloadItem,
+      status: platformDownloaded ? 'pass' : img ? 'warn' : 'fail',
+    },
+  ];
+
+  let preUploadStatus: 'READY TO UPLOAD' | 'REVIEW FIRST' | 'NOT READY';
+  if (!img) {
+    preUploadStatus = 'NOT READY';
+  } else if (hasActiveWarnings || !platformDownloaded) {
+    preUploadStatus = 'REVIEW FIRST';
+  } else {
+    preUploadStatus = 'READY TO UPLOAD';
+  }
+
+  const preUploadStatusColors: Record<
+    typeof preUploadStatus,
+    { color: string; background: string; border: string }
+  > = {
+    'READY TO UPLOAD': {
+      color: '#86efac',
+      background: 'rgba(22, 163, 74, 0.15)',
+      border: '1px solid rgba(134, 239, 172, 0.30)',
+    },
+    'REVIEW FIRST': {
+      color: '#facc15',
+      background: 'rgba(250, 204, 21, 0.12)',
+      border: '1px solid rgba(250, 204, 21, 0.30)',
+    },
+    'NOT READY': {
+      color: '#f87171',
+      background: 'rgba(248, 113, 113, 0.12)',
+      border: '1px solid rgba(248, 113, 113, 0.30)',
+    },
+  };
+
+  const itemMark: Record<ItemStatus, { mark: string; color: string }> = {
+    pass: { mark: '✓', color: '#86efac' },
+    warn: { mark: '⚠', color: '#facc15' },
+    fail: { mark: '✕', color: '#f87171' },
   };
 
   const baseBoxStyle: React.CSSProperties = {
@@ -516,6 +615,55 @@ export default function IssueBucketsPanel({
             {uploadTargetGuidance[uploadTarget].title}
           </div>
           <div>{uploadTargetGuidance[uploadTarget].message}</div>
+        </div>
+      </div>
+      <div
+        style={{
+          marginBottom: 12,
+          padding: 12,
+          borderRadius: 14,
+          background: 'rgba(15, 23, 42, 0.65)',
+          border: '1px solid rgba(147, 197, 253, 0.25)',
+          display: 'grid',
+          gap: 8,
+        }}
+      >
+        <div style={{ fontWeight: 800, color: '#e2e8f0', fontSize: 13 }}>
+          {currentConfig.title}
+        </div>
+        <div
+          style={{
+            display: 'inline-block',
+            justifySelf: 'start',
+            fontSize: 11,
+            fontWeight: 900,
+            borderRadius: 999,
+            padding: '4px 10px',
+            color: preUploadStatusColors[preUploadStatus].color,
+            background: preUploadStatusColors[preUploadStatus].background,
+            border: preUploadStatusColors[preUploadStatus].border,
+          }}
+        >
+          {preUploadStatus}
+        </div>
+        <div style={{ display: 'grid', gap: 4 }}>
+          {preUploadItems.map((item) => (
+            <div
+              key={item.label}
+              style={{
+                fontSize: 12,
+                color: '#cbd5e1',
+                lineHeight: 1.4,
+                display: 'flex',
+                gap: 8,
+              }}
+            >
+              <span style={{ color: itemMark[item.status].color, fontWeight: 900 }}>
+                {itemMark[item.status].mark}
+              </span>
+              <span>{item.label}</span>
+            </div>
+          ))}
         </div>
       </div>
       {isScanning && (

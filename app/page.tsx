@@ -1920,6 +1920,8 @@ gap: 16,
 <IssueBucketsPanel
   isScanning={isScanning}
   img={img}
+  checks={checks}
+  downloadMessage={downloadMessage}
   standardTargetLine={standardTargetLine}
   redbubbleTargetLine={redbubbleTargetLine}
   printfulTargetLine={printfulTargetLine}
