@@ -16,7 +16,10 @@ import type { RedbubblePresetId } from './lib/redbubblePresets';
 import { printfulPresets } from './lib/printfulPresets';
 import type { PrintfulPresetId } from './lib/printfulPresets';
 
-import DesignPreviewPanel from './components/DesignPreviewPanel';
+import DesignPreviewPanel, {
+  type PreviewBackground,
+  PREVIEW_BACKGROUND_COLORS,
+} from './components/DesignPreviewPanel';
 
 import IssueBucketsPanel from './components/IssueBucketsPanel';
 import ScanResultsPanel from './components/ScanResultsPanel';
@@ -836,6 +839,7 @@ export default function Page() {
   const [viewMode, setViewMode] = useState<ViewMode>('pod');
   const [previewSize, setPreviewSize] = useState<PreviewSize>(DEFAULT_PREVIEW_SIZE);
   const [inspectZoom, setInspectZoom] = useState(1);
+  const [previewBackground, setPreviewBackground] = useState<PreviewBackground>('checker');
 
   const [transform, setTransform] = useState({
     scale: 1,
@@ -1514,15 +1518,29 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
     targetCanvasAspect,
   ]);
 
-  function drawPodBackground(ctx: CanvasRenderingContext2D) {
-    const size = 40;
-    for (let y = 0; y < CANVAS_H; y += size) {
-      for (let x = 0; x < CANVAS_W; x += size) {
-        ctx.fillStyle =
-          (Math.floor(x / size) + Math.floor(y / size)) % 2 === 0 ? '#1f1f1f' : '#2a2a2a';
-        ctx.fillRect(x, y, size, size);
+  function fillPreviewBackground(
+    ctx: CanvasRenderingContext2D,
+    width: number,
+    height: number,
+    previewBg: PreviewBackground,
+    squareSize = 36
+  ) {
+    if (previewBg === 'checker') {
+      for (let y = 0; y < height; y += squareSize) {
+        for (let x = 0; x < width; x += squareSize) {
+          ctx.fillStyle =
+            (Math.floor(x / squareSize) + Math.floor(y / squareSize)) % 2 === 0 ? '#1f1f1f' : '#2a2a2a';
+          ctx.fillRect(x, y, squareSize, squareSize);
+        }
       }
+    } else {
+      ctx.fillStyle = PREVIEW_BACKGROUND_COLORS[previewBg];
+      ctx.fillRect(0, 0, width, height);
     }
+  }
+
+  function drawPodBackground(ctx: CanvasRenderingContext2D, previewBg: PreviewBackground = 'checker') {
+    fillPreviewBackground(ctx, CANVAS_W, CANVAS_H, previewBg, 40);
 
     ctx.strokeStyle = '#ef4444';
     ctx.lineWidth = 3;
@@ -1593,7 +1611,7 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
       canvas.height = CANVAS_H;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      drawPodBackground(ctx);
+      drawPodBackground(ctx, previewBackground);
 
       const drawW = img.naturalWidth * transform.scale;
       const drawH = img.naturalHeight * transform.scale;
@@ -1612,14 +1630,7 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
       canvas.height = designCanvasSize.height;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      const square = 36;
-      for (let y = 0; y < canvas.height; y += square) {
-        for (let x = 0; x < canvas.width; x += square) {
-          ctx.fillStyle =
-            (Math.floor(x / square) + Math.floor(y / square)) % 2 === 0 ? '#1f1f1f' : '#2a2a2a';
-          ctx.fillRect(x, y, square, square);
-        }
-      }
+      fillPreviewBackground(ctx, canvas.width, canvas.height, previewBackground);
 
       ctx.strokeStyle = '#f97316';
       ctx.lineWidth = 3;
@@ -1682,7 +1693,7 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
         );
       }
     }
-  }, [img, shirtImg, transform, effectiveBounds, viewMode, designCanvasSize, mockupOffsetX, mockupOffsetY, mockupScale]);
+  }, [img, shirtImg, transform, effectiveBounds, viewMode, designCanvasSize, mockupOffsetX, mockupOffsetY, mockupScale, previewBackground]);
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const selected = e.target.files?.[0];
@@ -1994,6 +2005,8 @@ gap: 16,
   previewCanvasW={previewCanvasW}
   previewCanvasH={previewCanvasH}
   totalScale={totalScale}
+  previewBackground={previewBackground}
+  setPreviewBackground={setPreviewBackground}
   setPreviewSize={setPreviewSize}
   setInspectZoom={setInspectZoom}
   setActionMessage={setActionMessage}

@@ -2,6 +2,27 @@
 
 import React from 'react';
 
+export type PreviewBackground = 'checker' | 'white' | 'black' | 'navy' | 'dark-grey' | 'red' | 'pink';
+
+export const PREVIEW_BACKGROUND_COLORS: Record<Exclude<PreviewBackground, 'checker'>, string> = {
+  white: '#ffffff',
+  black: '#000000',
+  navy: '#1e3a8a',
+  'dark-grey': '#4b5563',
+  red: '#dc2626',
+  pink: '#f472b6',
+};
+
+const PREVIEW_BACKGROUND_OPTIONS: { id: PreviewBackground; label: string }[] = [
+  { id: 'checker', label: 'Transparent' },
+  { id: 'white', label: 'White' },
+  { id: 'black', label: 'Black' },
+  { id: 'navy', label: 'Navy' },
+  { id: 'dark-grey', label: 'Dark Grey' },
+  { id: 'red', label: 'Red' },
+  { id: 'pink', label: 'Pink' },
+];
+
 type DesignPreviewPanelProps = {
   previewCanvasRef: React.RefObject<HTMLCanvasElement | null>;
   imgW: number;
@@ -12,6 +33,8 @@ type DesignPreviewPanelProps = {
   previewCanvasW: number;
   previewCanvasH: number;
   totalScale: number;
+  previewBackground: PreviewBackground;
+  setPreviewBackground: React.Dispatch<React.SetStateAction<PreviewBackground>>;
   setPreviewSize: React.Dispatch<React.SetStateAction<number>>;
   setInspectZoom: React.Dispatch<React.SetStateAction<number>>;
   setActionMessage: React.Dispatch<React.SetStateAction<string>>;
@@ -27,6 +50,8 @@ export default function DesignPreviewPanel({
   previewCanvasW,
   previewCanvasH,
   totalScale,
+  previewBackground,
+  setPreviewBackground,
   setPreviewSize,
   setInspectZoom,
   setActionMessage,
@@ -73,6 +98,25 @@ export default function DesignPreviewPanel({
               }}
             >
               {z * 100}%
+            </button>
+          ))}
+        </div>
+
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+          <span style={{ fontWeight: 700, color: '#bae6fd' }}>Preview Background</span>
+          {PREVIEW_BACKGROUND_OPTIONS.map((option) => (
+            <button
+              key={option.id}
+              onClick={() => {
+                setPreviewBackground(option.id);
+                setActionMessage(`Preview background set to ${option.label}.`);
+              }}
+              style={{
+                fontWeight: previewBackground === option.id ? 800 : 600,
+                outline: previewBackground === option.id ? '2px solid #38bdf8' : undefined,
+              }}
+            >
+              {option.label}
             </button>
           ))}
         </div>
