@@ -1419,7 +1419,6 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
           ]
         : []),
       ...(compressionArtifactCheck ? [compressionArtifactCheck] : []),
-      ...(pixelationCheck ? [pixelationCheck] : []),
       {
         label: 'Artwork Size',
         status: 'info',
@@ -1507,7 +1506,6 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
     lowContrastCheck,
     compressionArtifactCheck,
     emptyPaddingCheck,
-    pixelationCheck,
     unevenPaddingCheck,
     oversizedArtworkCheck,
     solidBackgroundBoxCheck,
