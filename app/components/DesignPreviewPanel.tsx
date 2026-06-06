@@ -68,27 +68,27 @@ export default function DesignPreviewPanel({
         height: 'fit-content',
       }}
     >
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          gap: 12,
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          marginBottom: 16,
-        }}
-      >
-        <h2 style={{ margin: 0, fontSize: 24, fontWeight: 800 }}>Design Preview</h2>
-
-        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
-          <span style={{ fontWeight: 700, color: '#bae6fd' }}>Preview Size</span>
-          <button onClick={() => { setPreviewSize(0.1); setActionMessage('Preview Size set to 10%.'); }}>10%</button>
-          <button onClick={() => { setPreviewSize(0.25); setActionMessage('Preview Size set to 25%.'); }}>25%</button>
-          <button onClick={() => { setPreviewSize(0.5); setActionMessage('Preview Size set to 50%.'); }}>50%</button>
+      <div style={{ display: 'grid', gap: 8, marginBottom: 10 }}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            gap: 8,
+            alignItems: 'center',
+            flexWrap: 'wrap',
+          }}
+        >
+          <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800 }}>Design Preview</h2>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+            <span style={{ fontWeight: 700, color: '#bae6fd', fontSize: 13 }}>Preview Size:</span>
+            <button onClick={() => { setPreviewSize(0.1); setActionMessage('Preview Size set to 10%.'); }}>10%</button>
+            <button onClick={() => { setPreviewSize(0.25); setActionMessage('Preview Size set to 25%.'); }}>25%</button>
+            <button onClick={() => { setPreviewSize(0.5); setActionMessage('Preview Size set to 50%.'); }}>50%</button>
+          </div>
         </div>
 
-        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
-          <span style={{ fontWeight: 700, color: '#bae6fd' }}>Detail Zoom</span>
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+          <span style={{ fontWeight: 700, color: '#bae6fd', fontSize: 13 }}>Detail Zoom:</span>
           {[1, 2, 4, 8].map((z) => (
             <button
               key={z}
@@ -102,8 +102,8 @@ export default function DesignPreviewPanel({
           ))}
         </div>
 
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-          <span style={{ fontWeight: 700, color: '#bae6fd' }}>Preview Background</span>
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+          <span style={{ fontWeight: 700, color: '#bae6fd', fontSize: 13 }}>Preview Background:</span>
           {PREVIEW_BACKGROUND_OPTIONS.map((option) => (
             <button
               key={option.id}
@@ -120,30 +120,28 @@ export default function DesignPreviewPanel({
             </button>
           ))}
         </div>
-      </div>
 
-      <div
-        style={{
-          display: 'flex',
-          gap: 14,
-          flexWrap: 'wrap',
-          marginBottom: 10,
-        }}
-      >
-        <div style={{ background: 'rgba(15,23,42,0.85)', padding: '12px 14px', borderRadius: 12, border: '1px solid rgba(255,255,255,0.06)' }}>
-          Canvas: <strong>{imgW || '-'} × {imgH || '-'}</strong>
-        </div>
-
-        <div style={{ background: 'rgba(15,23,42,0.85)', padding: '12px 14px', borderRadius: 12, border: '1px solid rgba(255,255,255,0.06)' }}>
-          Preview Size: <strong>{Math.round(previewSize * 100)}%</strong>
-        </div>
-
-        <div style={{ background: 'rgba(15,23,42,0.85)', padding: '12px 14px', borderRadius: 12, border: '1px solid rgba(255,255,255,0.06)' }}>
-          Inspect Zoom: <strong>{inspectZoom * 100}%</strong>
-        </div>
-
-        <div style={{ background: 'rgba(15,23,42,0.85)', padding: '12px 14px', borderRadius: 12, border: '1px solid rgba(255,255,255,0.06)' }}>
-          Practical DPI: <strong>{practicalPrintDpi || '-'}</strong>
+        <div
+          style={{
+            display: 'flex',
+            gap: 8,
+            flexWrap: 'wrap',
+            alignItems: 'center',
+            fontSize: 12,
+            color: '#cbd5e1',
+            background: 'rgba(15,23,42,0.85)',
+            padding: '8px 12px',
+            borderRadius: 10,
+            border: '1px solid rgba(255,255,255,0.06)',
+          }}
+        >
+          <span>Canvas: <strong>{imgW || '-'} × {imgH || '-'}</strong></span>
+          <span style={{ color: 'rgba(148,163,184,0.5)' }}>|</span>
+          <span>Preview Size: <strong>{Math.round(previewSize * 100)}%</strong></span>
+          <span style={{ color: 'rgba(148,163,184,0.5)' }}>|</span>
+          <span>Inspect Zoom: <strong>{inspectZoom * 100}%</strong></span>
+          <span style={{ color: 'rgba(148,163,184,0.5)' }}>|</span>
+          <span>Practical DPI: <strong>{practicalPrintDpi || '-'}</strong></span>
         </div>
       </div>
 
