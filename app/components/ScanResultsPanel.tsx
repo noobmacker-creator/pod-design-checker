@@ -256,7 +256,6 @@ export default function ScanResultsPanel({
     'Design Too Small',
     'Print Safety Border',
     'White Edge / Halo Risk',
-    'Semi-Transparency Risk',
     'Tiny Text Risk',
     'Compression Artifact Risk',
     'Pixelation Risk',
@@ -266,6 +265,7 @@ export default function ScanResultsPanel({
     'Speck Detector',
     'Off-Center Design',
     'Artwork Size',
+    'Soft Transparency',
   ];
 
   // Match a check label to its priority key. startsWith covers grouped checks like the
@@ -306,7 +306,7 @@ export default function ScanResultsPanel({
     'Design Too Small': 'Use Auto Fix or upload a larger artwork source.',
     'Print Safety Border': 'Use Auto Fix to move the artwork inside the safe print area.',
     'White Edge / Halo Risk': 'Clean the design edges before uploading to dark shirts.',
-    'Semi-Transparency Risk': 'Preview this design on dark shirt colours before uploading.',
+    'Soft Transparency': 'Preview this design on dark shirt colours before uploading.',
     'Tiny Text Risk': 'Enlarge small lettering before uploading.',
     'Compression Artifact Risk': 'Use a cleaner PNG source before uploading.',
     'Pixelation Risk': 'Use a higher-quality or less pixelated source image.',
@@ -366,7 +366,7 @@ export default function ScanResultsPanel({
     'Compression Artifact Risk': 'Use a cleaner PNG source before uploading.',
     'Pixelation Risk': 'Use a higher-quality or less pixelated source image.',
     'Tiny Text Risk': 'Enlarge small lettering before uploading.',
-    'Semi-Transparency Risk': 'Preview this design on dark shirt colours before uploading.',
+    'Soft Transparency': 'Preview this design on dark shirt colours before uploading.',
     'White Edge / Halo Risk': 'Clean the design edges before uploading to dark shirts.',
     'Low Contrast Risk': 'Increase contrast so details print clearly.',
     // Main issue key for the grouped shirt checks is "Shirt Fit"; cover both labels.

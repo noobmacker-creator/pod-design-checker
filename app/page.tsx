@@ -108,8 +108,8 @@ function getWhiteEdgeHaloCheck(imageData: ImageData): CheckItem {
   };
 }
 
-// Semi-Transparency Risk: counts partly transparent pixels (alpha between 20 and 220).
-// Lots of these can print as faded or ghosted edges on POD products.
+// Soft Transparency: counts partly transparent pixels (alpha between 20 and 220).
+// Common in smooth edges, shadows, and vintage/distressed artwork.
 function getSemiTransparencyRiskCheck(imageData: ImageData): CheckItem {
   const { data } = imageData;
   let transparentPixels = 0;
@@ -131,20 +131,20 @@ function getSemiTransparencyRiskCheck(imageData: ImageData): CheckItem {
   const semiTransparentRatio = visiblePixels === 0 ? 0 : semiTransparentPixels / visiblePixels;
 
   let status: CheckStatus = 'pass';
-  let message = 'No major semi-transparency risk detected.';
+  let message = 'No major soft transparency issue detected.';
 
   if (semiTransparentRatio >= 0.12) {
-    status = 'fail';
-    message =
-      'Heavy faded transparency detected. Soft areas may print differently on POD products. Check the preview before upload.';
-  } else if (semiTransparentRatio >= 0.03) {
     status = 'warn';
     message =
-      'Soft edges or faded pixels detected. This is common in transparent PNGs, but check the design on dark shirts before upload.';
+      'Heavy soft transparency detected. Check the design preview on dark shirt colours.';
+  } else if (semiTransparentRatio >= 0.03) {
+    status = 'info';
+    message =
+      'Soft transparent pixels detected. Common in smooth edges, shadows, and vintage/distressed artwork.';
   }
 
   return {
-    label: 'Semi-Transparency Risk',
+    label: 'Soft Transparency',
     status,
     message,
   };
