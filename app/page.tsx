@@ -677,7 +677,7 @@ function getOversizedArtworkRiskCheck(imageData: ImageData): CheckItem {
   // No visible artwork found.
   if (maxX < 0 || maxY < 0) {
     return {
-      label: 'Oversized Artwork Risk',
+      label: 'Artwork Too Close to Edge',
       status: 'info',
       message: 'Could not measure artwork bounds clearly.',
     };
@@ -702,7 +702,7 @@ function getOversizedArtworkRiskCheck(imageData: ImageData): CheckItem {
   }
 
   return {
-    label: 'Oversized Artwork Risk',
+    label: 'Artwork Too Close to Edge',
     status,
     message,
   };
