@@ -6,7 +6,6 @@ import {
   detectFakeTransparencyBackground,
   getImageDpi,
   detectBoundsAndCoverage,
-  detectSpecks,
   estimateThinLines,
   getEffectiveArtBounds,
   getDesignCanvasSize,
@@ -148,6 +147,91 @@ function getSemiTransparencyRiskCheck(imageData: ImageData): CheckItem {
     status,
     message,
   };
+}
+
+// Stray Speck Check: only counts small blobs outside an expanded artwork safe area.
+function detectStraySpecks(imageData: ImageData, thresholdAlpha = 40, maxSpeckPixels = 12): number {
+  const { width, height, data } = imageData;
+
+  let minX = width;
+  let minY = height;
+  let maxX = -1;
+  let maxY = -1;
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const i = (y * width + x) * 4;
+      if (data[i + 3] > thresholdAlpha) {
+        if (x < minX) minX = x;
+        if (y < minY) minY = y;
+        if (x > maxX) maxX = x;
+        if (y > maxY) maxY = y;
+      }
+    }
+  }
+
+  if (maxX === -1) return 0;
+
+  const padding = Math.max(40, Math.round(width * 0.02), Math.round(height * 0.02));
+  const safeMinX = Math.max(0, minX - padding);
+  const safeMinY = Math.max(0, minY - padding);
+  const safeMaxX = Math.min(width - 1, maxX + padding);
+  const safeMaxY = Math.min(height - 1, maxY + padding);
+
+  const isInsideSafeArea = (x: number, y: number) =>
+    x >= safeMinX && x <= safeMaxX && y >= safeMinY && y <= safeMaxY;
+
+  const visited = new Uint8Array(width * height);
+  let specks = 0;
+
+  function isSolid(x: number, y: number) {
+    const i = (y * width + x) * 4;
+    return data[i + 3] > thresholdAlpha;
+  }
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const pixelIndex = y * width + x;
+      if (visited[pixelIndex]) continue;
+      visited[pixelIndex] = 1;
+      if (!isSolid(x, y)) continue;
+
+      const stack: [number, number][] = [[x, y]];
+      let blobSize = 0;
+      let touchesSafeArea = false;
+
+      while (stack.length > 0) {
+        const [cx, cy] = stack.pop()!;
+        blobSize++;
+        if (isInsideSafeArea(cx, cy)) touchesSafeArea = true;
+
+        const neighbors = [
+          [cx - 1, cy],
+          [cx + 1, cy],
+          [cx, cy - 1],
+          [cx, cy + 1],
+          [cx - 1, cy - 1],
+          [cx + 1, cy - 1],
+          [cx - 1, cy + 1],
+          [cx + 1, cy + 1],
+        ];
+
+        for (const [nx, ny] of neighbors) {
+          if (nx < 0 || ny < 0 || nx >= width || ny >= height) continue;
+          const ni = ny * width + nx;
+          if (visited[ni]) continue;
+          visited[ni] = 1;
+          if (isSolid(nx, ny)) stack.push([nx, ny]);
+        }
+      }
+
+      if (blobSize <= maxSpeckPixels && !touchesSafeArea) {
+        specks++;
+      }
+    }
+  }
+
+  return specks;
 }
 
 // Cut-Off Edge Risk: looks for visible artwork sitting in a small band around the
@@ -805,7 +889,7 @@ canvas.height = img.naturalHeight;
     const res = detectBoundsAndCoverage(imageData, 10);
     setOriginalBounds(res.bounds);
     setCoverage(res.coverage);
-    setSpecks(detectSpecks(imageData, 160, 2));
+    setSpecks(detectStraySpecks(imageData));
     setThinLinePercent(estimateThinLines(imageData));
     const fakeTransparency = detectFakeTransparencyBackground(imageData);
     setFakeTransparencyDetected(fakeTransparency.detected);
@@ -1363,15 +1447,15 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
       },
       
       {
-        label: 'Speck Detector',
-        status: specks === 0 ? 'pass' : specks < 25 ? 'warn' : 'fail',
+        label: 'Stray Speck Check',
+        status: specks === 0 ? 'pass' : specks < 15 ? 'warn' : 'fail',
         message:
           specks === 0
-            ? 'No obvious specks detected.'
-            : specks <= 2
-            ? 'Specks detected. Clean up small stray marks before printing.'
-            : `${specks} specks detected. Clean your design before printing.`,
-          },
+            ? 'No obvious stray specks detected.'
+            : specks < 15
+            ? 'Small stray pixels detected outside the main artwork. Check empty transparent areas before upload.'
+            : 'Heavy stray pixels detected outside the main artwork. Remove unwanted floating marks before upload.',
+      },
           {
             label: 'Line Thickness',
             status: thinLinePercent < 8 ? 'pass' : thinLinePercent < 18 ? 'warn' : 'fail',
@@ -1382,7 +1466,6 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
             ? 'Some thin line risk detected.'
             : 'A lot of thin line risk detected.',
       },
-      ...(tinyTextCheck ? [tinyTextCheck] : []),
       {
         label: 'DPI Metadata',
         status: 'info',
@@ -1422,7 +1505,6 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
     semiTransparencyCheck,
     cutOffEdgeCheck,
     lowContrastCheck,
-    tinyTextCheck,
     compressionArtifactCheck,
     emptyPaddingCheck,
     pixelationCheck,
