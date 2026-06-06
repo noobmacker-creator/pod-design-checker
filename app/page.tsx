@@ -136,10 +136,11 @@ function getSemiTransparencyRiskCheck(imageData: ImageData): CheckItem {
   if (semiTransparentRatio >= 0.12) {
     status = 'fail';
     message =
-      'Heavy semi-transparency detected. Faded areas may print unpredictably on POD products.';
+      'Heavy faded transparency detected. Soft areas may print differently on POD products. Check the preview before upload.';
   } else if (semiTransparentRatio >= 0.03) {
     status = 'warn';
-    message = 'Some semi-transparent pixels detected. Check soft edges before upload.';
+    message =
+      'Soft edges or faded pixels detected. This is common in transparent PNGs, but check the design on dark shirts before upload.';
   }
 
   return {

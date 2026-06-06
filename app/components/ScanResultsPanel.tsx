@@ -306,7 +306,7 @@ export default function ScanResultsPanel({
     'Design Too Small': 'Use Auto Fix or upload a larger artwork source.',
     'Print Safety Border': 'Use Auto Fix to move the artwork inside the safe print area.',
     'White Edge / Halo Risk': 'Clean the design edges before uploading to dark shirts.',
-    'Semi-Transparency Risk': 'Check soft faded areas and clean/flatten them if needed.',
+    'Semi-Transparency Risk': 'Preview this design on dark shirt colours before uploading.',
     'Tiny Text Risk': 'Enlarge small lettering before uploading.',
     'Compression Artifact Risk': 'Use a cleaner PNG source before uploading.',
     'Pixelation Risk': 'Use a higher-quality or less pixelated source image.',
@@ -366,7 +366,7 @@ export default function ScanResultsPanel({
     'Compression Artifact Risk': 'Use a cleaner PNG source before uploading.',
     'Pixelation Risk': 'Use a higher-quality or less pixelated source image.',
     'Tiny Text Risk': 'Enlarge small lettering before uploading.',
-    'Semi-Transparency Risk': 'Clean or flatten faded semi-transparent areas if needed.',
+    'Semi-Transparency Risk': 'Preview this design on dark shirt colours before uploading.',
     'White Edge / Halo Risk': 'Clean the design edges before uploading to dark shirts.',
     'Low Contrast Risk': 'Increase contrast so details print clearly.',
     // Main issue key for the grouped shirt checks is "Shirt Fit"; cover both labels.
