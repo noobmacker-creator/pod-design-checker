@@ -16,10 +16,7 @@ import type { RedbubblePresetId } from './lib/redbubblePresets';
 import { printfulPresets } from './lib/printfulPresets';
 import type { PrintfulPresetId } from './lib/printfulPresets';
 
-import DesignPreviewPanel, {
-  type PreviewBackground,
-  PREVIEW_BACKGROUND_COLORS,
-} from './components/DesignPreviewPanel';
+import DesignPreviewPanel, { type PreviewBackground } from './components/DesignPreviewPanel';
 
 import IssueBucketsPanel from './components/IssueBucketsPanel';
 import ScanResultsPanel from './components/ScanResultsPanel';
@@ -1518,30 +1515,7 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
     targetCanvasAspect,
   ]);
 
-  function fillPreviewBackground(
-    ctx: CanvasRenderingContext2D,
-    width: number,
-    height: number,
-    previewBg: PreviewBackground,
-    squareSize = 36
-  ) {
-    if (previewBg === 'checker') {
-      for (let y = 0; y < height; y += squareSize) {
-        for (let x = 0; x < width; x += squareSize) {
-          ctx.fillStyle =
-            (Math.floor(x / squareSize) + Math.floor(y / squareSize)) % 2 === 0 ? '#1f1f1f' : '#2a2a2a';
-          ctx.fillRect(x, y, squareSize, squareSize);
-        }
-      }
-    } else {
-      ctx.fillStyle = PREVIEW_BACKGROUND_COLORS[previewBg];
-      ctx.fillRect(0, 0, width, height);
-    }
-  }
-
-  function drawPodBackground(ctx: CanvasRenderingContext2D, previewBg: PreviewBackground = 'checker') {
-    fillPreviewBackground(ctx, CANVAS_W, CANVAS_H, previewBg, 40);
-
+  function drawPodBackground(ctx: CanvasRenderingContext2D) {
     ctx.strokeStyle = '#ef4444';
     ctx.lineWidth = 3;
     ctx.setLineDash([16, 10]);
@@ -1611,7 +1585,7 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
       canvas.height = CANVAS_H;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      drawPodBackground(ctx, previewBackground);
+      drawPodBackground(ctx);
 
       const drawW = img.naturalWidth * transform.scale;
       const drawH = img.naturalHeight * transform.scale;
@@ -1629,8 +1603,6 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
       canvas.width = designCanvasSize.width;
       canvas.height = designCanvasSize.height;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      fillPreviewBackground(ctx, canvas.width, canvas.height, previewBackground);
 
       ctx.strokeStyle = '#f97316';
       ctx.lineWidth = 3;
@@ -1693,7 +1665,7 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
         );
       }
     }
-  }, [img, shirtImg, transform, effectiveBounds, viewMode, designCanvasSize, mockupOffsetX, mockupOffsetY, mockupScale, previewBackground]);
+  }, [img, shirtImg, transform, effectiveBounds, viewMode, designCanvasSize, mockupOffsetX, mockupOffsetY, mockupScale]);
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const selected = e.target.files?.[0];

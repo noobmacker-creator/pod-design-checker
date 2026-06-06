@@ -13,6 +13,26 @@ export const PREVIEW_BACKGROUND_COLORS: Record<Exclude<PreviewBackground, 'check
   pink: '#f472b6',
 };
 
+function getPreviewBackgroundStyle(previewBg: PreviewBackground): React.CSSProperties {
+  if (previewBg === 'checker') {
+    return {
+      backgroundColor: '#1f1f1f',
+      backgroundImage: `
+        linear-gradient(45deg, #2a2a2a 25%, transparent 25%),
+        linear-gradient(-45deg, #2a2a2a 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #2a2a2a 75%),
+        linear-gradient(-45deg, transparent 75%, #2a2a2a 75%)
+      `,
+      backgroundSize: '36px 36px',
+      backgroundPosition: '0 0, 0 18px, 18px -18px, -18px 0px',
+    };
+  }
+
+  return {
+    backgroundColor: PREVIEW_BACKGROUND_COLORS[previewBg],
+  };
+}
+
 const PREVIEW_BACKGROUND_OPTIONS: { id: PreviewBackground; label: string }[] = [
   { id: 'checker', label: 'Transparent' },
   { id: 'white', label: 'White' },
@@ -166,16 +186,25 @@ export default function DesignPreviewPanel({
     paddingBottom: 12,
   }}
 >
-  <canvas
-    ref={previewCanvasRef}
+  <div
     style={{
-      display: 'block',
+      ...getPreviewBackgroundStyle(previewBackground),
       width: `${previewCanvasW * totalScale}px`,
       height: `${previewCanvasH * totalScale}px`,
-      boxShadow: '0 12px 50px rgba(0,0,0,0.55)',
       borderRadius: 12,
+      overflow: 'hidden',
+      boxShadow: '0 12px 50px rgba(0,0,0,0.55)',
     }}
-  />
+  >
+    <canvas
+      ref={previewCanvasRef}
+      style={{
+        display: 'block',
+        width: '100%',
+        height: '100%',
+      }}
+    />
+  </div>
 </div>
       </div>
     </div>
