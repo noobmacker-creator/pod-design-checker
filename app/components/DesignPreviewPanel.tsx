@@ -1,10 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 
-export type PreviewBackground = 'checker' | 'white' | 'black' | 'navy' | 'dark-grey' | 'red' | 'pink';
+export type PreviewBackground = 'checker' | 'white' | 'black' | 'navy' | 'dark-grey' | 'red' | 'pink' | 'custom';
 
-export const PREVIEW_BACKGROUND_COLORS: Record<Exclude<PreviewBackground, 'checker'>, string> = {
+export const PREVIEW_BACKGROUND_COLORS: Record<Exclude<PreviewBackground, 'checker' | 'custom'>, string> = {
   white: '#ffffff',
   black: '#000000',
   navy: '#1e3a8a',
@@ -13,7 +13,10 @@ export const PREVIEW_BACKGROUND_COLORS: Record<Exclude<PreviewBackground, 'check
   pink: '#f472b6',
 };
 
-function getPreviewBackgroundStyle(previewBg: PreviewBackground): React.CSSProperties {
+function getPreviewBackgroundStyle(
+  previewBg: PreviewBackground,
+  customColor?: string,
+): React.CSSProperties {
   if (previewBg === 'checker') {
     return {
       backgroundColor: '#1f1f1f',
@@ -25,6 +28,12 @@ function getPreviewBackgroundStyle(previewBg: PreviewBackground): React.CSSPrope
       `,
       backgroundSize: '36px 36px',
       backgroundPosition: '0 0, 0 18px, 18px -18px, -18px 0px',
+    };
+  }
+
+  if (previewBg === 'custom') {
+    return {
+      backgroundColor: customColor || '#808080',
     };
   }
 
@@ -76,6 +85,8 @@ export default function DesignPreviewPanel({
   setInspectZoom,
   setActionMessage,
 }: DesignPreviewPanelProps) {
+  const [customPreviewColor, setCustomPreviewColor] = useState('#808080');
+
   return (
     <div
       style={{
@@ -139,6 +150,39 @@ export default function DesignPreviewPanel({
               {option.label}
             </button>
           ))}
+          <label
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+              fontSize: 13,
+              fontWeight: previewBackground === 'custom' ? 800 : 600,
+              outline: previewBackground === 'custom' ? '2px solid #38bdf8' : undefined,
+              borderRadius: 6,
+              padding: '2px 4px',
+              cursor: 'pointer',
+            }}
+          >
+            <span style={{ color: '#bae6fd' }}>Custom colour</span>
+            <input
+              type="color"
+              value={customPreviewColor}
+              onChange={(e) => {
+                setCustomPreviewColor(e.target.value);
+                setPreviewBackground('custom');
+                setActionMessage(`Preview background set to custom colour ${e.target.value}.`);
+              }}
+              style={{
+                width: 28,
+                height: 28,
+                padding: 0,
+                border: '1px solid rgba(148, 163, 184, 0.4)',
+                borderRadius: 6,
+                cursor: 'pointer',
+                background: 'transparent',
+              }}
+            />
+          </label>
         </div>
 
         <div
@@ -188,7 +232,7 @@ export default function DesignPreviewPanel({
 >
   <div
     style={{
-      ...getPreviewBackgroundStyle(previewBackground),
+      ...getPreviewBackgroundStyle(previewBackground, customPreviewColor),
       width: `${previewCanvasW * totalScale}px`,
       height: `${previewCanvasH * totalScale}px`,
       borderRadius: 12,
