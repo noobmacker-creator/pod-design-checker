@@ -1208,10 +1208,6 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
 
     let score = 100;
 
-    if (imgW !== targetCanvasW || imgH !== targetCanvasH) {
-      score -= 20;
-    }
-
     if (hasTransparency === false) {
       score -= 25;
     }
@@ -1271,9 +1267,6 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
     const aspect = imgW / imgH;
     const aspectClose = Math.abs(aspect - targetCanvasAspect) < 0.01;
     const largerThanTarget = imgW >= targetCanvasW && imgH >= targetCanvasH;
-    const widthRatio = imgW / targetCanvasW;
-    const heightRatio = imgH / targetCanvasH;
-    const slightlySmaller = widthRatio >= 0.85 && heightRatio >= 0.85;
 
     // Shirt Colour Fit: compare the artwork tone against common shirt colours.
     // Shirt tone groups: 'light' shirts, 'dark' shirts, and red (medium colourful).
@@ -1339,15 +1332,13 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
 
     return [
       {
-        label: 'Canvas Size',
-        status: exactSize ? 'pass' : largerThanTarget ? 'pass' : 'warn',
+        label: 'Export Size Note',
+        status: exactSize || largerThanTarget ? 'pass' : 'info',
         message: exactSize
           ? `Ready for selected target: ${imgW} × ${imgH}`
           : largerThanTarget
           ? `Larger than selected target (${targetCanvasW} × ${targetCanvasH}).`
-          : slightlySmaller
-          ? `Smaller than selected target (${targetCanvasW} × ${targetCanvasH}).`
-          : `Uploaded file is smaller than the selected target (${targetCanvasW} × ${targetCanvasH}). Export will place it on the canvas with transparent space around it, but fine detail may be limited at this size.`,
+          : 'Selected export size is larger than the uploaded file. The app will place the design on the export canvas with transparent space around it.\n\nFine detail depends on the original artwork quality.',
       },
       {
         label: 'Aspect Ratio',

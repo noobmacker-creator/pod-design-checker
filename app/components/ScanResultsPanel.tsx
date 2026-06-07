@@ -178,6 +178,7 @@ export default function ScanResultsPanel({
   const isAutoFixableLabel = (label: string) => autoFixableIssues.includes(label);
   const isShirtFit = (item: CheckItem) => item.label.startsWith('Shirt Fit:');
   const isSoftTransparency = (item: CheckItem) => item.label === 'Soft Transparency';
+  const isExportSizeNote = (item: CheckItem) => item.label === 'Export Size Note';
 
   // After Auto Fix, drop the fixable labels from the working set so every downstream
   // list (summary, critical, warnings) treats them as resolved. The original checks
@@ -187,7 +188,9 @@ export default function ScanResultsPanel({
     : checks;
 
   // Shirt colour and soft transparency are optional preview notes — never score-blocking.
-  const scoringChecks = visibleChecks.filter((item) => !isShirtFit(item) && !isSoftTransparency(item));
+  const scoringChecks = visibleChecks.filter(
+    (item) => !isShirtFit(item) && !isSoftTransparency(item) && !isExportSizeNote(item),
+  );
 
   // The auto-fixable labels that were actually present in the original scan, so the
   // "Auto Fix handled" confirmation under the Download Fixed PNG area lists real items.
@@ -224,8 +227,12 @@ export default function ScanResultsPanel({
     };
   }
 
-  const criticalDisplay = criticalItems.filter((item) => !isShirtFit(item) && !isSoftTransparency(item));
-  const warningDisplay = warningItems.filter((item) => !isShirtFit(item) && !isSoftTransparency(item));
+  const criticalDisplay = criticalItems.filter(
+    (item) => !isShirtFit(item) && !isSoftTransparency(item) && !isExportSizeNote(item),
+  );
+  const warningDisplay = warningItems.filter(
+    (item) => !isShirtFit(item) && !isSoftTransparency(item) && !isExportSizeNote(item),
+  );
   const passedDisplay = passedItems.filter((item) => !isShirtFit(item) && !isSoftTransparency(item));
   const infoDisplay = infoItems.filter((item) => !isShirtFit(item) && !isSoftTransparency(item));
 
@@ -255,7 +262,6 @@ export default function ScanResultsPanel({
     'White Background Risk',
     'Fake Transparency Background',
     'File Type Risk',
-    'Canvas Size',
     'Aspect Ratio',
     'Cut-Off Edge Risk',
     'Artwork Near Canvas Edge',
@@ -299,7 +305,6 @@ export default function ScanResultsPanel({
     'Fake Transparency Background':
       'Replace the fake checkerboard background with real transparency.',
     'File Type Risk': 'Use a transparent PNG source file for best POD results.',
-    'Canvas Size': 'Use the fixed export or upload a larger source file.',
     'Aspect Ratio': 'Use the fixed export so the design fits the POD canvas correctly.',
     'Cut-Off Edge Risk':
       'Use the original uncropped artwork or add transparent space around the design.',
