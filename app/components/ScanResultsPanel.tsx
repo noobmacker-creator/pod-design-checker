@@ -171,7 +171,7 @@ export default function ScanResultsPanel({
     'Off-Center Design',
     'Empty Padding Risk',
     'Uneven Padding Risk',
-    'Artwork Too Close to Edge',
+    'Artwork Near Canvas Edge',
     'Cut-Off Edge Risk',
   ];
   const autoFixApplied = Boolean(img) && actionMessage.includes('Auto Fix applied');
@@ -250,7 +250,7 @@ export default function ScanResultsPanel({
     'Canvas Size',
     'Aspect Ratio',
     'Cut-Off Edge Risk',
-    'Artwork Too Close to Edge',
+    'Artwork Near Canvas Edge',
     'Empty Padding Risk',
     'Uneven Padding Risk',
     'Design Too Small',
@@ -298,8 +298,8 @@ export default function ScanResultsPanel({
     'Aspect Ratio': 'Use the fixed export so the design fits the POD canvas correctly.',
     'Cut-Off Edge Risk':
       'Use the original uncropped artwork or add transparent space around the design.',
-    'Artwork Too Close to Edge':
-      'Run Auto Fix to give the design more breathing room, then download the fixed PNG.',
+    'Artwork Near Canvas Edge':
+      'Run Auto Fix to add safer breathing room around the design, then download the fixed PNG.',
     'Empty Padding Risk': 'Crop empty space or use Auto Fix before uploading.',
     'Uneven Padding Risk': 'Center the artwork or crop the file more evenly.',
     'Design Too Small': 'Use Auto Fix or upload a larger artwork source.',
@@ -774,7 +774,7 @@ export default function ScanResultsPanel({
             'Off-Center Design',
             'Empty Padding Risk',
             'Uneven Padding Risk',
-            'Artwork Too Close to Edge',
+            'Artwork Near Canvas Edge',
             'Cut-Off Edge Risk',
           ].includes(mainIssue) ? (
             <button
