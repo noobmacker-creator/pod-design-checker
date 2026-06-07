@@ -659,7 +659,7 @@ export default function ScanResultsPanel({
               : 'Review the scan results.'}
           </div>
 
-          {handleResetDesign && downloadMessage.includes('Download ready') ? (
+          {img && handleResetDesign ? (
             <button
               onClick={handleResetDesign}
               style={{

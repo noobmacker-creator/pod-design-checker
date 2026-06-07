@@ -1564,10 +1564,16 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
   }
 
   useEffect(() => {
-    if (!img) return;
-
     const canvas = previewCanvasRef.current;
     if (!canvas) return;
+
+    if (!img) {
+      const ctx = canvas.getContext('2d');
+      canvas.width = 1;
+      canvas.height = 1;
+      if (ctx) ctx.clearRect(0, 0, 1, 1);
+      return;
+    }
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
@@ -1760,8 +1766,26 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
     setHasAutoFixApplied(true);
   }
 
+  function clearDesignCanvases() {
+    const analysisCanvas = analysisCanvasRef.current;
+    if (analysisCanvas) {
+      analysisCanvas.width = 0;
+      analysisCanvas.height = 0;
+    }
+
+    const previewCanvas = previewCanvasRef.current;
+    if (previewCanvas) {
+      const ctx = previewCanvas.getContext('2d');
+      previewCanvas.width = 1;
+      previewCanvas.height = 1;
+      if (ctx) ctx.clearRect(0, 0, 1, 1);
+    }
+  }
+
   function handleResetDesign() {
     if (fileUrl) URL.revokeObjectURL(fileUrl);
+
+    clearDesignCanvases();
 
     setFile(null);
     setFileUrl('');
