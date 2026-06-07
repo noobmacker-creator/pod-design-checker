@@ -949,12 +949,24 @@ export default function ScanResultsPanel({
             status: hasWarnings ? 'warn' : 'pass',
           },
           {
-            label: fixedDownloaded ? 'Fixed PNG downloaded' : 'Download fixed PNG before upload',
-            status: fixedDownloaded ? 'pass' : img ? 'warn' : 'fail',
+            label: fixedDownloaded
+              ? 'Fixed PNG downloaded'
+              : img && noFailRemain && !hasWarnings
+              ? 'Next: Download fixed PNG'
+              : 'Download fixed PNG before upload',
+            status: fixedDownloaded
+              ? 'pass'
+              : img && noFailRemain && !hasWarnings
+              ? 'next'
+              : img
+              ? 'warn'
+              : 'fail',
           },
         ];
-        const mark = (s: string) => (s === 'pass' ? '✓' : s === 'warn' ? '⚠' : '✕');
-        const markColor = (s: string) => (s === 'pass' ? '#86efac' : s === 'warn' ? '#fde68a' : '#fca5a5');
+        const mark = (s: string) =>
+          s === 'pass' ? '✓' : s === 'next' ? '→' : s === 'warn' ? '⚠' : '✕';
+        const markColor = (s: string) =>
+          s === 'pass' ? '#86efac' : s === 'next' ? '#7dd3fc' : s === 'warn' ? '#fde68a' : '#fca5a5';
 
         return (
           <div
