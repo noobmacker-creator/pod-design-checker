@@ -1673,6 +1673,7 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
   
     setIsScanning(true);
     setHasAutoFixApplied(false);
+    setPreviewBackground('checker');
   
     if (fileUrl) URL.revokeObjectURL(fileUrl);
   
