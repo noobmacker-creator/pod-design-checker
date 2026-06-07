@@ -377,6 +377,9 @@ export default function ScanResultsPanel({
   const criticalActive = criticalDisplay;
   const warningActive = warningDisplay;
 
+  const displayScore =
+    img && criticalActive.length === 0 && warningActive.length === 0 ? 100 : printScore;
+
   return (
     <div
       style={{
@@ -708,12 +711,12 @@ export default function ScanResultsPanel({
             fontSize: 36,
             fontWeight: 800,
             color:
-              printScore >= 80 ? '#22c55e' : printScore >= 50 ? '#f59e0b' : '#ef4444',
+              displayScore >= 80 ? '#22c55e' : displayScore >= 50 ? '#f59e0b' : '#ef4444',
             lineHeight: 1,
             marginBottom: 10,
           }}
         >
-          {printScore}%
+          {displayScore}%
         </div>
 
         <div
@@ -729,11 +732,11 @@ export default function ScanResultsPanel({
         >
           <div
             style={{
-              width: `${printScore}%`,
+              width: `${displayScore}%`,
               height: '100%',
               borderRadius: 999,
               background:
-                printScore >= 80 ? '#22c55e' : printScore >= 50 ? '#f59e0b' : '#ef4444',
+                displayScore >= 80 ? '#22c55e' : displayScore >= 50 ? '#f59e0b' : '#ef4444',
               transition: 'width 0.5s ease',
             }}
           />
