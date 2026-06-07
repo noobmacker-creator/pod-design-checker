@@ -22,6 +22,7 @@ type ScanResultsPanelProps = {
   handleQuickFix: () => void;
   handleDownloadFixedPng: () => void;
   handleResetDesign?: () => void;
+  autoFixApplied?: boolean;
   img: HTMLImageElement | null;
   checks: CheckItem[];
   printScore: number;
@@ -145,6 +146,7 @@ export default function ScanResultsPanel({
   handleQuickFix,
   handleDownloadFixedPng,
   handleResetDesign,
+  autoFixApplied: autoFixAppliedProp = false,
   img,
   checks,
   printScore,
@@ -174,7 +176,7 @@ export default function ScanResultsPanel({
     'Artwork Near Canvas Edge',
     'Cut-Off Edge Risk',
   ];
-  const autoFixApplied = Boolean(img) && actionMessage.includes('Auto Fix applied');
+  const autoFixApplied = Boolean(img) && autoFixAppliedProp;
   const isAutoFixableLabel = (label: string) => autoFixableIssues.includes(label);
   const isShirtFit = (item: CheckItem) => item.label.startsWith('Shirt Fit:');
   const isSoftTransparency = (item: CheckItem) => item.label === 'Soft Transparency';
@@ -647,7 +649,7 @@ export default function ScanResultsPanel({
             Next Step:{' '}
             {downloadMessage.includes('Download ready')
               ? 'Upload this fixed PNG to your POD platform, or check another design.'
-              : actionMessage.includes('Auto Fix applied')
+              : autoFixApplied
               ? 'Review the preview, then download the fixed PNG.'
               : !img
               ? 'Upload a design to begin.'
@@ -871,7 +873,7 @@ export default function ScanResultsPanel({
             </div>
           ) : null}
 
-          {img && actionMessage.includes('Auto Fix applied') ? (
+          {img && autoFixApplied ? (
             <div
               style={{
                 padding: '10px 12px',

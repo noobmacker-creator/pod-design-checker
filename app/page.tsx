@@ -1940,6 +1940,7 @@ gap: 16,
   handleQuickFix={handleQuickFix}
   handleDownloadFixedPng={handleDownloadApparelPng}
   handleResetDesign={handleResetDesign}
+  autoFixApplied={hasAutoFixApplied}
   img={img}
   checks={checks}
   printScore={printScore}
