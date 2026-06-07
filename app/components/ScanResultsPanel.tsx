@@ -177,6 +177,7 @@ export default function ScanResultsPanel({
   const autoFixApplied = Boolean(img) && actionMessage.includes('Auto Fix applied');
   const isAutoFixableLabel = (label: string) => autoFixableIssues.includes(label);
   const isShirtFit = (item: CheckItem) => item.label.startsWith('Shirt Fit:');
+  const isSoftTransparency = (item: CheckItem) => item.label === 'Soft Transparency';
 
   // After Auto Fix, drop the fixable labels from the working set so every downstream
   // list (summary, critical, warnings) treats them as resolved. The original checks
@@ -185,8 +186,8 @@ export default function ScanResultsPanel({
     ? checks.filter((item) => !isAutoFixableLabel(item.label))
     : checks;
 
-  // Shirt colour guidance is optional preview help — never score-blocking.
-  const scoringChecks = visibleChecks.filter((item) => !isShirtFit(item));
+  // Shirt colour and soft transparency are optional preview notes — never score-blocking.
+  const scoringChecks = visibleChecks.filter((item) => !isShirtFit(item) && !isSoftTransparency(item));
 
   // The auto-fixable labels that were actually present in the original scan, so the
   // "Auto Fix handled" confirmation under the Download Fixed PNG area lists real items.
@@ -223,13 +224,27 @@ export default function ScanResultsPanel({
     };
   }
 
-  const criticalDisplay = criticalItems.filter((item) => !isShirtFit(item));
-  const warningDisplay = warningItems.filter((item) => !isShirtFit(item));
-  const passedDisplay = passedItems.filter((item) => !isShirtFit(item));
-  const infoDisplay = infoItems.filter((item) => !isShirtFit(item));
+  const criticalDisplay = criticalItems.filter((item) => !isShirtFit(item) && !isSoftTransparency(item));
+  const warningDisplay = warningItems.filter((item) => !isShirtFit(item) && !isSoftTransparency(item));
+  const passedDisplay = passedItems.filter((item) => !isShirtFit(item) && !isSoftTransparency(item));
+  const infoDisplay = infoItems.filter((item) => !isShirtFit(item) && !isSoftTransparency(item));
 
   if (shirtFitCard) {
     infoDisplay.push(shirtFitCard);
+  }
+
+  // Soft Transparency is optional preview guidance — always shown as an info note.
+  const softTransparencyItem = checks.find(isSoftTransparency);
+  if (softTransparencyItem && softTransparencyItem.status !== 'pass') {
+    const note =
+      softTransparencyItem.status === 'warn'
+        ? softTransparencyItem.message
+        : 'Soft transparent pixels detected. Common in smooth edges, shadows, fades, and vintage artwork.';
+    infoDisplay.push({
+      label: 'Soft Transparency',
+      status: 'info',
+      message: `${note}\n\nPreview on dark shirt colours if needed.`,
+    });
   }
 
   // Result Summary Engine: picks the single most important issue from the checks array.
@@ -255,7 +270,6 @@ export default function ScanResultsPanel({
     'Off-Center Design',
     'Artwork Size',
     'Stray Speck Check',
-    'Soft Transparency',
   ];
 
   // Match a check label to its priority key. startsWith covers labels that share a prefix.
@@ -296,7 +310,6 @@ export default function ScanResultsPanel({
     'Design Too Small': 'Use Auto Fix or upload a larger artwork source.',
     'Print Safety Border': 'Use Auto Fix to move the artwork inside the safe print area.',
     'White Edge / Halo Risk': 'Clean the design edges before uploading to dark shirts.',
-    'Soft Transparency': 'Preview this design on dark shirt colours before uploading.',
     'Compression Artifact Risk': 'Use a cleaner PNG source before uploading.',
     'Low Contrast Risk': 'Increase contrast so details print clearly.',
     'Line Thickness': 'Thicken fine lines before printing.',
@@ -352,7 +365,6 @@ export default function ScanResultsPanel({
     'Fake Transparency Background': 'Replace the fake checkerboard background with real transparency.',
     'File Type Risk': 'Use a PNG source file with transparency for best POD results.',
     'Compression Artifact Risk': 'Use a cleaner PNG source before uploading.',
-    'Soft Transparency': 'Preview this design on dark shirt colours before uploading.',
     'White Edge / Halo Risk': 'Clean the design edges before uploading to dark shirts.',
     'Low Contrast Risk': 'Increase contrast so details print clearly.',
   };

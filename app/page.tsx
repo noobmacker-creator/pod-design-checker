@@ -132,14 +132,14 @@ function getSemiTransparencyRiskCheck(imageData: ImageData): CheckItem {
   let status: CheckStatus = 'pass';
   let message = 'No major soft transparency issue detected.';
 
-  if (semiTransparentRatio >= 0.12) {
+  if (semiTransparentRatio >= 0.25) {
     status = 'warn';
     message =
       'Heavy soft transparency detected. Check the design preview on dark shirt colours.';
   } else if (semiTransparentRatio >= 0.03) {
     status = 'info';
     message =
-      'Soft transparent pixels detected. Common in smooth edges, shadows, and vintage/distressed artwork.';
+      'Soft transparent pixels detected. Common in smooth edges, shadows, fades, and vintage artwork.';
   }
 
   return {
