@@ -13,6 +13,7 @@ type Bounds = {
 
 type ScanResultsPanelProps = {
   file: File | null;
+  uploadInputKey?: number;
   actionMessage: string;
   downloadMessage: string;
   handleFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -137,6 +138,7 @@ function Section({ title, items, emptyText, headingColor }: SectionProps) {
 
 export default function ScanResultsPanel({
   file,
+  uploadInputKey = 0,
   actionMessage,
   downloadMessage,
   handleFileChange,
@@ -553,6 +555,7 @@ export default function ScanResultsPanel({
         </label>
 
         <input
+          key={uploadInputKey}
           id="design-upload"
           type="file"
           accept="image/png,image/jpeg,image/jpg,image/webp"

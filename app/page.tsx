@@ -848,6 +848,7 @@ export default function Page() {
   const [downloadMessage, setDownloadMessage] = useState('');
   const [isScanning, setIsScanning] = useState(false);
   const [hasAutoFixApplied, setHasAutoFixApplied] = useState(false);
+  const [uploadInputKey, setUploadInputKey] = useState(0);
   const [selectedRedbubblePreset, setSelectedRedbubblePreset] = useState<RedbubblePresetId>('apparel');
   const [selectedPrintfulPreset, setSelectedPrintfulPreset] = useState<PrintfulPresetId>('dtg-dtf-apparel');
   const [activePresetSystem, setActivePresetSystem] = useState<'redbubble' | 'printful' | 'teepublic'>('redbubble');
@@ -1776,6 +1777,7 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
     setSpecks(0);
     setThinLinePercent(0);
     setFakeTransparencyDetected(false);
+    setShirtFitTone(null);
 
     setWhiteBackgroundCheck(null);
     setWhiteEdgeCheck(null);
@@ -1791,11 +1793,18 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
     setSolidBackgroundBoxCheck(null);
 
     setHasAutoFixApplied(false);
+    setIsScanning(false);
+    setTransform({ scale: 1, offsetX: 0, offsetY: 0 });
+    setMockupOffsetX(0);
+    setMockupOffsetY(0);
+    setMockupScale(1);
     setInspectZoom(1);
     setPreviewSize(DEFAULT_PREVIEW_SIZE);
+    setPreviewBackground('checker');
     setViewMode('pod');
     setActionMessage('Upload a design to begin.');
     setDownloadMessage('');
+    setUploadInputKey((key) => key + 1);
   }
 
   function toSafeSlug(value: string) {
@@ -1931,6 +1940,7 @@ gap: 16,
          <div style={{ minWidth: 0, width: '100%', maxWidth: '100%' }}>
          <ScanResultsPanel
   file={file}
+  uploadInputKey={uploadInputKey}
   actionMessage={actionMessage}
   downloadMessage={downloadMessage}
   handleFileChange={handleFileChange}
