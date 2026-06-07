@@ -93,24 +93,11 @@ export default function IssueBucketsPanel({
     { id: 'teepublic', label: 'TeePublic' },
   ];
 
-  const uploadTargetGuidance: Record<UploadTarget, { title: string; message: string }> = {
-    standard: {
-      title: 'Standard POD Focus',
-      message:
-        'Best general export for most POD shirt uploads. Use this when you are not sure which platform preset you need.',
-    },
-    redbubble: {
-      title: 'Redbubble Focus',
-      message: 'Use the Redbubble export when uploading apparel designs to Redbubble.',
-    },
-    printful: {
-      title: 'Printful Focus',
-      message: 'Use the Printful DTG/DTF export when uploading apparel designs to Printful.',
-    },
-    teepublic: {
-      title: 'TeePublic Focus',
-      message: 'Use the TeePublic export for TeePublic all-products upload.',
-    },
+  const uploadTargetHelper: Record<UploadTarget, string> = {
+    standard: 'Use this export for most general POD shirt uploads.',
+    redbubble: 'Use this export when uploading apparel designs to Redbubble.',
+    printful: 'Use this export when uploading DTG/DTF apparel designs to Printful.',
+    teepublic: 'Use this export for TeePublic all-products upload.',
   };
 
   const baseBoxStyle: React.CSSProperties = {
@@ -446,33 +433,6 @@ export default function IssueBucketsPanel({
           borderRadius: 12,
           background: 'rgba(37, 99, 235, 0.10)',
           border: '1px solid rgba(147, 197, 253, 0.25)',
-          color: '#cbd5e1',
-          fontSize: 12,
-          lineHeight: 1.45,
-        }}
-      >
-        <div style={{ fontWeight: 800, color: '#bfdbfe', marginBottom: 4 }}>
-          Recommended Export
-        </div>
-        <div>
-          Start with Standard Apparel PNG for most POD shirt uploads. Use
-          Redbubble, Printful, or TeePublic exports only when uploading to those
-          platforms.
-        </div>
-        <ul style={{ margin: '6px 0 0', paddingLeft: 18 }}>
-          <li>Standard Apparel: best general starting point</li>
-          <li>Redbubble: use for Redbubble apparel upload</li>
-          <li>Printful: use for Printful DTG/DTF apparel</li>
-          <li>TeePublic: use for TeePublic all-products upload</li>
-        </ul>
-      </div>
-      <div
-        style={{
-          marginBottom: 12,
-          padding: 10,
-          borderRadius: 12,
-          background: 'rgba(37, 99, 235, 0.10)',
-          border: '1px solid rgba(147, 197, 253, 0.25)',
         }}
       >
         <div style={{ fontWeight: 800, color: '#bfdbfe', fontSize: 12, marginBottom: 6 }}>
@@ -505,20 +465,13 @@ export default function IssueBucketsPanel({
         </div>
         <div
           style={{
-            marginTop: 10,
-            padding: 10,
-            borderRadius: 12,
-            background: 'rgba(37, 99, 235, 0.10)',
-            border: '1px solid rgba(147, 197, 253, 0.25)',
-            color: '#cbd5e1',
+            marginTop: 8,
             fontSize: 12,
+            color: '#cbd5e1',
             lineHeight: 1.45,
           }}
         >
-          <div style={{ fontWeight: 800, color: '#bfdbfe', marginBottom: 4 }}>
-            {uploadTargetGuidance[uploadTarget].title}
-          </div>
-          <div>{uploadTargetGuidance[uploadTarget].message}</div>
+          {uploadTargetHelper[uploadTarget]}
         </div>
       </div>
       {isScanning && (
