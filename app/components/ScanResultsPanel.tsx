@@ -571,11 +571,17 @@ export default function ScanResultsPanel({
               background: 'rgba(15,23,42,0.62)',
               border: '1px solid rgba(255,255,255,0.08)',
               color: '#cbd5e1',
-              fontSize: 13,
+              fontSize: 12,
               lineHeight: 1.45,
+              display: 'grid',
+              gap: 4,
             }}
           >
-            Upload a PNG to check size, placement, transparency, and print safety.
+            <div>Upload a PNG design to begin.</div>
+            <div>Transparent PNG recommended for POD.</div>
+            <div style={{ color: '#94a3b8', fontSize: 11 }}>
+              JPG/WebP can be checked, but PNG is best for final upload.
+            </div>
           </div>
         ) : null}
 
