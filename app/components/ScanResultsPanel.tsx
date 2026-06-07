@@ -176,6 +176,7 @@ export default function ScanResultsPanel({
   ];
   const autoFixApplied = Boolean(img) && actionMessage.includes('Auto Fix applied');
   const isAutoFixableLabel = (label: string) => autoFixableIssues.includes(label);
+  const isShirtFit = (item: CheckItem) => item.label.startsWith('Shirt Fit:');
 
   // After Auto Fix, drop the fixable labels from the working set so every downstream
   // list (summary, critical, warnings) treats them as resolved. The original checks
@@ -184,21 +185,22 @@ export default function ScanResultsPanel({
     ? checks.filter((item) => !isAutoFixableLabel(item.label))
     : checks;
 
+  // Shirt colour guidance is optional preview help — never score-blocking.
+  const scoringChecks = visibleChecks.filter((item) => !isShirtFit(item));
+
   // The auto-fixable labels that were actually present in the original scan, so the
   // "Auto Fix handled" confirmation under the Download Fixed PNG area lists real items.
   const autoFixHandledLabels = autoFixableIssues.filter((label) =>
     checks.some((item) => item.label === label),
   );
 
-  const criticalItems = visibleChecks.filter((item) => item.status === 'fail');
-  const warningItems = visibleChecks.filter((item) => item.status === 'warn');
+  const criticalItems = scoringChecks.filter((item) => item.status === 'fail');
+  const warningItems = scoringChecks.filter((item) => item.status === 'warn');
   const passedItems = visibleChecks.filter((item) => item.status === 'pass');
   const infoItems = visibleChecks.filter((item) => item.status === 'info');
 
   // Display grouping only: compact the many "Shirt Fit: <colour>" rows into one
-  // "Shirt Colour Fit" card. This does NOT change the checks array or the summary
-  // engine above; it only affects how the section lists are rendered.
-  const isShirtFit = (item: CheckItem) => item.label.startsWith('Shirt Fit:');
+  // optional "Shirt Colour Preview" note. This does NOT change the checks array.
   const shirtName = (item: CheckItem) => item.label.replace(/^Shirt Fit:\s*/, '');
   const shirtFitItems = checks.filter(isShirtFit);
 
@@ -208,18 +210,12 @@ export default function ScanResultsPanel({
     const checkFirst = shirtFitItems.filter((i) => i.status === 'warn').map(shirtName);
     const notRecommended = shirtFitItems.filter((i) => i.status === 'fail').map(shirtName);
 
-    const combinedStatus: CheckItem['status'] = notRecommended.length
-      ? 'fail'
-      : checkFirst.length
-      ? 'warn'
-      : goodFit.length
-      ? 'pass'
-      : 'info';
-
     shirtFitCard = {
-      label: 'Shirt Colour Fit',
-      status: combinedStatus,
+      label: 'Shirt Colour Preview',
+      status: 'info',
       message: [
+        'Some shirt colours may suit this artwork better than others. Use the preview background to choose the best colours.',
+        '',
         `Good fit: ${goodFit.length ? goodFit.join(', ') : 'none'}`,
         `Check first: ${checkFirst.length ? checkFirst.join(', ') : 'none'}`,
         `Not recommended: ${notRecommended.length ? notRecommended.join(', ') : 'none'}`,
@@ -233,10 +229,7 @@ export default function ScanResultsPanel({
   const infoDisplay = infoItems.filter((item) => !isShirtFit(item));
 
   if (shirtFitCard) {
-    if (shirtFitCard.status === 'fail') criticalDisplay.push(shirtFitCard);
-    else if (shirtFitCard.status === 'warn') warningDisplay.push(shirtFitCard);
-    else if (shirtFitCard.status === 'pass') passedDisplay.push(shirtFitCard);
-    else infoDisplay.push(shirtFitCard);
+    infoDisplay.push(shirtFitCard);
   }
 
   // Result Summary Engine: picks the single most important issue from the checks array.
@@ -258,7 +251,6 @@ export default function ScanResultsPanel({
     'White Edge / Halo Risk',
     'Compression Artifact Risk',
     'Low Contrast Risk',
-    'Shirt Fit',
     'Line Thickness',
     'Off-Center Design',
     'Artwork Size',
@@ -266,8 +258,7 @@ export default function ScanResultsPanel({
     'Soft Transparency',
   ];
 
-  // Match a check label to its priority key. startsWith covers grouped checks like the
-  // "Shirt Fit: White" labels, which all map to the single "Shirt Fit" priority entry.
+  // Match a check label to its priority key. startsWith covers labels that share a prefix.
   const matchPriorityKey = (label: string) =>
     issuePriority.find((key) => label === key || label.startsWith(key));
 
@@ -308,7 +299,6 @@ export default function ScanResultsPanel({
     'Soft Transparency': 'Preview this design on dark shirt colours before uploading.',
     'Compression Artifact Risk': 'Use a cleaner PNG source before uploading.',
     'Low Contrast Risk': 'Increase contrast so details print clearly.',
-    'Shirt Fit': 'Choose shirt colours where the artwork has strong contrast.',
     'Line Thickness': 'Thicken fine lines before printing.',
     'Stray Speck Check':
       'Remove unwanted floating marks from empty transparent areas before upload.',
@@ -365,9 +355,6 @@ export default function ScanResultsPanel({
     'Soft Transparency': 'Preview this design on dark shirt colours before uploading.',
     'White Edge / Halo Risk': 'Clean the design edges before uploading to dark shirts.',
     'Low Contrast Risk': 'Increase contrast so details print clearly.',
-    // Main issue key for the grouped shirt checks is "Shirt Fit"; cover both labels.
-    'Shirt Fit': 'Choose shirt colours where the artwork has stronger contrast.',
-    'Shirt Colour Fit': 'Choose shirt colours where the artwork has stronger contrast.',
   };
 
   const showManualFixCard = Boolean(img) && Boolean(mainPick.item) && !autoFixableIssues.includes(mainIssue);
