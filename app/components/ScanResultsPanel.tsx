@@ -1110,12 +1110,27 @@ export default function ScanResultsPanel({
       ) : null}
 
       {infoDisplay.length > 0 ? (
-        <Section
-          title="Info"
-          items={infoDisplay}
-          emptyText="No info checks."
-          headingColor="#7dd3fc"
-        />
+        <details
+          style={{
+            marginBottom: 8,
+            padding: '8px 10px',
+            borderRadius: 10,
+            background: 'rgba(15,23,42,0.55)',
+            border: '1px solid rgba(125,211,252,0.2)',
+          }}
+        >
+          <summary style={{ cursor: 'pointer', fontWeight: 700, color: '#7dd3fc', fontSize: 13 }}>
+            Show Optional Notes ({infoDisplay.length})
+          </summary>
+          <div style={{ marginTop: 10 }}>
+            <Section
+              title="Optional Notes"
+              items={infoDisplay}
+              emptyText="No optional notes."
+              headingColor="#7dd3fc"
+            />
+          </div>
+        </details>
       ) : null}
 
       {img && effectiveBounds ? (
