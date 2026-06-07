@@ -185,6 +185,18 @@ export default function DesignPreviewPanel({
           </label>
         </div>
 
+        <p
+          style={{
+            fontSize: 11,
+            color: '#94a3b8',
+            lineHeight: 1.35,
+            marginTop: 4,
+            marginBottom: 0,
+          }}
+        >
+          Preview only — downloads stay transparent.
+        </p>
+
         <div
           style={{
             display: 'flex',
