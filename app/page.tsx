@@ -843,6 +843,12 @@ export default function Page() {
     offsetX: 0,
     offsetY: 0,
   });
+  const [originalTransform, setOriginalTransform] = useState<{
+    scale: number;
+    offsetX: number;
+    offsetY: number;
+  } | null>(null);
+  const [autoFixPreviewMode, setAutoFixPreviewMode] = useState<'fixed' | 'original'>('fixed');
 
   const [actionMessage, setActionMessage] = useState('Upload a design to begin.');
   const [downloadMessage, setDownloadMessage] = useState('');
@@ -1013,17 +1019,32 @@ canvas.height = img.naturalHeight;
     return getDesignCanvasSize(effectiveBounds, img);
   }, [effectiveBounds, img]);
 
+  const previewTransform = useMemo(() => {
+    if (hasAutoFixApplied && autoFixPreviewMode === 'original' && originalTransform) {
+      return originalTransform;
+    }
+    return transform;
+  }, [hasAutoFixApplied, autoFixPreviewMode, originalTransform, transform]);
+
+  const previewEffectiveBounds = useMemo(() => {
+    return getEffectiveArtBounds(originalBounds, previewTransform);
+  }, [originalBounds, previewTransform]);
+
+  const previewDesignCanvasSize = useMemo(() => {
+    return getDesignCanvasSize(previewEffectiveBounds, img);
+  }, [previewEffectiveBounds, img]);
+
   const previewCanvasW = useMemo(() => {
     if (viewMode === 'pod') return CANVAS_W;
-    if (viewMode === 'design') return designCanvasSize.width;
+    if (viewMode === 'design') return previewDesignCanvasSize.width;
     return SHIRT_W;
-  }, [viewMode, designCanvasSize]);
+  }, [viewMode, previewDesignCanvasSize]);
 
   const previewCanvasH = useMemo(() => {
     if (viewMode === 'pod') return CANVAS_H;
-    if (viewMode === 'design') return designCanvasSize.height;
+    if (viewMode === 'design') return previewDesignCanvasSize.height;
     return SHIRT_H;
-  }, [viewMode, designCanvasSize]);
+  }, [viewMode, previewDesignCanvasSize]);
 
   const totalScale = useMemo(() => {
     return previewSize * inspectZoom;
@@ -1585,42 +1606,42 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
 
       drawPodBackground(ctx);
 
-      const drawW = img.naturalWidth * transform.scale;
-      const drawH = img.naturalHeight * transform.scale;
-      const drawX = transform.offsetX;
-      const drawY = transform.offsetY;
+      const drawW = img.naturalWidth * previewTransform.scale;
+      const drawH = img.naturalHeight * previewTransform.scale;
+      const drawX = previewTransform.offsetX;
+      const drawY = previewTransform.offsetY;
 
       ctx.drawImage(img, drawX, drawY, drawW, drawH);
 
-      if (effectiveBounds) {
-        drawBoundsOverlay(ctx, effectiveBounds.x, effectiveBounds.y, effectiveBounds.w, effectiveBounds.h);
+      if (previewEffectiveBounds) {
+        drawBoundsOverlay(ctx, previewEffectiveBounds.x, previewEffectiveBounds.y, previewEffectiveBounds.w, previewEffectiveBounds.h);
       }
     }
 
     if (viewMode === 'design') {
-      canvas.width = designCanvasSize.width;
-      canvas.height = designCanvasSize.height;
+      canvas.width = previewDesignCanvasSize.width;
+      canvas.height = previewDesignCanvasSize.height;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       ctx.strokeStyle = '#f97316';
       ctx.lineWidth = 3;
       ctx.strokeRect(12, 12, canvas.width - 24, canvas.height - 24);
 
-      const drawW = img.naturalWidth * transform.scale;
-      const drawH = img.naturalHeight * transform.scale;
+      const drawW = img.naturalWidth * previewTransform.scale;
+      const drawH = img.naturalHeight * previewTransform.scale;
 
-      if (effectiveBounds) {
-        const targetX = (canvas.width - effectiveBounds.w) / 2;
-        const targetY = (canvas.height - effectiveBounds.h) / 2;
+      if (previewEffectiveBounds) {
+        const targetX = (canvas.width - previewEffectiveBounds.w) / 2;
+        const targetY = (canvas.height - previewEffectiveBounds.h) / 2;
 
-        const shiftX = targetX - effectiveBounds.x;
-        const shiftY = targetY - effectiveBounds.y;
+        const shiftX = targetX - previewEffectiveBounds.x;
+        const shiftY = targetY - previewEffectiveBounds.y;
 
-        const drawX = transform.offsetX + shiftX;
-        const drawY = transform.offsetY + shiftY;
+        const drawX = previewTransform.offsetX + shiftX;
+        const drawY = previewTransform.offsetY + shiftY;
 
         ctx.drawImage(img, drawX, drawY, drawW, drawH);
-        drawBoundsOverlay(ctx, targetX, targetY, effectiveBounds.w, effectiveBounds.h);
+        drawBoundsOverlay(ctx, targetX, targetY, previewEffectiveBounds.w, previewEffectiveBounds.h);
       } else {
         const drawX = (canvas.width - drawW) / 2;
         const drawY = (canvas.height - drawH) / 2;
@@ -1646,24 +1667,24 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
       const mapX = SHIRT_PRINT_W / CANVAS_W;
       const mapY = SHIRT_PRINT_H / CANVAS_H;
 
-      const drawW = img.naturalWidth * transform.scale * mapX * mockupScale;
-const drawH = img.naturalHeight * transform.scale * mapY * mockupScale;
-const drawX = SHIRT_PRINT_X + transform.offsetX * mapX + mockupOffsetX;
-const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
+      const drawW = img.naturalWidth * previewTransform.scale * mapX * mockupScale;
+const drawH = img.naturalHeight * previewTransform.scale * mapY * mockupScale;
+const drawX = SHIRT_PRINT_X + previewTransform.offsetX * mapX + mockupOffsetX;
+const drawY = SHIRT_PRINT_Y + previewTransform.offsetY * mapY + mockupOffsetY;
 
       ctx.drawImage(img, drawX, drawY, drawW, drawH);
 
-      if (effectiveBounds) {
+      if (previewEffectiveBounds) {
         drawBoundsOverlay(
           ctx,
-          SHIRT_PRINT_X + effectiveBounds.x * mapX,
-          SHIRT_PRINT_Y + effectiveBounds.y * mapY,
-          effectiveBounds.w * mapX,
-          effectiveBounds.h * mapY
+          SHIRT_PRINT_X + previewEffectiveBounds.x * mapX,
+          SHIRT_PRINT_Y + previewEffectiveBounds.y * mapY,
+          previewEffectiveBounds.w * mapX,
+          previewEffectiveBounds.h * mapY
         );
       }
     }
-  }, [img, shirtImg, transform, effectiveBounds, viewMode, designCanvasSize, mockupOffsetX, mockupOffsetY, mockupScale]);
+  }, [img, shirtImg, previewTransform, previewEffectiveBounds, viewMode, previewDesignCanvasSize, mockupOffsetX, mockupOffsetY, mockupScale]);
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const selected = e.target.files?.[0];
@@ -1671,6 +1692,8 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
   
     setIsScanning(true);
     setHasAutoFixApplied(false);
+    setOriginalTransform(null);
+    setAutoFixPreviewMode('fixed');
     setPreviewBackground('checker');
   
     if (fileUrl) URL.revokeObjectURL(fileUrl);
@@ -1728,7 +1751,9 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
 
   function handleQuickFix() {
     if (!originalBounds) return;
-  
+
+    setOriginalTransform({ ...transform });
+    setAutoFixPreviewMode('fixed');
     setViewMode('pod');
   
     const availableW = CANVAS_W - SAFE_BOX * 2;
@@ -1817,6 +1842,8 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
     setSolidBackgroundBoxCheck(null);
 
     setHasAutoFixApplied(false);
+    setOriginalTransform(null);
+    setAutoFixPreviewMode('fixed');
     setIsScanning(false);
     setTransform({ scale: 1, offsetX: 0, offsetY: 0 });
     setMockupOffsetX(0);
@@ -2009,6 +2036,9 @@ gap: 16,
   setPreviewSize={setPreviewSize}
   setInspectZoom={setInspectZoom}
   setActionMessage={setActionMessage}
+  autoFixApplied={hasAutoFixApplied}
+  autoFixPreviewMode={autoFixPreviewMode}
+  setAutoFixPreviewMode={setAutoFixPreviewMode}
 />
 <IssueBucketsPanel
   isScanning={isScanning}

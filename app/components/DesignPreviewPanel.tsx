@@ -67,6 +67,9 @@ type DesignPreviewPanelProps = {
   setPreviewSize: React.Dispatch<React.SetStateAction<number>>;
   setInspectZoom: React.Dispatch<React.SetStateAction<number>>;
   setActionMessage: React.Dispatch<React.SetStateAction<string>>;
+  autoFixApplied?: boolean;
+  autoFixPreviewMode?: 'fixed' | 'original';
+  setAutoFixPreviewMode?: React.Dispatch<React.SetStateAction<'fixed' | 'original'>>;
 };
 
 export default function DesignPreviewPanel({
@@ -84,6 +87,9 @@ export default function DesignPreviewPanel({
   setPreviewSize,
   setInspectZoom,
   setActionMessage,
+  autoFixApplied = false,
+  autoFixPreviewMode = 'fixed',
+  setAutoFixPreviewMode,
 }: DesignPreviewPanelProps) {
   const [customPreviewColor, setCustomPreviewColor] = useState('#808080');
 
@@ -132,6 +138,36 @@ export default function DesignPreviewPanel({
             </button>
           ))}
         </div>
+
+        {autoFixApplied && setAutoFixPreviewMode ? (
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+            <span style={{ fontWeight: 700, color: '#bae6fd', fontSize: 13 }}>Preview:</span>
+            <button
+              onClick={() => {
+                setAutoFixPreviewMode('original');
+                setActionMessage('Showing original upload preview.');
+              }}
+              style={{
+                fontWeight: autoFixPreviewMode === 'original' ? 800 : 600,
+                outline: autoFixPreviewMode === 'original' ? '2px solid #38bdf8' : undefined,
+              }}
+            >
+              Original
+            </button>
+            <button
+              onClick={() => {
+                setAutoFixPreviewMode('fixed');
+                setActionMessage('Showing Auto Fix preview.');
+              }}
+              style={{
+                fontWeight: autoFixPreviewMode === 'fixed' ? 800 : 600,
+                outline: autoFixPreviewMode === 'fixed' ? '2px solid #38bdf8' : undefined,
+              }}
+            >
+              Fixed
+            </button>
+          </div>
+        ) : null}
 
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
           <span style={{ fontWeight: 700, color: '#bae6fd', fontSize: 13 }}>Preview Background:</span>
