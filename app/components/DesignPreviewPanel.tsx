@@ -70,6 +70,7 @@ type DesignPreviewPanelProps = {
   autoFixApplied?: boolean;
   autoFixPreviewMode?: 'fixed' | 'original';
   setAutoFixPreviewMode?: React.Dispatch<React.SetStateAction<'fixed' | 'original'>>;
+  isScanning?: boolean;
 };
 
 export default function DesignPreviewPanel({
@@ -90,6 +91,7 @@ export default function DesignPreviewPanel({
   autoFixApplied = false,
   autoFixPreviewMode = 'fixed',
   setAutoFixPreviewMode,
+  isScanning = false,
 }: DesignPreviewPanelProps) {
   const [customPreviewColor, setCustomPreviewColor] = useState('#808080');
 
@@ -257,8 +259,16 @@ export default function DesignPreviewPanel({
         </div>
       </div>
 
+      <style>{`
+        @keyframes scanOverlayPulse {
+          0%, 100% { opacity: 1; box-shadow: 0 0 22px rgba(56, 189, 248, 0.28); }
+          50% { opacity: 0.82; box-shadow: 0 0 32px rgba(56, 189, 248, 0.45); }
+        }
+      `}</style>
+
       <div
         style={{
+          position: 'relative',
           width: '100%',
           height: '100vh',
           overflow: 'auto',
@@ -270,6 +280,41 @@ export default function DesignPreviewPanel({
           minWidth: 0,
         }}
       >
+        {isScanning && (
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: 'rgba(2, 6, 23, 0.45)',
+              backdropFilter: 'blur(2px)',
+              borderRadius: 16,
+              zIndex: 10,
+              pointerEvents: 'none',
+            }}
+          >
+            <div
+              style={{
+                padding: '14px 18px',
+                borderRadius: 14,
+                background: 'rgba(15, 23, 42, 0.88)',
+                border: '1px solid rgba(125, 211, 252, 0.45)',
+                boxShadow: '0 0 22px rgba(56, 189, 248, 0.28)',
+                textAlign: 'center',
+                animation: 'scanOverlayPulse 1.6s ease-in-out infinite',
+              }}
+            >
+              <div style={{ fontWeight: 800, fontSize: 16, color: '#e0f2fe', marginBottom: 6 }}>
+                Scanning design...
+              </div>
+              <div style={{ fontSize: 13, color: '#94a3b8', lineHeight: 1.45 }}>
+                Checking transparency, sizing, edges, and print safety.
+              </div>
+            </div>
+          </div>
+        )}
         <div
   style={{
     width: 'fit-content',

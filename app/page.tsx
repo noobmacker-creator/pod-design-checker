@@ -2039,6 +2039,7 @@ gap: 16,
   autoFixApplied={hasAutoFixApplied}
   autoFixPreviewMode={autoFixPreviewMode}
   setAutoFixPreviewMode={setAutoFixPreviewMode}
+  isScanning={isScanning}
 />
 <IssueBucketsPanel
   isScanning={isScanning}
