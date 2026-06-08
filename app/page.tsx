@@ -853,6 +853,7 @@ export default function Page() {
   const [actionMessage, setActionMessage] = useState('Upload a design to begin.');
   const [downloadMessage, setDownloadMessage] = useState('');
   const [isScanning, setIsScanning] = useState(false);
+  const [showSafeAreaOverlay, setShowSafeAreaOverlay] = useState(false);
   const [hasAutoFixApplied, setHasAutoFixApplied] = useState(false);
   const [uploadInputKey, setUploadInputKey] = useState(0);
   const [selectedRedbubblePreset, setSelectedRedbubblePreset] = useState<RedbubblePresetId>('apparel');
@@ -1604,8 +1605,6 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
       canvas.height = CANVAS_H;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      drawPodBackground(ctx);
-
       const drawW = img.naturalWidth * previewTransform.scale;
       const drawH = img.naturalHeight * previewTransform.scale;
       const drawX = previewTransform.offsetX;
@@ -1695,7 +1694,8 @@ const drawY = SHIRT_PRINT_Y + previewTransform.offsetY * mapY + mockupOffsetY;
     setOriginalTransform(null);
     setAutoFixPreviewMode('fixed');
     setPreviewBackground('checker');
-  
+    setShowSafeAreaOverlay(false);
+
     if (fileUrl) URL.revokeObjectURL(fileUrl);
   
     setFile(selected);
@@ -1852,6 +1852,7 @@ const drawY = SHIRT_PRINT_Y + previewTransform.offsetY * mapY + mockupOffsetY;
     setInspectZoom(1);
     setPreviewSize(DEFAULT_PREVIEW_SIZE);
     setPreviewBackground('checker');
+    setShowSafeAreaOverlay(false);
     setViewMode('pod');
     setActionMessage('Upload a design to begin.');
     setDownloadMessage('');
@@ -2040,6 +2041,9 @@ gap: 16,
   autoFixPreviewMode={autoFixPreviewMode}
   setAutoFixPreviewMode={setAutoFixPreviewMode}
   isScanning={isScanning}
+  viewMode={viewMode}
+  showSafeAreaOverlay={showSafeAreaOverlay}
+  setShowSafeAreaOverlay={setShowSafeAreaOverlay}
 />
 <IssueBucketsPanel
   isScanning={isScanning}

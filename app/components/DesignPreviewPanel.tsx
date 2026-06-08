@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import type { ViewMode } from '../lib/podCheckerTypes';
 
 export type PreviewBackground = 'checker' | 'white' | 'black' | 'navy' | 'dark-grey' | 'red' | 'pink' | 'custom';
 
@@ -71,7 +72,14 @@ type DesignPreviewPanelProps = {
   autoFixPreviewMode?: 'fixed' | 'original';
   setAutoFixPreviewMode?: React.Dispatch<React.SetStateAction<'fixed' | 'original'>>;
   isScanning?: boolean;
+  viewMode?: ViewMode;
+  showSafeAreaOverlay?: boolean;
+  setShowSafeAreaOverlay?: React.Dispatch<React.SetStateAction<boolean>>;
 };
+
+const POD_CANVAS_W = 4200;
+const POD_CANVAS_H = 4800;
+const SAFE_BOX_INSET = 180;
 
 export default function DesignPreviewPanel({
   previewCanvasRef,
@@ -92,6 +100,9 @@ export default function DesignPreviewPanel({
   autoFixPreviewMode = 'fixed',
   setAutoFixPreviewMode,
   isScanning = false,
+  viewMode = 'pod',
+  showSafeAreaOverlay = false,
+  setShowSafeAreaOverlay,
 }: DesignPreviewPanelProps) {
   const [customPreviewColor, setCustomPreviewColor] = useState('#808080');
 
@@ -169,6 +180,51 @@ export default function DesignPreviewPanel({
               Fixed
             </button>
           </div>
+        ) : null}
+
+        {setShowSafeAreaOverlay ? (
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+            <span style={{ fontWeight: 700, color: '#bae6fd', fontSize: 13 }}>Safe Area:</span>
+            <button
+              onClick={() => {
+                setShowSafeAreaOverlay(true);
+                setActionMessage('Safe print area overlay turned on.');
+              }}
+              style={{
+                fontWeight: showSafeAreaOverlay ? 800 : 600,
+                outline: showSafeAreaOverlay ? '2px solid #38bdf8' : undefined,
+              }}
+            >
+              On
+            </button>
+            <button
+              onClick={() => {
+                setShowSafeAreaOverlay(false);
+                setActionMessage('Safe print area overlay turned off.');
+              }}
+              style={{
+                fontWeight: !showSafeAreaOverlay ? 800 : 600,
+                outline: !showSafeAreaOverlay ? '2px solid #38bdf8' : undefined,
+              }}
+            >
+              Off
+            </button>
+            <span style={{ fontSize: 11, color: '#94a3b8' }}>Show safe print area</span>
+          </div>
+        ) : null}
+
+        {setShowSafeAreaOverlay ? (
+          <p
+            style={{
+              fontSize: 11,
+              color: '#94a3b8',
+              lineHeight: 1.35,
+              marginTop: 0,
+              marginBottom: 0,
+            }}
+          >
+            Preview only — not included in downloads.
+          </p>
         ) : null}
 
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
@@ -326,6 +382,7 @@ export default function DesignPreviewPanel({
   <div
     style={{
       ...getPreviewBackgroundStyle(previewBackground, customPreviewColor),
+      position: 'relative',
       width: `${previewCanvasW * totalScale}px`,
       height: `${previewCanvasH * totalScale}px`,
       borderRadius: 12,
@@ -341,6 +398,23 @@ export default function DesignPreviewPanel({
         height: '100%',
       }}
     />
+    {showSafeAreaOverlay && viewMode === 'pod' ? (
+      <div
+        aria-hidden
+        style={{
+          position: 'absolute',
+          left: `${(SAFE_BOX_INSET / POD_CANVAS_W) * 100}%`,
+          top: `${(SAFE_BOX_INSET / POD_CANVAS_H) * 100}%`,
+          right: `${(SAFE_BOX_INSET / POD_CANVAS_W) * 100}%`,
+          bottom: `${(SAFE_BOX_INSET / POD_CANVAS_H) * 100}%`,
+          border: '2px dashed rgba(74, 222, 128, 0.85)',
+          borderRadius: 4,
+          pointerEvents: 'none',
+          zIndex: 5,
+          boxSizing: 'border-box',
+        }}
+      />
+    ) : null}
   </div>
 </div>
       </div>
