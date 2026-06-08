@@ -237,6 +237,8 @@ export default function ScanResultsPanel({
   const warningDisplay = warningItems.filter(
     (item) => !isShirtFit(item) && !isSoftTransparency(item) && !isExportSizeNote(item),
   );
+  const criticalActive = criticalDisplay;
+  const warningActive = warningDisplay;
   const passedDisplay = passedItems.filter((item) => !isShirtFit(item) && !isSoftTransparency(item));
   const infoDisplay = infoItems.filter((item) => !isShirtFit(item) && !isSoftTransparency(item));
 
@@ -328,25 +330,25 @@ export default function ScanResultsPanel({
     'Artwork Size': 'Check the artwork size before upload.',
   };
 
-  const mainPick = criticalItems.length
-    ? pickMainIssue(criticalItems)
-    : warningItems.length
-    ? pickMainIssue(warningItems)
+  const mainPick = criticalActive.length
+    ? pickMainIssue(criticalActive)
+    : warningActive.length
+    ? pickMainIssue(warningActive)
     : { key: undefined, item: null };
 
   const riskLabel = !img
     ? 'UPLOAD A DESIGN'
-    : criticalItems.length
+    : criticalActive.length
     ? 'HIGH RISK'
-    : warningItems.length
-    ? 'NEEDS FIX'
+    : warningActive.length
+    ? 'NEEDS REVIEW'
     : 'READY';
 
   const riskBg = !img
     ? '#1e293b'
-    : criticalItems.length
+    : criticalActive.length
     ? '#7f1d1d'
-    : warningItems.length
+    : warningActive.length
     ? '#78350f'
     : '#14532d';
 
@@ -380,11 +382,6 @@ export default function ScanResultsPanel({
 
   const showManualFixCard = Boolean(img) && Boolean(mainPick.item) && !autoFixableIssues.includes(mainIssue);
   const manualFixMessage = manualFixMessages[mainIssue] ?? 'This issue needs a source-file fix before upload.';
-
-  // The fixable placement/size issues are already removed from visibleChecks above,
-  // so criticalDisplay / warningDisplay no longer contain them after Auto Fix.
-  const criticalActive = criticalDisplay;
-  const warningActive = warningDisplay;
 
   const displayScore =
     img && criticalActive.length === 0 && warningActive.length === 0 ? 100 : printScore;
@@ -832,7 +829,7 @@ export default function ScanResultsPanel({
             </div>
           ) : null}
 
-          {img && criticalItems.length === 0 && warningItems.length > 0 ? (
+          {img && criticalActive.length === 0 && warningActive.length > 0 ? (
             <div
               style={{
                 padding: '10px 12px',
@@ -845,7 +842,7 @@ export default function ScanResultsPanel({
                 fontWeight: 700,
               }}
             >
-              You can download, but review warnings first.
+              You can download, but review the notes first.
             </div>
           ) : null}
 
@@ -899,8 +896,8 @@ export default function ScanResultsPanel({
       {/* Final Upload Check: beginner-friendly readiness checklist using existing scan data. */}
       {(() => {
         const fixedDownloaded = downloadMessage.includes('Download ready');
-        const noFailRemain = criticalItems.length === 0;
-        const hasWarnings = warningItems.length > 0;
+        const noFailRemain = criticalActive.length === 0;
+        const hasWarnings = warningActive.length > 0;
         const scanCompleted = Boolean(img) && checks.length > 0;
         const autoFixNeeded = checks.some(
           (item) => isAutoFixableLabel(item.label) && (item.status === 'fail' || item.status === 'warn'),
@@ -916,10 +913,10 @@ export default function ScanResultsPanel({
           finalBg = 'rgba(127,29,29,0.45)';
           finalMsg = 'Fix the main issue before uploading.';
         } else if (hasWarnings) {
-          finalLabel = 'REVIEW FIRST';
+          finalLabel = 'READY WITH NOTES';
           finalColor = '#fde68a';
           finalBg = 'rgba(120,53,15,0.45)';
-          finalMsg = 'Review remaining warnings before upload.';
+          finalMsg = 'Your design may be usable, but review the notes before uploading.';
         } else if (fixedDownloaded) {
           finalLabel = 'READY TO UPLOAD';
           finalColor = '#86efac';
@@ -1031,12 +1028,15 @@ export default function ScanResultsPanel({
       })()}
 
       {criticalActive.length > 0 ? (
-        <Section
-          title="Critical Issues"
-          items={criticalActive}
-          emptyText="No critical issues."
-          headingColor="#fca5a5"
-        />
+        <div style={{ marginBottom: 18 }}>
+          <div style={{ color: '#94a3b8', fontSize: 12, marginBottom: 8 }}>Must fix before upload.</div>
+          <Section
+            title="Critical Issues"
+            items={criticalActive}
+            emptyText="No critical issues."
+            headingColor="#fca5a5"
+          />
+        </div>
       ) : (
         <div style={{ color: '#94a3b8', fontSize: 13 }}>No critical issues.</div>
       )}
@@ -1049,11 +1049,14 @@ export default function ScanResultsPanel({
               justifyContent: 'space-between',
               alignItems: 'center',
               gap: 10,
-              marginBottom: 8,
+              marginBottom: 4,
             }}
           >
-            <div style={{ fontWeight: 800, color: '#fdba74' }}>Warnings</div>
+            <div style={{ fontWeight: 800, color: '#fdba74' }}>Review Warnings</div>
             <div style={{ color: '#cbd5e1', fontSize: 13, fontWeight: 700 }}>{warningActive.length}</div>
+          </div>
+          <div style={{ color: '#94a3b8', fontSize: 12, marginBottom: 8 }}>
+            Check these before upload, but they may not block the design.
           </div>
 
           <div style={{ display: 'grid', gap: 8 }}>
