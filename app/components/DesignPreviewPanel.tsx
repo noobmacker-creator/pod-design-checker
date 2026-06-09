@@ -124,26 +124,61 @@ export default function DesignPreviewPanel({
         height: 'fit-content',
       }}
     >
-      <div style={{ display: 'grid', gap: 8, marginBottom: 10 }}>
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            gap: 8,
-            alignItems: 'center',
-            flexWrap: 'wrap',
-          }}
-        >
-          <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800 }}>Design Preview</h2>
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
-            <span style={{ fontWeight: 700, color: '#bae6fd', fontSize: 13 }}>Preview Size:</span>
-            <button onClick={() => { setPreviewSize(0.1); setActionMessage('Preview Size set to 10%.'); }}>10%</button>
-            <button onClick={() => { setPreviewSize(0.25); setActionMessage('Preview Size set to 25%.'); }}>25%</button>
-            <button onClick={() => { setPreviewSize(0.5); setActionMessage('Preview Size set to 50%.'); }}>50%</button>
-          </div>
+      <h2 style={{ margin: '0 0 8px', fontSize: 22, fontWeight: 800 }}>Design Preview</h2>
+
+      <div
+        style={{
+          border: '1px solid rgba(56, 189, 248, 0.35)',
+          background: 'rgba(8, 47, 73, 0.18)',
+          borderRadius: 14,
+          padding: 10,
+          display: 'grid',
+          gap: 8,
+          marginBottom: 10,
+        }}
+      >
+        <div style={{ fontWeight: 800, fontSize: 13, color: '#7dd3fc', letterSpacing: '0.02em' }}>
+          Preview Controls
         </div>
 
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6 }}>
+          {autoFixApplied && setAutoFixPreviewMode ? (
+            <>
+              <span style={{ fontWeight: 700, color: '#bae6fd', fontSize: 13 }}>View:</span>
+              <button
+                onClick={() => {
+                  setAutoFixPreviewMode('original');
+                  setActionMessage('Showing original upload preview.');
+                }}
+                style={{
+                  fontWeight: autoFixPreviewMode === 'original' ? 800 : 600,
+                  outline: autoFixPreviewMode === 'original' ? '2px solid #38bdf8' : undefined,
+                }}
+              >
+                Original
+              </button>
+              <button
+                onClick={() => {
+                  setAutoFixPreviewMode('fixed');
+                  setActionMessage('Showing Auto Fix preview.');
+                }}
+                style={{
+                  fontWeight: autoFixPreviewMode === 'fixed' ? 800 : 600,
+                  outline: autoFixPreviewMode === 'fixed' ? '2px solid #38bdf8' : undefined,
+                }}
+              >
+                Fixed
+              </button>
+              <span style={{ color: 'rgba(148,163,184,0.5)', margin: '0 2px' }}>|</span>
+            </>
+          ) : null}
+          <span style={{ fontWeight: 700, color: '#bae6fd', fontSize: 13 }}>Preview Size:</span>
+          <button onClick={() => { setPreviewSize(0.1); setActionMessage('Preview Size set to 10%.'); }}>10%</button>
+          <button onClick={() => { setPreviewSize(0.25); setActionMessage('Preview Size set to 25%.'); }}>25%</button>
+          <button onClick={() => { setPreviewSize(0.5); setActionMessage('Preview Size set to 50%.'); }}>50%</button>
+        </div>
+
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6 }}>
           <span style={{ fontWeight: 700, color: '#bae6fd', fontSize: 13 }}>Detail Zoom:</span>
           {[1, 2, 4, 8].map((z) => (
             <button
@@ -158,126 +193,8 @@ export default function DesignPreviewPanel({
           ))}
         </div>
 
-        {autoFixApplied && setAutoFixPreviewMode ? (
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
-            <span style={{ fontWeight: 700, color: '#bae6fd', fontSize: 13 }}>Preview:</span>
-            <button
-              onClick={() => {
-                setAutoFixPreviewMode('original');
-                setActionMessage('Showing original upload preview.');
-              }}
-              style={{
-                fontWeight: autoFixPreviewMode === 'original' ? 800 : 600,
-                outline: autoFixPreviewMode === 'original' ? '2px solid #38bdf8' : undefined,
-              }}
-            >
-              Original
-            </button>
-            <button
-              onClick={() => {
-                setAutoFixPreviewMode('fixed');
-                setActionMessage('Showing Auto Fix preview.');
-              }}
-              style={{
-                fontWeight: autoFixPreviewMode === 'fixed' ? 800 : 600,
-                outline: autoFixPreviewMode === 'fixed' ? '2px solid #38bdf8' : undefined,
-              }}
-            >
-              Fixed
-            </button>
-          </div>
-        ) : null}
-
-        {setShowSafeAreaOverlay || setShowArtworkBoundsOverlay ? (
-          <details style={{ fontSize: 13 }}>
-            <summary
-              style={{
-                cursor: 'pointer',
-                fontWeight: 700,
-                color: '#bae6fd',
-                listStyle: 'none',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 4,
-              }}
-            >
-              Preview Tools
-            </summary>
-            <div style={{ display: 'grid', gap: 6, marginTop: 6, paddingLeft: 2 }}>
-              {setShowSafeAreaOverlay ? (
-                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
-                  <span style={{ fontWeight: 700, color: '#bae6fd', fontSize: 13 }}>Safe Area:</span>
-                  <button
-                    onClick={() => {
-                      setShowSafeAreaOverlay(true);
-                      setActionMessage('Safe print area overlay turned on.');
-                    }}
-                    style={{
-                      fontWeight: showSafeAreaOverlay ? 800 : 600,
-                      outline: showSafeAreaOverlay ? '2px solid #38bdf8' : undefined,
-                    }}
-                  >
-                    On
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowSafeAreaOverlay(false);
-                      setActionMessage('Safe print area overlay turned off.');
-                    }}
-                    style={{
-                      fontWeight: !showSafeAreaOverlay ? 800 : 600,
-                      outline: !showSafeAreaOverlay ? '2px solid #38bdf8' : undefined,
-                    }}
-                  >
-                    Off
-                  </button>
-                </div>
-              ) : null}
-              {setShowArtworkBoundsOverlay ? (
-                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
-                  <span style={{ fontWeight: 700, color: '#bae6fd', fontSize: 13 }}>Artwork Bounds:</span>
-                  <button
-                    onClick={() => {
-                      setShowArtworkBoundsOverlay(true);
-                      setActionMessage('Artwork bounds overlay turned on.');
-                    }}
-                    style={{
-                      fontWeight: showArtworkBoundsOverlay ? 800 : 600,
-                      outline: showArtworkBoundsOverlay ? '2px solid #38bdf8' : undefined,
-                    }}
-                  >
-                    On
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowArtworkBoundsOverlay(false);
-                      setActionMessage('Artwork bounds overlay turned off.');
-                    }}
-                    style={{
-                      fontWeight: !showArtworkBoundsOverlay ? 800 : 600,
-                      outline: !showArtworkBoundsOverlay ? '2px solid #38bdf8' : undefined,
-                    }}
-                  >
-                    Off
-                  </button>
-                </div>
-              ) : null}
-              <p
-                style={{
-                  fontSize: 11,
-                  color: '#94a3b8',
-                  lineHeight: 1.35,
-                  margin: 0,
-                }}
-              >
-                Preview only — overlays are not included in downloads.
-              </p>
-            </div>
-          </details>
-        ) : null}
-
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
-          <span style={{ fontWeight: 700, color: '#bae6fd', fontSize: 13 }}>Preview Background:</span>
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6 }}>
+          <span style={{ fontWeight: 700, color: '#bae6fd', fontSize: 13 }}>Background:</span>
           {PREVIEW_BACKGROUND_OPTIONS.map((option) => (
             <button
               key={option.id}
@@ -328,16 +245,82 @@ export default function DesignPreviewPanel({
           </label>
         </div>
 
+        {setShowSafeAreaOverlay || setShowArtworkBoundsOverlay ? (
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6 }}>
+            <span style={{ fontWeight: 700, color: '#bae6fd', fontSize: 13 }}>Tools:</span>
+            {setShowSafeAreaOverlay ? (
+              <>
+                <span style={{ fontSize: 13, color: '#cbd5e1' }}>Safe Area</span>
+                <button
+                  onClick={() => {
+                    setShowSafeAreaOverlay(true);
+                    setActionMessage('Safe print area overlay turned on.');
+                  }}
+                  style={{
+                    fontWeight: showSafeAreaOverlay ? 800 : 600,
+                    outline: showSafeAreaOverlay ? '2px solid #38bdf8' : undefined,
+                  }}
+                >
+                  On
+                </button>
+                <button
+                  onClick={() => {
+                    setShowSafeAreaOverlay(false);
+                    setActionMessage('Safe print area overlay turned off.');
+                  }}
+                  style={{
+                    fontWeight: !showSafeAreaOverlay ? 800 : 600,
+                    outline: !showSafeAreaOverlay ? '2px solid #38bdf8' : undefined,
+                  }}
+                >
+                  Off
+                </button>
+              </>
+            ) : null}
+            {setShowSafeAreaOverlay && setShowArtworkBoundsOverlay ? (
+              <span style={{ color: 'rgba(148,163,184,0.5)', margin: '0 2px' }}>|</span>
+            ) : null}
+            {setShowArtworkBoundsOverlay ? (
+              <>
+                <span style={{ fontSize: 13, color: '#cbd5e1' }}>Artwork Bounds</span>
+                <button
+                  onClick={() => {
+                    setShowArtworkBoundsOverlay(true);
+                    setActionMessage('Artwork bounds overlay turned on.');
+                  }}
+                  style={{
+                    fontWeight: showArtworkBoundsOverlay ? 800 : 600,
+                    outline: showArtworkBoundsOverlay ? '2px solid #38bdf8' : undefined,
+                  }}
+                >
+                  On
+                </button>
+                <button
+                  onClick={() => {
+                    setShowArtworkBoundsOverlay(false);
+                    setActionMessage('Artwork bounds overlay turned off.');
+                  }}
+                  style={{
+                    fontWeight: !showArtworkBoundsOverlay ? 800 : 600,
+                    outline: !showArtworkBoundsOverlay ? '2px solid #38bdf8' : undefined,
+                  }}
+                >
+                  Off
+                </button>
+              </>
+            ) : null}
+          </div>
+        ) : null}
+
         <p
           style={{
             fontSize: 11,
             color: '#94a3b8',
             lineHeight: 1.35,
-            marginTop: 4,
-            marginBottom: 0,
+            margin: 0,
           }}
         >
-          Preview only — downloads stay transparent.
+          Preview tools only affect what you see — downloads stay clean and transparent.
         </p>
 
         <div
