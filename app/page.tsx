@@ -853,8 +853,6 @@ export default function Page() {
   const [actionMessage, setActionMessage] = useState('Upload a design to begin.');
   const [downloadMessage, setDownloadMessage] = useState('');
   const [isScanning, setIsScanning] = useState(false);
-  const [showSafeAreaOverlay, setShowSafeAreaOverlay] = useState(false);
-  const [showArtworkBoundsOverlay, setShowArtworkBoundsOverlay] = useState(false);
   const [hasAutoFixApplied, setHasAutoFixApplied] = useState(false);
   const [uploadInputKey, setUploadInputKey] = useState(0);
   const [selectedRedbubblePreset, setSelectedRedbubblePreset] = useState<RedbubblePresetId>('apparel');
@@ -1051,37 +1049,6 @@ canvas.height = img.naturalHeight;
   const totalScale = useMemo(() => {
     return previewSize * inspectZoom;
   }, [previewSize, inspectZoom]);
-
-  const artworkBoundsOverlay = useMemo(() => {
-    if (!previewEffectiveBounds) return null;
-
-    if (viewMode === 'pod') {
-      return {
-        x: previewEffectiveBounds.x,
-        y: previewEffectiveBounds.y,
-        w: previewEffectiveBounds.w,
-        h: previewEffectiveBounds.h,
-      };
-    }
-
-    if (viewMode === 'design') {
-      return {
-        x: (previewDesignCanvasSize.width - previewEffectiveBounds.w) / 2,
-        y: (previewDesignCanvasSize.height - previewEffectiveBounds.h) / 2,
-        w: previewEffectiveBounds.w,
-        h: previewEffectiveBounds.h,
-      };
-    }
-
-    const mapX = SHIRT_PRINT_W / CANVAS_W;
-    const mapY = SHIRT_PRINT_H / CANVAS_H;
-    return {
-      x: SHIRT_PRINT_X + previewEffectiveBounds.x * mapX,
-      y: SHIRT_PRINT_Y + previewEffectiveBounds.y * mapY,
-      w: previewEffectiveBounds.w * mapX,
-      h: previewEffectiveBounds.h * mapY,
-    };
-  }, [previewEffectiveBounds, viewMode, previewDesignCanvasSize]);
 
   const practicalPrintDpi = useMemo(() => {
     if (!imgW || !imgH) return 0;
@@ -1681,8 +1648,6 @@ const drawY = SHIRT_PRINT_Y + previewTransform.offsetY * mapY + mockupOffsetY;
     setOriginalTransform(null);
     setAutoFixPreviewMode('fixed');
     setPreviewBackground('checker');
-    setShowSafeAreaOverlay(false);
-    setShowArtworkBoundsOverlay(false);
 
     if (fileUrl) URL.revokeObjectURL(fileUrl);
   
@@ -1840,8 +1805,6 @@ const drawY = SHIRT_PRINT_Y + previewTransform.offsetY * mapY + mockupOffsetY;
     setInspectZoom(1);
     setPreviewSize(DEFAULT_PREVIEW_SIZE);
     setPreviewBackground('checker');
-    setShowSafeAreaOverlay(false);
-    setShowArtworkBoundsOverlay(false);
     setViewMode('pod');
     setActionMessage('Upload a design to begin.');
     setDownloadMessage('');
@@ -1985,8 +1948,6 @@ gap: 16,
   actionMessage={actionMessage}
   downloadMessage={downloadMessage}
   handleFileChange={handleFileChange}
-  viewMode={viewMode}
-  setViewMode={setViewMode}
   setActionMessage={setActionMessage}
   handleQuickFix={handleQuickFix}
   handleDownloadFixedPng={handleDownloadApparelPng}
@@ -2014,28 +1975,16 @@ gap: 16,
 
           <DesignPreviewPanel
   previewCanvasRef={previewCanvasRef}
-  imgW={imgW}
-  imgH={imgH}
-  previewSize={previewSize}
-  inspectZoom={inspectZoom}
-  practicalPrintDpi={practicalPrintDpi}
   previewCanvasW={previewCanvasW}
   previewCanvasH={previewCanvasH}
   totalScale={totalScale}
   previewBackground={previewBackground}
   setPreviewBackground={setPreviewBackground}
-  setPreviewSize={setPreviewSize}
   setActionMessage={setActionMessage}
   autoFixApplied={hasAutoFixApplied}
   autoFixPreviewMode={autoFixPreviewMode}
   setAutoFixPreviewMode={setAutoFixPreviewMode}
   isScanning={isScanning}
-  viewMode={viewMode}
-  showSafeAreaOverlay={showSafeAreaOverlay}
-  setShowSafeAreaOverlay={setShowSafeAreaOverlay}
-  showArtworkBoundsOverlay={showArtworkBoundsOverlay}
-  setShowArtworkBoundsOverlay={setShowArtworkBoundsOverlay}
-  artworkBoundsOverlay={artworkBoundsOverlay}
 />
 <IssueBucketsPanel
   isScanning={isScanning}
