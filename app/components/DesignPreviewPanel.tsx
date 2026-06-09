@@ -66,7 +66,6 @@ type DesignPreviewPanelProps = {
   previewBackground: PreviewBackground;
   setPreviewBackground: React.Dispatch<React.SetStateAction<PreviewBackground>>;
   setPreviewSize: React.Dispatch<React.SetStateAction<number>>;
-  setInspectZoom: React.Dispatch<React.SetStateAction<number>>;
   setActionMessage: React.Dispatch<React.SetStateAction<string>>;
   autoFixApplied?: boolean;
   autoFixPreviewMode?: 'fixed' | 'original';
@@ -97,7 +96,6 @@ export default function DesignPreviewPanel({
   previewBackground,
   setPreviewBackground,
   setPreviewSize,
-  setInspectZoom,
   setActionMessage,
   autoFixApplied = false,
   autoFixPreviewMode = 'fixed',
@@ -276,20 +274,6 @@ export default function DesignPreviewPanel({
                 ) : null}
               </div>
             ) : null}
-          </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 4 }}>
-            <span style={{ fontWeight: 700, color: '#bae6fd', fontSize: 13 }}>Detail Zoom:</span>
-            {[1, 2, 4, 8].map((z) => (
-              <button
-                key={z}
-                onClick={() => {
-                  setInspectZoom(z);
-                  setActionMessage(`Inspect Zoom set to ${z * 100}%.`);
-                }}
-              >
-                {z * 100}%
-              </button>
-            ))}
           </div>
         </div>
 

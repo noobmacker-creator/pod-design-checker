@@ -2005,6 +2005,7 @@ gap: 16,
   transform={transform}
   previewSize={previewSize}
   inspectZoom={inspectZoom}
+  setInspectZoom={setInspectZoom}
   practicalPrintDpi={practicalPrintDpi}
   targetCanvasW={targetCanvasW}
   targetCanvasH={targetCanvasH}
@@ -2024,7 +2025,6 @@ gap: 16,
   previewBackground={previewBackground}
   setPreviewBackground={setPreviewBackground}
   setPreviewSize={setPreviewSize}
-  setInspectZoom={setInspectZoom}
   setActionMessage={setActionMessage}
   autoFixApplied={hasAutoFixApplied}
   autoFixPreviewMode={autoFixPreviewMode}

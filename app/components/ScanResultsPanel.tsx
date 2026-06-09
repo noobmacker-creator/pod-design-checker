@@ -37,6 +37,7 @@ type ScanResultsPanelProps = {
   transform: { scale: number; offsetX: number; offsetY: number };
   previewSize: number;
   inspectZoom: number;
+  setInspectZoom: React.Dispatch<React.SetStateAction<number>>;
   practicalPrintDpi: number;
   targetCanvasW: number;
   targetCanvasH: number;
@@ -162,6 +163,7 @@ export default function ScanResultsPanel({
   transform,
   previewSize,
   inspectZoom,
+  setInspectZoom,
   practicalPrintDpi,
   targetCanvasW,
   targetCanvasH,
@@ -502,6 +504,36 @@ export default function ScanResultsPanel({
               >
                 Design
               </button>
+            </div>
+
+            <div
+              style={{
+                display: 'flex',
+                gap: 8,
+                flexWrap: 'wrap',
+                alignItems: 'center',
+              }}
+            >
+              <span style={{ fontWeight: 800, color: '#bae6fd', fontSize: 13 }}>
+                Detail Zoom
+              </span>
+
+              {[1, 2, 4, 8].map((z) => (
+                <button
+                  key={z}
+                  onClick={() => {
+                    setInspectZoom(z);
+                    setActionMessage(`Inspect Zoom set to ${z * 100}%.`);
+                  }}
+                  style={{
+                    fontWeight: inspectZoom === z ? 800 : 600,
+                    outline: inspectZoom === z ? '2px solid #38bdf8' : undefined,
+                  }}
+                  disabled={!img}
+                >
+                  {z * 100}%
+                </button>
+              ))}
             </div>
           </div>
         </div>
