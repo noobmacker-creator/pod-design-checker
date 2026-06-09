@@ -75,6 +75,9 @@ type DesignPreviewPanelProps = {
   viewMode?: ViewMode;
   showSafeAreaOverlay?: boolean;
   setShowSafeAreaOverlay?: React.Dispatch<React.SetStateAction<boolean>>;
+  showArtworkBoundsOverlay?: boolean;
+  setShowArtworkBoundsOverlay?: React.Dispatch<React.SetStateAction<boolean>>;
+  artworkBoundsOverlay?: { x: number; y: number; w: number; h: number } | null;
 };
 
 const POD_CANVAS_W = 4200;
@@ -103,6 +106,9 @@ export default function DesignPreviewPanel({
   viewMode = 'pod',
   showSafeAreaOverlay = false,
   setShowSafeAreaOverlay,
+  showArtworkBoundsOverlay = false,
+  setShowArtworkBoundsOverlay,
+  artworkBoundsOverlay = null,
 }: DesignPreviewPanelProps) {
   const [customPreviewColor, setCustomPreviewColor] = useState('#808080');
 
@@ -214,6 +220,51 @@ export default function DesignPreviewPanel({
         ) : null}
 
         {setShowSafeAreaOverlay ? (
+          <p
+            style={{
+              fontSize: 11,
+              color: '#94a3b8',
+              lineHeight: 1.35,
+              marginTop: 0,
+              marginBottom: 0,
+            }}
+          >
+            Preview only — not included in downloads.
+          </p>
+        ) : null}
+
+        {setShowArtworkBoundsOverlay ? (
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+            <span style={{ fontWeight: 700, color: '#bae6fd', fontSize: 13 }}>Artwork Bounds:</span>
+            <button
+              onClick={() => {
+                setShowArtworkBoundsOverlay(true);
+                setActionMessage('Artwork bounds overlay turned on.');
+              }}
+              style={{
+                fontWeight: showArtworkBoundsOverlay ? 800 : 600,
+                outline: showArtworkBoundsOverlay ? '2px solid #38bdf8' : undefined,
+              }}
+            >
+              On
+            </button>
+            <button
+              onClick={() => {
+                setShowArtworkBoundsOverlay(false);
+                setActionMessage('Artwork bounds overlay turned off.');
+              }}
+              style={{
+                fontWeight: !showArtworkBoundsOverlay ? 800 : 600,
+                outline: !showArtworkBoundsOverlay ? '2px solid #38bdf8' : undefined,
+              }}
+            >
+              Off
+            </button>
+            <span style={{ fontSize: 11, color: '#94a3b8' }}>Show detected artwork area</span>
+          </div>
+        ) : null}
+
+        {setShowArtworkBoundsOverlay ? (
           <p
             style={{
               fontSize: 11,
@@ -411,6 +462,23 @@ export default function DesignPreviewPanel({
           borderRadius: 4,
           pointerEvents: 'none',
           zIndex: 5,
+          boxSizing: 'border-box',
+        }}
+      />
+    ) : null}
+    {showArtworkBoundsOverlay && artworkBoundsOverlay && previewCanvasW > 0 && previewCanvasH > 0 ? (
+      <div
+        aria-hidden
+        style={{
+          position: 'absolute',
+          left: `${(artworkBoundsOverlay.x / previewCanvasW) * 100}%`,
+          top: `${(artworkBoundsOverlay.y / previewCanvasH) * 100}%`,
+          width: `${(artworkBoundsOverlay.w / previewCanvasW) * 100}%`,
+          height: `${(artworkBoundsOverlay.h / previewCanvasH) * 100}%`,
+          border: '2px dashed rgba(250, 204, 21, 0.9)',
+          borderRadius: 2,
+          pointerEvents: 'none',
+          zIndex: 6,
           boxSizing: 'border-box',
         }}
       />

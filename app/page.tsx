@@ -854,6 +854,7 @@ export default function Page() {
   const [downloadMessage, setDownloadMessage] = useState('');
   const [isScanning, setIsScanning] = useState(false);
   const [showSafeAreaOverlay, setShowSafeAreaOverlay] = useState(false);
+  const [showArtworkBoundsOverlay, setShowArtworkBoundsOverlay] = useState(false);
   const [hasAutoFixApplied, setHasAutoFixApplied] = useState(false);
   const [uploadInputKey, setUploadInputKey] = useState(0);
   const [selectedRedbubblePreset, setSelectedRedbubblePreset] = useState<RedbubblePresetId>('apparel');
@@ -1050,6 +1051,37 @@ canvas.height = img.naturalHeight;
   const totalScale = useMemo(() => {
     return previewSize * inspectZoom;
   }, [previewSize, inspectZoom]);
+
+  const artworkBoundsOverlay = useMemo(() => {
+    if (!previewEffectiveBounds) return null;
+
+    if (viewMode === 'pod') {
+      return {
+        x: previewEffectiveBounds.x,
+        y: previewEffectiveBounds.y,
+        w: previewEffectiveBounds.w,
+        h: previewEffectiveBounds.h,
+      };
+    }
+
+    if (viewMode === 'design') {
+      return {
+        x: (previewDesignCanvasSize.width - previewEffectiveBounds.w) / 2,
+        y: (previewDesignCanvasSize.height - previewEffectiveBounds.h) / 2,
+        w: previewEffectiveBounds.w,
+        h: previewEffectiveBounds.h,
+      };
+    }
+
+    const mapX = SHIRT_PRINT_W / CANVAS_W;
+    const mapY = SHIRT_PRINT_H / CANVAS_H;
+    return {
+      x: SHIRT_PRINT_X + previewEffectiveBounds.x * mapX,
+      y: SHIRT_PRINT_Y + previewEffectiveBounds.y * mapY,
+      w: previewEffectiveBounds.w * mapX,
+      h: previewEffectiveBounds.h * mapY,
+    };
+  }, [previewEffectiveBounds, viewMode, previewDesignCanvasSize]);
 
   const practicalPrintDpi = useMemo(() => {
     if (!imgW || !imgH) return 0;
@@ -1555,36 +1587,6 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
     ctx.stroke();
   }
 
-  function drawBoundsOverlay(
-    ctx: CanvasRenderingContext2D,
-    bx: number,
-    by: number,
-    bw: number,
-    bh: number
-  ) {
-    ctx.strokeStyle = '#22c55e';
-    ctx.lineWidth = 3;
-    ctx.setLineDash([10, 8]);
-    ctx.strokeRect(bx, by, bw, bh);
-    ctx.setLineDash([]);
-
-    const cx = bx + bw / 2;
-    const cy = by + bh / 2;
-
-    ctx.strokeStyle = '#facc15';
-    ctx.lineWidth = 2;
-
-    ctx.beginPath();
-    ctx.moveTo(cx - 18, cy);
-    ctx.lineTo(cx + 18, cy);
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo(cx, cy - 18);
-    ctx.lineTo(cx, cy + 18);
-    ctx.stroke();
-  }
-
   useEffect(() => {
     const canvas = previewCanvasRef.current;
     if (!canvas) return;
@@ -1611,10 +1613,6 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
       const drawY = previewTransform.offsetY;
 
       ctx.drawImage(img, drawX, drawY, drawW, drawH);
-
-      if (previewEffectiveBounds) {
-        drawBoundsOverlay(ctx, previewEffectiveBounds.x, previewEffectiveBounds.y, previewEffectiveBounds.w, previewEffectiveBounds.h);
-      }
     }
 
     if (viewMode === 'design') {
@@ -1640,7 +1638,6 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
         const drawY = previewTransform.offsetY + shiftY;
 
         ctx.drawImage(img, drawX, drawY, drawW, drawH);
-        drawBoundsOverlay(ctx, targetX, targetY, previewEffectiveBounds.w, previewEffectiveBounds.h);
       } else {
         const drawX = (canvas.width - drawW) / 2;
         const drawY = (canvas.height - drawH) / 2;
@@ -1672,16 +1669,6 @@ const drawX = SHIRT_PRINT_X + previewTransform.offsetX * mapX + mockupOffsetX;
 const drawY = SHIRT_PRINT_Y + previewTransform.offsetY * mapY + mockupOffsetY;
 
       ctx.drawImage(img, drawX, drawY, drawW, drawH);
-
-      if (previewEffectiveBounds) {
-        drawBoundsOverlay(
-          ctx,
-          SHIRT_PRINT_X + previewEffectiveBounds.x * mapX,
-          SHIRT_PRINT_Y + previewEffectiveBounds.y * mapY,
-          previewEffectiveBounds.w * mapX,
-          previewEffectiveBounds.h * mapY
-        );
-      }
     }
   }, [img, shirtImg, previewTransform, previewEffectiveBounds, viewMode, previewDesignCanvasSize, mockupOffsetX, mockupOffsetY, mockupScale]);
 
@@ -1695,6 +1682,7 @@ const drawY = SHIRT_PRINT_Y + previewTransform.offsetY * mapY + mockupOffsetY;
     setAutoFixPreviewMode('fixed');
     setPreviewBackground('checker');
     setShowSafeAreaOverlay(false);
+    setShowArtworkBoundsOverlay(false);
 
     if (fileUrl) URL.revokeObjectURL(fileUrl);
   
@@ -1853,6 +1841,7 @@ const drawY = SHIRT_PRINT_Y + previewTransform.offsetY * mapY + mockupOffsetY;
     setPreviewSize(DEFAULT_PREVIEW_SIZE);
     setPreviewBackground('checker');
     setShowSafeAreaOverlay(false);
+    setShowArtworkBoundsOverlay(false);
     setViewMode('pod');
     setActionMessage('Upload a design to begin.');
     setDownloadMessage('');
@@ -2044,6 +2033,9 @@ gap: 16,
   viewMode={viewMode}
   showSafeAreaOverlay={showSafeAreaOverlay}
   setShowSafeAreaOverlay={setShowSafeAreaOverlay}
+  showArtworkBoundsOverlay={showArtworkBoundsOverlay}
+  setShowArtworkBoundsOverlay={setShowArtworkBoundsOverlay}
+  artworkBoundsOverlay={artworkBoundsOverlay}
 />
 <IssueBucketsPanel
   isScanning={isScanning}
