@@ -133,7 +133,7 @@ export default function DesignPreviewPanel({
           borderRadius: 14,
           padding: 10,
           display: 'grid',
-          gap: 8,
+          gap: 10,
           marginBottom: 10,
         }}
       >
@@ -141,10 +141,21 @@ export default function DesignPreviewPanel({
           Preview Controls
         </div>
 
-        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6 }}>
-          {autoFixApplied && setAutoFixPreviewMode ? (
-            <>
-              <span style={{ fontWeight: 700, color: '#bae6fd', fontSize: 13 }}>View:</span>
+        {autoFixApplied && setAutoFixPreviewMode ? (
+          <div
+            style={{
+              border: '1px solid rgba(148, 163, 184, 0.18)',
+              background: 'rgba(15, 23, 42, 0.45)',
+              borderRadius: 12,
+              padding: 8,
+              display: 'grid',
+              gap: 6,
+            }}
+          >
+            <div style={{ fontWeight: 700, fontSize: 12, color: '#93c5fd', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              Design View
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6 }}>
               <button
                 onClick={() => {
                   setAutoFixPreviewMode('original');
@@ -169,148 +180,189 @@ export default function DesignPreviewPanel({
               >
                 Fixed
               </button>
-              <span style={{ color: 'rgba(148,163,184,0.5)', margin: '0 2px' }}>|</span>
-            </>
-          ) : null}
-          <span style={{ fontWeight: 700, color: '#bae6fd', fontSize: 13 }}>Preview Size:</span>
-          <button onClick={() => { setPreviewSize(0.1); setActionMessage('Preview Size set to 10%.'); }}>10%</button>
-          <button onClick={() => { setPreviewSize(0.25); setActionMessage('Preview Size set to 25%.'); }}>25%</button>
-          <button onClick={() => { setPreviewSize(0.5); setActionMessage('Preview Size set to 50%.'); }}>50%</button>
-        </div>
+            </div>
+          </div>
+        ) : null}
 
-        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6 }}>
-          <span style={{ fontWeight: 700, color: '#bae6fd', fontSize: 13 }}>Detail Zoom:</span>
-          {[1, 2, 4, 8].map((z) => (
-            <button
-              key={z}
-              onClick={() => {
-                setInspectZoom(z);
-                setActionMessage(`Inspect Zoom set to ${z * 100}%.`);
-              }}
-            >
-              {z * 100}%
-            </button>
-          ))}
-        </div>
-
-        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6 }}>
-          <span style={{ fontWeight: 700, color: '#bae6fd', fontSize: 13 }}>Background:</span>
-          {PREVIEW_BACKGROUND_OPTIONS.map((option) => (
-            <button
-              key={option.id}
-              onClick={() => {
-                setPreviewBackground(option.id);
-                setActionMessage(`Preview background set to ${option.label}.`);
-              }}
-              style={{
-                fontWeight: previewBackground === option.id ? 800 : 600,
-                outline: previewBackground === option.id ? '2px solid #38bdf8' : undefined,
-              }}
-            >
-              {option.label}
-            </button>
-          ))}
-          <label
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 6,
-              fontSize: 13,
-              fontWeight: previewBackground === 'custom' ? 800 : 600,
-              outline: previewBackground === 'custom' ? '2px solid #38bdf8' : undefined,
-              borderRadius: 6,
-              padding: '2px 4px',
-              cursor: 'pointer',
-            }}
-          >
-            <span style={{ color: '#bae6fd' }}>Custom colour</span>
-            <input
-              type="color"
-              value={customPreviewColor}
-              onChange={(e) => {
-                setCustomPreviewColor(e.target.value);
-                setPreviewBackground('custom');
-                setActionMessage(`Preview background set to custom colour ${e.target.value}.`);
-              }}
-              style={{
-                width: 28,
-                height: 28,
-                padding: 0,
-                border: '1px solid rgba(148, 163, 184, 0.4)',
-                borderRadius: 6,
-                cursor: 'pointer',
-                background: 'transparent',
-              }}
-            />
-          </label>
+        <div
+          style={{
+            border: '1px solid rgba(148, 163, 184, 0.18)',
+            background: 'rgba(15, 23, 42, 0.45)',
+            borderRadius: 12,
+            padding: 8,
+            display: 'grid',
+            gap: 6,
+          }}
+        >
+          <div style={{ fontWeight: 700, fontSize: 12, color: '#93c5fd', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            Preview View
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6 }}>
+            <span style={{ fontWeight: 700, color: '#bae6fd', fontSize: 13 }}>Preview Size:</span>
+            <button onClick={() => { setPreviewSize(0.1); setActionMessage('Preview Size set to 10%.'); }}>10%</button>
+            <button onClick={() => { setPreviewSize(0.25); setActionMessage('Preview Size set to 25%.'); }}>25%</button>
+            <button onClick={() => { setPreviewSize(0.5); setActionMessage('Preview Size set to 50%.'); }}>50%</button>
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6 }}>
+            <span style={{ fontWeight: 700, color: '#bae6fd', fontSize: 13 }}>Detail Zoom:</span>
+            {[1, 2, 4, 8].map((z) => (
+              <button
+                key={z}
+                onClick={() => {
+                  setInspectZoom(z);
+                  setActionMessage(`Inspect Zoom set to ${z * 100}%.`);
+                }}
+              >
+                {z * 100}%
+              </button>
+            ))}
+          </div>
         </div>
 
         {setShowSafeAreaOverlay || setShowArtworkBoundsOverlay ? (
-          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6 }}>
-            <span style={{ fontWeight: 700, color: '#bae6fd', fontSize: 13 }}>Tools:</span>
-            {setShowSafeAreaOverlay ? (
-              <>
-                <span style={{ fontSize: 13, color: '#cbd5e1' }}>Safe Area</span>
-                <button
-                  onClick={() => {
-                    setShowSafeAreaOverlay(true);
-                    setActionMessage('Safe print area overlay turned on.');
-                  }}
-                  style={{
-                    fontWeight: showSafeAreaOverlay ? 800 : 600,
-                    outline: showSafeAreaOverlay ? '2px solid #38bdf8' : undefined,
-                  }}
-                >
-                  On
-                </button>
-                <button
-                  onClick={() => {
-                    setShowSafeAreaOverlay(false);
-                    setActionMessage('Safe print area overlay turned off.');
-                  }}
-                  style={{
-                    fontWeight: !showSafeAreaOverlay ? 800 : 600,
-                    outline: !showSafeAreaOverlay ? '2px solid #38bdf8' : undefined,
-                  }}
-                >
-                  Off
-                </button>
-              </>
-            ) : null}
-            {setShowSafeAreaOverlay && setShowArtworkBoundsOverlay ? (
-              <span style={{ color: 'rgba(148,163,184,0.5)', margin: '0 2px' }}>|</span>
-            ) : null}
-            {setShowArtworkBoundsOverlay ? (
-              <>
-                <span style={{ fontSize: 13, color: '#cbd5e1' }}>Artwork Bounds</span>
-                <button
-                  onClick={() => {
-                    setShowArtworkBoundsOverlay(true);
-                    setActionMessage('Artwork bounds overlay turned on.');
-                  }}
-                  style={{
-                    fontWeight: showArtworkBoundsOverlay ? 800 : 600,
-                    outline: showArtworkBoundsOverlay ? '2px solid #38bdf8' : undefined,
-                  }}
-                >
-                  On
-                </button>
-                <button
-                  onClick={() => {
-                    setShowArtworkBoundsOverlay(false);
-                    setActionMessage('Artwork bounds overlay turned off.');
-                  }}
-                  style={{
-                    fontWeight: !showArtworkBoundsOverlay ? 800 : 600,
-                    outline: !showArtworkBoundsOverlay ? '2px solid #38bdf8' : undefined,
-                  }}
-                >
-                  Off
-                </button>
-              </>
-            ) : null}
+          <div
+            style={{
+              border: '1px solid rgba(148, 163, 184, 0.18)',
+              background: 'rgba(15, 23, 42, 0.45)',
+              borderRadius: 12,
+              padding: 8,
+              display: 'grid',
+              gap: 6,
+            }}
+          >
+            <div style={{ fontWeight: 700, fontSize: 12, color: '#93c5fd', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              Preview Tools
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6 }}>
+              {setShowSafeAreaOverlay ? (
+                <>
+                  <span style={{ fontSize: 13, color: '#cbd5e1' }}>Safe Area</span>
+                  <button
+                    onClick={() => {
+                      setShowSafeAreaOverlay(true);
+                      setActionMessage('Safe print area overlay turned on.');
+                    }}
+                    style={{
+                      fontWeight: showSafeAreaOverlay ? 800 : 600,
+                      outline: showSafeAreaOverlay ? '2px solid #38bdf8' : undefined,
+                    }}
+                  >
+                    On
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowSafeAreaOverlay(false);
+                      setActionMessage('Safe print area overlay turned off.');
+                    }}
+                    style={{
+                      fontWeight: !showSafeAreaOverlay ? 800 : 600,
+                      outline: !showSafeAreaOverlay ? '2px solid #38bdf8' : undefined,
+                    }}
+                  >
+                    Off
+                  </button>
+                </>
+              ) : null}
+              {setShowSafeAreaOverlay && setShowArtworkBoundsOverlay ? (
+                <span style={{ color: 'rgba(148,163,184,0.5)', margin: '0 2px' }}>|</span>
+              ) : null}
+              {setShowArtworkBoundsOverlay ? (
+                <>
+                  <span style={{ fontSize: 13, color: '#cbd5e1' }}>Artwork Bounds</span>
+                  <button
+                    onClick={() => {
+                      setShowArtworkBoundsOverlay(true);
+                      setActionMessage('Artwork bounds overlay turned on.');
+                    }}
+                    style={{
+                      fontWeight: showArtworkBoundsOverlay ? 800 : 600,
+                      outline: showArtworkBoundsOverlay ? '2px solid #38bdf8' : undefined,
+                    }}
+                  >
+                    On
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowArtworkBoundsOverlay(false);
+                      setActionMessage('Artwork bounds overlay turned off.');
+                    }}
+                    style={{
+                      fontWeight: !showArtworkBoundsOverlay ? 800 : 600,
+                      outline: !showArtworkBoundsOverlay ? '2px solid #38bdf8' : undefined,
+                    }}
+                  >
+                    Off
+                  </button>
+                </>
+              ) : null}
+            </div>
           </div>
         ) : null}
+
+        <div
+          style={{
+            border: '1px solid rgba(148, 163, 184, 0.18)',
+            background: 'rgba(15, 23, 42, 0.45)',
+            borderRadius: 12,
+            padding: 8,
+            display: 'grid',
+            gap: 6,
+          }}
+        >
+          <div style={{ fontWeight: 700, fontSize: 12, color: '#93c5fd', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            Background Preview
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6 }}>
+            {PREVIEW_BACKGROUND_OPTIONS.map((option) => (
+              <button
+                key={option.id}
+                onClick={() => {
+                  setPreviewBackground(option.id);
+                  setActionMessage(`Preview background set to ${option.label}.`);
+                }}
+                style={{
+                  fontWeight: previewBackground === option.id ? 800 : 600,
+                  outline: previewBackground === option.id ? '2px solid #38bdf8' : undefined,
+                }}
+              >
+                {option.label}
+              </button>
+            ))}
+            <label
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                fontSize: 13,
+                fontWeight: previewBackground === 'custom' ? 800 : 600,
+                outline: previewBackground === 'custom' ? '2px solid #38bdf8' : undefined,
+                borderRadius: 6,
+                padding: '2px 4px',
+                cursor: 'pointer',
+              }}
+            >
+              <span style={{ color: '#bae6fd' }}>Custom colour</span>
+              <input
+                type="color"
+                value={customPreviewColor}
+                onChange={(e) => {
+                  setCustomPreviewColor(e.target.value);
+                  setPreviewBackground('custom');
+                  setActionMessage(`Preview background set to custom colour ${e.target.value}.`);
+                }}
+                style={{
+                  width: 28,
+                  height: 28,
+                  padding: 0,
+                  border: '1px solid rgba(148, 163, 184, 0.4)',
+                  borderRadius: 6,
+                  cursor: 'pointer',
+                  background: 'transparent',
+                }}
+              />
+            </label>
+          </div>
+        </div>
 
         <p
           style={{
