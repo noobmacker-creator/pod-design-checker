@@ -21,6 +21,7 @@ type ScanResultsPanelProps = {
   setViewMode: React.Dispatch<React.SetStateAction<ViewMode>>;
   setActionMessage: React.Dispatch<React.SetStateAction<string>>;
   handleQuickFix: () => void;
+  handleRemoveWhiteBackground?: () => void;
   handleDownloadFixedPng: () => void;
   handleResetDesign?: () => void;
   autoFixApplied?: boolean;
@@ -146,6 +147,7 @@ export default function ScanResultsPanel({
   setViewMode,
   setActionMessage,
   handleQuickFix,
+  handleRemoveWhiteBackground,
   handleDownloadFixedPng,
   handleResetDesign,
   autoFixApplied: autoFixAppliedProp = false,
@@ -205,6 +207,12 @@ export default function ScanResultsPanel({
   const criticalItems = scoringChecks.filter((item) => item.status === 'fail');
   const warningItems = scoringChecks.filter((item) => item.status === 'warn');
   const passedItems = visibleChecks.filter((item) => item.status === 'pass');
+
+  const hasWhiteBgIssue = checks.some(
+    (item) =>
+      (item.label === 'White Background Risk' || item.label === 'Solid Background Box Risk') &&
+      (item.status === 'warn' || item.status === 'fail'),
+  );
   const infoItems = visibleChecks.filter((item) => item.status === 'info');
 
   // Display grouping only: compact the many "Shirt Fit: <colour>" rows into one
@@ -503,15 +511,39 @@ export default function ScanResultsPanel({
               </button>
             </div>
 
-            <button
-              onClick={handleQuickFix}
-              disabled={!img}
+            <div
               style={{
-                background: '#2563eb',
+                display: 'flex',
+                gap: 8,
+                flexWrap: 'wrap',
+                alignItems: 'center',
               }}
             >
-              Auto Fix
-            </button>
+              <button
+                onClick={handleQuickFix}
+                disabled={!img}
+                style={{
+                  background: '#2563eb',
+                }}
+              >
+                Auto Fix
+              </button>
+
+              {img && handleRemoveWhiteBackground && (
+                <button
+                  onClick={handleRemoveWhiteBackground}
+                  style={{
+                    background: hasWhiteBgIssue ? '#0ea5e9' : undefined,
+                    fontWeight: hasWhiteBgIssue ? 800 : undefined,
+                    boxShadow: hasWhiteBgIssue
+                      ? '0 0 0 2px rgba(125, 211, 252, 0.35)'
+                      : undefined,
+                  }}
+                >
+                  Remove White Background
+                </button>
+              )}
+            </div>
           </div>
         </div>
 

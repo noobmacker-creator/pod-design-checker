@@ -797,6 +797,91 @@ function getSolidBackgroundBoxRiskCheck(imageData: ImageData): CheckItem {
   };
 }
 
+// Remove near-white pixels connected to the canvas edges via flood-fill.
+// Interior white pixels not connected to the outer edge are preserved.
+function isNearWhiteRemovablePixel(data: Uint8ClampedArray, pixelIndex: number): boolean {
+  const idx = pixelIndex * 4;
+  const r = data[idx];
+  const g = data[idx + 1];
+  const b = data[idx + 2];
+  const a = data[idx + 3];
+  return a > 0 && r > 235 && g > 235 && b > 235;
+}
+
+function removeEdgeConnectedNearWhiteBackground(imageData: ImageData): ImageData {
+  const { width, height, data } = imageData;
+  const out = new Uint8ClampedArray(data);
+  const total = width * height;
+  const toRemove = new Uint8Array(total);
+  const visited = new Uint8Array(total);
+  const queue: number[] = [];
+
+  const trySeed = (pixelIndex: number) => {
+    if (visited[pixelIndex]) return;
+    if (!isNearWhiteRemovablePixel(data, pixelIndex)) return;
+    visited[pixelIndex] = 1;
+    toRemove[pixelIndex] = 1;
+    queue.push(pixelIndex);
+  };
+
+  for (let x = 0; x < width; x++) {
+    trySeed(x);
+    trySeed((height - 1) * width + x);
+  }
+  for (let y = 0; y < height; y++) {
+    trySeed(y * width);
+    trySeed(y * width + width - 1);
+  }
+
+  let head = 0;
+  while (head < queue.length) {
+    const px = queue[head++];
+    const x = px % width;
+    const y = Math.floor(px / width);
+
+    if (x > 0) {
+      const next = px - 1;
+      if (!visited[next] && isNearWhiteRemovablePixel(data, next)) {
+        visited[next] = 1;
+        toRemove[next] = 1;
+        queue.push(next);
+      }
+    }
+    if (x < width - 1) {
+      const next = px + 1;
+      if (!visited[next] && isNearWhiteRemovablePixel(data, next)) {
+        visited[next] = 1;
+        toRemove[next] = 1;
+        queue.push(next);
+      }
+    }
+    if (y > 0) {
+      const next = px - width;
+      if (!visited[next] && isNearWhiteRemovablePixel(data, next)) {
+        visited[next] = 1;
+        toRemove[next] = 1;
+        queue.push(next);
+      }
+    }
+    if (y < height - 1) {
+      const next = px + width;
+      if (!visited[next] && isNearWhiteRemovablePixel(data, next)) {
+        visited[next] = 1;
+        toRemove[next] = 1;
+        queue.push(next);
+      }
+    }
+  }
+
+  for (let i = 0; i < total; i++) {
+    if (toRemove[i]) {
+      out[i * 4 + 3] = 0;
+    }
+  }
+
+  return new ImageData(out, width, height);
+}
+
 export default function Page() {
   const [file, setFile] = useState<File | null>(null);
   const [fileUrl, setFileUrl] = useState('');
@@ -1779,6 +1864,41 @@ const drawY = SHIRT_PRINT_Y + previewTransform.offsetY * mapY + mockupOffsetY;
     setHasAutoFixApplied(true);
   }
 
+  function handleRemoveWhiteBackground() {
+    if (!img) return;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = img.naturalWidth;
+    canvas.height = img.naturalHeight;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    ctx.drawImage(img, 0, 0);
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const cleaned = removeEdgeConnectedNearWhiteBackground(imageData);
+    ctx.putImageData(cleaned, 0, 0);
+
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+
+      if (fileUrl) URL.revokeObjectURL(fileUrl);
+      const url = URL.createObjectURL(blob);
+
+      const newImg = new Image();
+      newImg.onload = () => {
+        setImg(newImg);
+        setFileUrl(url);
+        setHasTransparency(true);
+        setDownloadMessage('');
+        setActionMessage('White background removed. Review the preview, then download the fixed PNG.');
+      };
+      newImg.onerror = () => {
+        setActionMessage('Could not process the cleaned image.');
+      };
+      newImg.src = url;
+    }, 'image/png');
+  }
+
   function clearDesignCanvases() {
     const analysisCanvas = analysisCanvasRef.current;
     if (analysisCanvas) {
@@ -1989,6 +2109,7 @@ gap: 16,
   setViewMode={setViewMode}
   setActionMessage={setActionMessage}
   handleQuickFix={handleQuickFix}
+  handleRemoveWhiteBackground={handleRemoveWhiteBackground}
   handleDownloadFixedPng={handleDownloadApparelPng}
   handleResetDesign={handleResetDesign}
   autoFixApplied={hasAutoFixApplied}
