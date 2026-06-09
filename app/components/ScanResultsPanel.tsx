@@ -503,25 +503,6 @@ export default function ScanResultsPanel({
                 Design
               </button>
             </div>
-
-            <div
-              style={{
-                display: 'flex',
-                gap: 8,
-                flexWrap: 'wrap',
-                alignItems: 'center',
-              }}
-            >
-              <button
-                onClick={handleQuickFix}
-                disabled={!img}
-                style={{
-                  background: '#2563eb',
-                }}
-              >
-                Auto Fix
-              </button>
-            </div>
           </div>
         </div>
 
@@ -808,14 +789,13 @@ export default function ScanResultsPanel({
                 setActionMessage('Auto Fix applied. Artwork was centered and moved into a safer print area. Review the preview, then download the fixed PNG.');
               }}
               style={{
-                justifySelf: 'start',
-                padding: '8px 14px',
-                borderRadius: 10,
-                background: '#0284c7',
+                width: '100%',
+                padding: '10px 14px',
+                borderRadius: 12,
+                background: '#2563eb',
                 color: '#ffffff',
-                fontSize: 13,
-                fontWeight: 700,
-                border: '1px solid rgba(255,255,255,0.2)',
+                fontSize: 14,
+                fontWeight: 800,
                 cursor: 'pointer',
               }}
             >
