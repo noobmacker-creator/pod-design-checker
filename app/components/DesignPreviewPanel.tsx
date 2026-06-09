@@ -203,86 +203,96 @@ export default function DesignPreviewPanel({
             <button onClick={() => { setPreviewSize(0.25); setActionMessage('Preview Size set to 25%.'); }}>25%</button>
             <button onClick={() => { setPreviewSize(0.5); setActionMessage('Preview Size set to 50%.'); }}>50%</button>
           </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6 }}>
-            <span style={{ fontWeight: 700, color: '#bae6fd', fontSize: 13 }}>Detail Zoom:</span>
-            {[1, 2, 4, 8].map((z) => (
-              <button
-                key={z}
-                onClick={() => {
-                  setInspectZoom(z);
-                  setActionMessage(`Inspect Zoom set to ${z * 100}%.`);
-                }}
-              >
-                {z * 100}%
-              </button>
-            ))}
-          </div>
-          {setShowSafeAreaOverlay || setShowArtworkBoundsOverlay ? (
-            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontWeight: 700, color: '#bae6fd', fontSize: 13 }}>Preview Overlays:</span>
-              {setShowSafeAreaOverlay ? (
-                <>
-                  <span style={{ fontWeight: 600, color: '#cbd5e1', fontSize: 13 }}>Safe Area</span>
-                  <button
-                    onClick={() => {
-                      setShowSafeAreaOverlay(true);
-                      setActionMessage('Safe print area overlay turned on.');
-                    }}
-                    style={{
-                      fontWeight: showSafeAreaOverlay ? 800 : 600,
-                      outline: showSafeAreaOverlay ? '2px solid #38bdf8' : undefined,
-                    }}
-                  >
-                    On
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowSafeAreaOverlay(false);
-                      setActionMessage('Safe print area overlay turned off.');
-                    }}
-                    style={{
-                      fontWeight: !showSafeAreaOverlay ? 800 : 600,
-                      outline: !showSafeAreaOverlay ? '2px solid #38bdf8' : undefined,
-                    }}
-                  >
-                    Off
-                  </button>
-                </>
-              ) : null}
-              {setShowSafeAreaOverlay && setShowArtworkBoundsOverlay ? (
-                <span style={{ color: 'rgba(148,163,184,0.5)', margin: '0 2px' }}>|</span>
-              ) : null}
-              {setShowArtworkBoundsOverlay ? (
-                <>
-                  <span style={{ fontWeight: 600, color: '#cbd5e1', fontSize: 13 }}>Artwork Bounds</span>
-                  <button
-                    onClick={() => {
-                      setShowArtworkBoundsOverlay(true);
-                      setActionMessage('Artwork bounds overlay turned on.');
-                    }}
-                    style={{
-                      fontWeight: showArtworkBoundsOverlay ? 800 : 600,
-                      outline: showArtworkBoundsOverlay ? '2px solid #38bdf8' : undefined,
-                    }}
-                  >
-                    On
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowArtworkBoundsOverlay(false);
-                      setActionMessage('Artwork bounds overlay turned off.');
-                    }}
-                    style={{
-                      fontWeight: !showArtworkBoundsOverlay ? 800 : 600,
-                      outline: !showArtworkBoundsOverlay ? '2px solid #38bdf8' : undefined,
-                    }}
-                  >
-                    Off
-                  </button>
-                </>
-              ) : null}
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              gap: 10,
+            }}
+          >
+            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6 }}>
+              <span style={{ fontWeight: 700, color: '#bae6fd', fontSize: 13 }}>Detail Zoom:</span>
+              {[1, 2, 4, 8].map((z) => (
+                <button
+                  key={z}
+                  onClick={() => {
+                    setInspectZoom(z);
+                    setActionMessage(`Inspect Zoom set to ${z * 100}%.`);
+                  }}
+                >
+                  {z * 100}%
+                </button>
+              ))}
             </div>
-          ) : null}
+            {setShowSafeAreaOverlay || setShowArtworkBoundsOverlay ? (
+              <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontWeight: 700, color: '#bae6fd', fontSize: 13 }}>Preview Overlays:</span>
+                {setShowSafeAreaOverlay ? (
+                  <>
+                    <span style={{ fontWeight: 600, color: '#cbd5e1', fontSize: 13 }}>Safe Area</span>
+                    <button
+                      onClick={() => {
+                        setShowSafeAreaOverlay(true);
+                        setActionMessage('Safe print area overlay turned on.');
+                      }}
+                      style={{
+                        fontWeight: showSafeAreaOverlay ? 800 : 600,
+                        outline: showSafeAreaOverlay ? '2px solid #38bdf8' : undefined,
+                      }}
+                    >
+                      On
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowSafeAreaOverlay(false);
+                        setActionMessage('Safe print area overlay turned off.');
+                      }}
+                      style={{
+                        fontWeight: !showSafeAreaOverlay ? 800 : 600,
+                        outline: !showSafeAreaOverlay ? '2px solid #38bdf8' : undefined,
+                      }}
+                    >
+                      Off
+                    </button>
+                  </>
+                ) : null}
+                {setShowSafeAreaOverlay && setShowArtworkBoundsOverlay ? (
+                  <span style={{ color: 'rgba(148,163,184,0.5)', margin: '0 2px' }}>|</span>
+                ) : null}
+                {setShowArtworkBoundsOverlay ? (
+                  <>
+                    <span style={{ fontWeight: 600, color: '#cbd5e1', fontSize: 13 }}>Artwork Bounds</span>
+                    <button
+                      onClick={() => {
+                        setShowArtworkBoundsOverlay(true);
+                        setActionMessage('Artwork bounds overlay turned on.');
+                      }}
+                      style={{
+                        fontWeight: showArtworkBoundsOverlay ? 800 : 600,
+                        outline: showArtworkBoundsOverlay ? '2px solid #38bdf8' : undefined,
+                      }}
+                    >
+                      On
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowArtworkBoundsOverlay(false);
+                        setActionMessage('Artwork bounds overlay turned off.');
+                      }}
+                      style={{
+                        fontWeight: !showArtworkBoundsOverlay ? 800 : 600,
+                        outline: !showArtworkBoundsOverlay ? '2px solid #38bdf8' : undefined,
+                      }}
+                    >
+                      Off
+                    </button>
+                  </>
+                ) : null}
+              </div>
+            ) : null}
+          </div>
         </div>
 
         <div
