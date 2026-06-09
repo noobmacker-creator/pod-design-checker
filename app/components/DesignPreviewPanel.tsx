@@ -217,26 +217,11 @@ export default function DesignPreviewPanel({
               </button>
             ))}
           </div>
-        </div>
-
-        {setShowSafeAreaOverlay || setShowArtworkBoundsOverlay ? (
-          <div
-            style={{
-              border: '1px solid rgba(148, 163, 184, 0.18)',
-              background: 'rgba(15, 23, 42, 0.45)',
-              borderRadius: 12,
-              padding: 8,
-              display: 'grid',
-              gap: 6,
-            }}
-          >
-            <div style={{ fontWeight: 700, fontSize: 12, color: '#93c5fd', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              Preview Tools
-            </div>
+          {setShowSafeAreaOverlay || setShowArtworkBoundsOverlay ? (
             <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6 }}>
               {setShowSafeAreaOverlay ? (
                 <>
-                  <span style={{ fontSize: 13, color: '#cbd5e1' }}>Safe Area</span>
+                  <span style={{ fontWeight: 700, color: '#bae6fd', fontSize: 13 }}>Safe Area:</span>
                   <button
                     onClick={() => {
                       setShowSafeAreaOverlay(true);
@@ -268,7 +253,7 @@ export default function DesignPreviewPanel({
               ) : null}
               {setShowArtworkBoundsOverlay ? (
                 <>
-                  <span style={{ fontSize: 13, color: '#cbd5e1' }}>Artwork Bounds</span>
+                  <span style={{ fontWeight: 700, color: '#bae6fd', fontSize: 13 }}>Artwork Bounds:</span>
                   <button
                     onClick={() => {
                       setShowArtworkBoundsOverlay(true);
@@ -296,8 +281,8 @@ export default function DesignPreviewPanel({
                 </>
               ) : null}
             </div>
-          </div>
-        ) : null}
+          ) : null}
+        </div>
 
         <div
           style={{
