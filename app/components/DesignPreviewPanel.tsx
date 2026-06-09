@@ -124,17 +124,18 @@ export default function DesignPreviewPanel({
         height: 'fit-content',
       }}
     >
-      <h2 style={{ margin: '0 0 8px', fontSize: 22, fontWeight: 800 }}>Design Preview</h2>
+      <h2 style={{ margin: '0 0 6px', fontSize: 22, fontWeight: 800 }}>Design Preview</h2>
 
       <div
+        className="preview-controls-compact"
         style={{
           border: '1px solid rgba(56, 189, 248, 0.35)',
           background: 'rgba(8, 47, 73, 0.18)',
           borderRadius: 14,
-          padding: 10,
+          padding: 8,
           display: 'grid',
-          gap: 10,
-          marginBottom: 10,
+          gap: 6,
+          marginBottom: 8,
         }}
       >
         <div style={{ fontWeight: 800, fontSize: 13, color: '#7dd3fc', letterSpacing: '0.02em' }}>
@@ -147,15 +148,15 @@ export default function DesignPreviewPanel({
               border: '1px solid rgba(148, 163, 184, 0.18)',
               background: 'rgba(15, 23, 42, 0.45)',
               borderRadius: 12,
-              padding: 8,
+              padding: 6,
               display: 'grid',
-              gap: 6,
+              gap: 4,
             }}
           >
             <div style={{ fontWeight: 700, fontSize: 12, color: '#93c5fd', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
               Design View
             </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6 }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 4 }}>
               <button
                 onClick={() => {
                   setAutoFixPreviewMode('original');
@@ -189,49 +190,35 @@ export default function DesignPreviewPanel({
             border: '1px solid rgba(148, 163, 184, 0.18)',
             background: 'rgba(15, 23, 42, 0.45)',
             borderRadius: 12,
-            padding: 8,
+            padding: 6,
             display: 'grid',
-            gap: 6,
+            gap: 4,
           }}
         >
           <div style={{ fontWeight: 700, fontSize: 12, color: '#93c5fd', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
             Preview View
-          </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6 }}>
-            <span style={{ fontWeight: 700, color: '#bae6fd', fontSize: 13 }}>Preview Size:</span>
-            <button onClick={() => { setPreviewSize(0.1); setActionMessage('Preview Size set to 10%.'); }}>10%</button>
-            <button onClick={() => { setPreviewSize(0.25); setActionMessage('Preview Size set to 25%.'); }}>25%</button>
-            <button onClick={() => { setPreviewSize(0.5); setActionMessage('Preview Size set to 50%.'); }}>50%</button>
           </div>
           <div
             style={{
               display: 'flex',
               flexWrap: 'wrap',
               justifyContent: 'space-between',
-              alignItems: 'center',
-              gap: 10,
+              alignItems: 'flex-start',
+              gap: 8,
             }}
           >
-            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6 }}>
-              <span style={{ fontWeight: 700, color: '#bae6fd', fontSize: 13 }}>Detail Zoom:</span>
-              {[1, 2, 4, 8].map((z) => (
-                <button
-                  key={z}
-                  onClick={() => {
-                    setInspectZoom(z);
-                    setActionMessage(`Inspect Zoom set to ${z * 100}%.`);
-                  }}
-                >
-                  {z * 100}%
-                </button>
-              ))}
+            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 4 }}>
+              <span style={{ fontWeight: 700, color: '#bae6fd', fontSize: 13 }}>Preview Size:</span>
+              <button onClick={() => { setPreviewSize(0.1); setActionMessage('Preview Size set to 10%.'); }}>10%</button>
+              <button onClick={() => { setPreviewSize(0.25); setActionMessage('Preview Size set to 25%.'); }}>25%</button>
+              <button onClick={() => { setPreviewSize(0.5); setActionMessage('Preview Size set to 50%.'); }}>50%</button>
             </div>
             {setShowSafeAreaOverlay || setShowArtworkBoundsOverlay ? (
-              <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}>
+              <div style={{ display: 'grid', gap: 4, justifyItems: 'start' }}>
                 <span style={{ fontWeight: 700, color: '#bae6fd', fontSize: 13 }}>Preview Overlays:</span>
                 {setShowSafeAreaOverlay ? (
-                  <>
-                    <span style={{ fontWeight: 600, color: '#cbd5e1', fontSize: 13 }}>Safe Area</span>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 4 }}>
+                    <span style={{ fontWeight: 600, color: '#cbd5e1', fontSize: 13 }}>Safe Area:</span>
                     <button
                       onClick={() => {
                         setShowSafeAreaOverlay(true);
@@ -256,14 +243,11 @@ export default function DesignPreviewPanel({
                     >
                       Off
                     </button>
-                  </>
-                ) : null}
-                {setShowSafeAreaOverlay && setShowArtworkBoundsOverlay ? (
-                  <span style={{ color: 'rgba(148,163,184,0.5)', margin: '0 2px' }}>|</span>
+                  </div>
                 ) : null}
                 {setShowArtworkBoundsOverlay ? (
-                  <>
-                    <span style={{ fontWeight: 600, color: '#cbd5e1', fontSize: 13 }}>Artwork Bounds</span>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 4 }}>
+                    <span style={{ fontWeight: 600, color: '#cbd5e1', fontSize: 13 }}>Artwork Bounds:</span>
                     <button
                       onClick={() => {
                         setShowArtworkBoundsOverlay(true);
@@ -288,10 +272,24 @@ export default function DesignPreviewPanel({
                     >
                       Off
                     </button>
-                  </>
+                  </div>
                 ) : null}
               </div>
             ) : null}
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 4 }}>
+            <span style={{ fontWeight: 700, color: '#bae6fd', fontSize: 13 }}>Detail Zoom:</span>
+            {[1, 2, 4, 8].map((z) => (
+              <button
+                key={z}
+                onClick={() => {
+                  setInspectZoom(z);
+                  setActionMessage(`Inspect Zoom set to ${z * 100}%.`);
+                }}
+              >
+                {z * 100}%
+              </button>
+            ))}
           </div>
         </div>
 
@@ -300,15 +298,15 @@ export default function DesignPreviewPanel({
             border: '1px solid rgba(148, 163, 184, 0.18)',
             background: 'rgba(15, 23, 42, 0.45)',
             borderRadius: 12,
-            padding: 8,
+            padding: 6,
             display: 'grid',
-            gap: 6,
+            gap: 4,
           }}
         >
           <div style={{ fontWeight: 700, fontSize: 12, color: '#93c5fd', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
             Background Preview
           </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6 }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 4 }}>
             {PREVIEW_BACKGROUND_OPTIONS.map((option) => (
               <button
                 key={option.id}
@@ -328,12 +326,12 @@ export default function DesignPreviewPanel({
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: 6,
-                fontSize: 13,
+                gap: 4,
+                fontSize: 12,
                 fontWeight: previewBackground === 'custom' ? 800 : 600,
                 outline: previewBackground === 'custom' ? '2px solid #38bdf8' : undefined,
                 borderRadius: 6,
-                padding: '2px 4px',
+                padding: '1px 2px',
                 cursor: 'pointer',
               }}
             >
@@ -347,11 +345,11 @@ export default function DesignPreviewPanel({
                   setActionMessage(`Preview background set to custom colour ${e.target.value}.`);
                 }}
                 style={{
-                  width: 28,
-                  height: 28,
+                  width: 24,
+                  height: 24,
                   padding: 0,
                   border: '1px solid rgba(148, 163, 184, 0.4)',
-                  borderRadius: 6,
+                  borderRadius: 5,
                   cursor: 'pointer',
                   background: 'transparent',
                 }}
@@ -374,13 +372,13 @@ export default function DesignPreviewPanel({
         <div
           style={{
             display: 'flex',
-            gap: 8,
+            gap: 6,
             flexWrap: 'wrap',
             alignItems: 'center',
             fontSize: 12,
             color: '#cbd5e1',
             background: 'rgba(15,23,42,0.85)',
-            padding: '8px 12px',
+            padding: '6px 10px',
             borderRadius: 10,
             border: '1px solid rgba(255,255,255,0.06)',
           }}
@@ -396,6 +394,10 @@ export default function DesignPreviewPanel({
       </div>
 
       <style>{`
+        .preview-controls-compact button {
+          padding: 5px 8px;
+          font-size: 12px;
+        }
         @keyframes scanOverlayPulse {
           0%, 100% { opacity: 1; box-shadow: 0 0 22px rgba(56, 189, 248, 0.28); }
           50% { opacity: 0.82; box-shadow: 0 0 32px rgba(56, 189, 248, 0.45); }
