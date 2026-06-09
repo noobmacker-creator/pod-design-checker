@@ -188,94 +188,92 @@ export default function DesignPreviewPanel({
           </div>
         ) : null}
 
-        {setShowSafeAreaOverlay ? (
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
-            <span style={{ fontWeight: 700, color: '#bae6fd', fontSize: 13 }}>Safe Area:</span>
-            <button
-              onClick={() => {
-                setShowSafeAreaOverlay(true);
-                setActionMessage('Safe print area overlay turned on.');
-              }}
+        {setShowSafeAreaOverlay || setShowArtworkBoundsOverlay ? (
+          <details style={{ fontSize: 13 }}>
+            <summary
               style={{
-                fontWeight: showSafeAreaOverlay ? 800 : 600,
-                outline: showSafeAreaOverlay ? '2px solid #38bdf8' : undefined,
+                cursor: 'pointer',
+                fontWeight: 700,
+                color: '#bae6fd',
+                listStyle: 'none',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 4,
               }}
             >
-              On
-            </button>
-            <button
-              onClick={() => {
-                setShowSafeAreaOverlay(false);
-                setActionMessage('Safe print area overlay turned off.');
-              }}
-              style={{
-                fontWeight: !showSafeAreaOverlay ? 800 : 600,
-                outline: !showSafeAreaOverlay ? '2px solid #38bdf8' : undefined,
-              }}
-            >
-              Off
-            </button>
-            <span style={{ fontSize: 11, color: '#94a3b8' }}>Show safe print area</span>
-          </div>
-        ) : null}
-
-        {setShowSafeAreaOverlay ? (
-          <p
-            style={{
-              fontSize: 11,
-              color: '#94a3b8',
-              lineHeight: 1.35,
-              marginTop: 0,
-              marginBottom: 0,
-            }}
-          >
-            Preview only — not included in downloads.
-          </p>
-        ) : null}
-
-        {setShowArtworkBoundsOverlay ? (
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
-            <span style={{ fontWeight: 700, color: '#bae6fd', fontSize: 13 }}>Artwork Bounds:</span>
-            <button
-              onClick={() => {
-                setShowArtworkBoundsOverlay(true);
-                setActionMessage('Artwork bounds overlay turned on.');
-              }}
-              style={{
-                fontWeight: showArtworkBoundsOverlay ? 800 : 600,
-                outline: showArtworkBoundsOverlay ? '2px solid #38bdf8' : undefined,
-              }}
-            >
-              On
-            </button>
-            <button
-              onClick={() => {
-                setShowArtworkBoundsOverlay(false);
-                setActionMessage('Artwork bounds overlay turned off.');
-              }}
-              style={{
-                fontWeight: !showArtworkBoundsOverlay ? 800 : 600,
-                outline: !showArtworkBoundsOverlay ? '2px solid #38bdf8' : undefined,
-              }}
-            >
-              Off
-            </button>
-            <span style={{ fontSize: 11, color: '#94a3b8' }}>Show detected artwork area</span>
-          </div>
-        ) : null}
-
-        {setShowArtworkBoundsOverlay ? (
-          <p
-            style={{
-              fontSize: 11,
-              color: '#94a3b8',
-              lineHeight: 1.35,
-              marginTop: 0,
-              marginBottom: 0,
-            }}
-          >
-            Preview only — not included in downloads.
-          </p>
+              Preview Tools
+            </summary>
+            <div style={{ display: 'grid', gap: 6, marginTop: 6, paddingLeft: 2 }}>
+              {setShowSafeAreaOverlay ? (
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+                  <span style={{ fontWeight: 700, color: '#bae6fd', fontSize: 13 }}>Safe Area:</span>
+                  <button
+                    onClick={() => {
+                      setShowSafeAreaOverlay(true);
+                      setActionMessage('Safe print area overlay turned on.');
+                    }}
+                    style={{
+                      fontWeight: showSafeAreaOverlay ? 800 : 600,
+                      outline: showSafeAreaOverlay ? '2px solid #38bdf8' : undefined,
+                    }}
+                  >
+                    On
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowSafeAreaOverlay(false);
+                      setActionMessage('Safe print area overlay turned off.');
+                    }}
+                    style={{
+                      fontWeight: !showSafeAreaOverlay ? 800 : 600,
+                      outline: !showSafeAreaOverlay ? '2px solid #38bdf8' : undefined,
+                    }}
+                  >
+                    Off
+                  </button>
+                </div>
+              ) : null}
+              {setShowArtworkBoundsOverlay ? (
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+                  <span style={{ fontWeight: 700, color: '#bae6fd', fontSize: 13 }}>Artwork Bounds:</span>
+                  <button
+                    onClick={() => {
+                      setShowArtworkBoundsOverlay(true);
+                      setActionMessage('Artwork bounds overlay turned on.');
+                    }}
+                    style={{
+                      fontWeight: showArtworkBoundsOverlay ? 800 : 600,
+                      outline: showArtworkBoundsOverlay ? '2px solid #38bdf8' : undefined,
+                    }}
+                  >
+                    On
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowArtworkBoundsOverlay(false);
+                      setActionMessage('Artwork bounds overlay turned off.');
+                    }}
+                    style={{
+                      fontWeight: !showArtworkBoundsOverlay ? 800 : 600,
+                      outline: !showArtworkBoundsOverlay ? '2px solid #38bdf8' : undefined,
+                    }}
+                  >
+                    Off
+                  </button>
+                </div>
+              ) : null}
+              <p
+                style={{
+                  fontSize: 11,
+                  color: '#94a3b8',
+                  lineHeight: 1.35,
+                  margin: 0,
+                }}
+              >
+                Preview only — overlays are not included in downloads.
+              </p>
+            </div>
+          </details>
         ) : null}
 
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
