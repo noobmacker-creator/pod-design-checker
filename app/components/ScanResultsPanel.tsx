@@ -467,34 +467,37 @@ export default function ScanResultsPanel({
               gap: 8,
             }}
           >
-            <div
-              style={{
-                display: 'flex',
-                gap: 8,
-                flexWrap: 'wrap',
-                alignItems: 'center',
-              }}
-            >
-              <span style={{ fontWeight: 800, color: '#bae6fd', fontSize: 13 }}>
+            <div style={{ display: 'grid', gap: 4 }}>
+              <span style={{ fontWeight: 800, color: '#bae6fd', fontSize: 12 }}>
                 Detail Zoom
               </span>
-
-              {[1, 2, 4, 8].map((z) => (
-                <button
-                  key={z}
-                  onClick={() => {
-                    setInspectZoom(z);
-                    setActionMessage(`Inspect Zoom set to ${z * 100}%.`);
-                  }}
-                  style={{
-                    fontWeight: inspectZoom === z ? 800 : 600,
-                    outline: inspectZoom === z ? '2px solid #38bdf8' : undefined,
-                  }}
-                  disabled={!img}
-                >
-                  {z * 100}%
-                </button>
-              ))}
+              <div
+                style={{
+                  display: 'flex',
+                  flexWrap: 'nowrap',
+                  gap: 6,
+                  alignItems: 'center',
+                }}
+              >
+                {[1, 2, 4, 8].map((z) => (
+                  <button
+                    key={z}
+                    onClick={() => {
+                      setInspectZoom(z);
+                      setActionMessage(`Inspect Zoom set to ${z * 100}%.`);
+                    }}
+                    style={{
+                      padding: '7px 10px',
+                      minWidth: 52,
+                      fontWeight: inspectZoom === z ? 800 : 600,
+                      outline: inspectZoom === z ? '2px solid #38bdf8' : undefined,
+                    }}
+                    disabled={!img}
+                  >
+                    {z * 100}%
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </div>
