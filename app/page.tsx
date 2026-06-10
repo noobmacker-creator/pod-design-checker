@@ -1991,6 +1991,10 @@ gap: 16,
   img={img}
   checks={checks}
   downloadMessage={downloadMessage}
+  file={file}
+  fileSize={fileSize}
+  hasTransparency={hasTransparency}
+  practicalPrintDpi={practicalPrintDpi}
   standardTargetLine={standardTargetLine}
   redbubbleTargetLine={redbubbleTargetLine}
   printfulTargetLine={printfulTargetLine}

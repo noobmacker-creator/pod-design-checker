@@ -7,11 +7,25 @@ import { redbubblePresets } from '../lib/redbubblePresets';
 import type { PrintfulPresetId } from '../lib/printfulPresets';
 import { printfulPresets } from '../lib/printfulPresets';
 
+type PreflightMark = 'pass' | 'warn' | 'fail' | 'info';
+
+type PreflightItem = {
+  label: string;
+  mark: PreflightMark;
+  detail?: string;
+};
+
+type PrintfulOverallStatus = 'NOT READY' | 'REVIEW FIRST' | 'PRINTFUL READY';
+
 type IssueBucketsPanelProps = {
   isScanning: boolean;
   img: HTMLImageElement | null;
   checks?: CheckItem[];
   downloadMessage?: string;
+  file: File | null;
+  fileSize: number;
+  hasTransparency: boolean | null;
+  practicalPrintDpi: number;
   standardTargetLine: string;
   redbubbleTargetLine: string;
   printfulTargetLine: string;
@@ -32,9 +46,159 @@ type IssueBucketsPanelProps = {
   handleDownloadTeePublicPng: () => void;
 };
 
+const PRINTFUL_MAX_BYTES = 200 * 1024 * 1024;
+
+function getPrintfulPreflight(
+  img: HTMLImageElement | null,
+  checks: CheckItem[] | undefined,
+  file: File | null,
+  fileSize: number,
+  hasTransparency: boolean | null,
+  practicalPrintDpi: number,
+  uploadTarget: 'standard' | 'redbubble' | 'printful' | 'teepublic'
+): { overall: PrintfulOverallStatus; items: PreflightItem[] } {
+  const findCheck = (label: string) => checks?.find((c) => c.label === label);
+
+  const whiteBg = findCheck('White Background Risk');
+  const solidBg = findCheck('Solid Background Box Risk');
+  const fakeBg = findCheck('Fake Transparency Background');
+
+  const isActiveIssue = (check: CheckItem | undefined) =>
+    check?.status === 'fail' || check?.status === 'warn';
+
+  const strongBackgroundIssue =
+    whiteBg?.status === 'fail' ||
+    solidBg?.status === 'fail' ||
+    fakeBg?.status === 'fail';
+
+  const backgroundNeedsReview =
+    isActiveIssue(whiteBg) || isActiveIssue(solidBg) || isActiveIssue(fakeBg);
+
+  const isPng = file?.type.includes('png') ?? false;
+  const isJpeg =
+    (file?.type.includes('jpeg') || file?.type.includes('jpg')) ?? false;
+  const isWebp = file?.type.includes('webp') ?? false;
+
+  let fileTypeMark: PreflightMark = 'warn';
+  let fileTypeDetail =
+    'PNG preferred for transparency. JPEG can work if no transparency is needed.';
+  if (isPng || isJpeg) {
+    fileTypeMark = 'pass';
+    fileTypeDetail = isPng
+      ? 'PNG detected — good for transparent DTG artwork.'
+      : 'JPEG detected — fine if transparency is not needed.';
+  } else if (isWebp) {
+    fileTypeMark = 'warn';
+    fileTypeDetail =
+      'WebP detected. PNG preferred for transparency. JPEG can work if no transparency is needed.';
+  } else if (!file) {
+    fileTypeMark = 'warn';
+    fileTypeDetail =
+      'PNG preferred for transparency. JPEG can work if no transparency is needed.';
+  }
+
+  const transparencyPass =
+    hasTransparency === true && !backgroundNeedsReview;
+  const transparencyMark: PreflightMark = transparencyPass
+    ? 'pass'
+    : img
+    ? 'warn'
+    : 'fail';
+  const transparencyDetail = backgroundNeedsReview
+    ? 'Background boxes may print as rectangles on DTG products.'
+    : hasTransparency === false
+    ? 'No transparency detected — background may print as a solid area.'
+    : hasTransparency === true
+    ? 'Transparent PNG with no obvious background box issues.'
+    : 'Background boxes may print as rectangles on DTG products.';
+
+  const dpiMark: PreflightMark =
+    practicalPrintDpi >= 150 ? 'pass' : img ? 'warn' : 'fail';
+  const dpiDetail = '150–300 DPI is the usual Printful target range.';
+
+  const fileSizeMark: PreflightMark =
+    fileSize > 0 && fileSize < PRINTFUL_MAX_BYTES
+      ? 'pass'
+      : fileSize >= PRINTFUL_MAX_BYTES
+      ? 'warn'
+      : img
+      ? 'pass'
+      : 'fail';
+  const fileSizeDetail = 'Printful upload max is 200 MB.';
+
+  const items: PreflightItem[] = [
+    {
+      label: 'Design uploaded',
+      mark: img ? 'pass' : 'fail',
+    },
+    {
+      label: 'Printful export selected',
+      mark: uploadTarget === 'printful' ? 'pass' : 'info',
+    },
+    {
+      label: 'File type',
+      mark: fileTypeMark,
+      detail: fileTypeDetail,
+    },
+    {
+      label: 'Transparency / background',
+      mark: transparencyMark,
+      detail: transparencyDetail,
+    },
+    {
+      label: 'Practical DPI',
+      mark: dpiMark,
+      detail: dpiDetail,
+    },
+    {
+      label: 'File size',
+      mark: fileSizeMark,
+      detail: fileSizeDetail,
+    },
+    {
+      label: 'sRGB note',
+      mark: 'info',
+      detail: 'sRGB recommended for Printful digital printing.',
+    },
+  ];
+
+  let overall: PrintfulOverallStatus = 'PRINTFUL READY';
+  if (!img || strongBackgroundIssue) {
+    overall = 'NOT READY';
+  } else if (
+    practicalPrintDpi < 150 ||
+    fileTypeMark === 'warn' ||
+    transparencyMark === 'warn' ||
+    fileSizeMark === 'warn'
+  ) {
+    overall = 'REVIEW FIRST';
+  }
+
+  return { overall, items };
+}
+
+function preflightMarkSymbol(mark: PreflightMark): string {
+  if (mark === 'pass') return '✓';
+  if (mark === 'warn') return '⚠';
+  if (mark === 'fail') return '✕';
+  return 'ℹ';
+}
+
+function preflightStatusColor(status: PrintfulOverallStatus): string {
+  if (status === 'PRINTFUL READY') return '#86efac';
+  if (status === 'REVIEW FIRST') return '#fde047';
+  return '#fca5a5';
+}
+
 export default function IssueBucketsPanel({
   isScanning,
   img,
+  checks = [],
+  downloadMessage,
+  file,
+  fileSize,
+  hasTransparency,
+  practicalPrintDpi,
   standardTargetLine,
   redbubbleTargetLine,
   printfulTargetLine,
@@ -259,6 +423,70 @@ export default function IssueBucketsPanel({
     </div>
   );
 
+  const renderPrintfulPreflightCard = () => {
+    const { overall, items } = getPrintfulPreflight(
+      img,
+      checks,
+      file,
+      fileSize,
+      hasTransparency,
+      practicalPrintDpi,
+      uploadTarget
+    );
+
+    return (
+      <div
+        style={{
+          padding: 12,
+          borderRadius: 14,
+          background: 'rgba(15, 23, 42, 0.65)',
+          border: '1px solid rgba(147, 197, 253, 0.25)',
+          display: 'grid',
+          gap: 8,
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+          <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 800 }}>Printful Preflight</div>
+          <div
+            style={{
+              fontSize: 10,
+              fontWeight: 900,
+              color: preflightStatusColor(overall),
+              letterSpacing: '0.04em',
+            }}
+          >
+            {overall}
+          </div>
+        </div>
+        <div style={{ fontSize: 11, color: '#94a3b8', lineHeight: 1.4 }}>
+          Quick guide for Printful DTG/DTF apparel export — uses your current scan data.
+        </div>
+        <div style={{ display: 'grid', gap: 6 }}>
+          {items.map((item) => (
+            <div key={item.label} style={{ display: 'grid', gap: 2 }}>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 12, lineHeight: 1.4 }}>
+                <span style={{ flexShrink: 0, width: 14, fontWeight: 900, color: '#cbd5e1' }}>
+                  {preflightMarkSymbol(item.mark)}
+                </span>
+                <span style={{ color: '#e2e8f0', fontWeight: 700 }}>{item.label}</span>
+              </div>
+              {item.detail && (
+                <div style={{ paddingLeft: 22, fontSize: 11, color: '#94a3b8', lineHeight: 1.35 }}>
+                  {item.detail}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+        {downloadMessage?.includes('Printful') && (
+          <div style={{ fontSize: 11, color: '#86efac', fontWeight: 700 }}>
+            Printful export downloaded.
+          </div>
+        )}
+      </div>
+    );
+  };
+
   const renderPrintfulExportBox = () => (
     <div key="printful" style={getBoxStyle('printful')}>
       <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 800 }}>
@@ -270,6 +498,7 @@ export default function IssueBucketsPanel({
       <div style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.4 }}>
         Best for: Printful DTG/DTF apparel.
       </div>
+      {uploadTarget === 'printful' && renderPrintfulPreflightCard()}
       <div style={stepLabelStyle}>Step 1: Choose export size</div>
       <div style={{ fontSize: 12, color: '#cbd5e1', fontWeight: 800 }}>
         Export Size
