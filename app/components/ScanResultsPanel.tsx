@@ -418,7 +418,7 @@ export default function ScanResultsPanel({
               POD Design Checker™
             </div>
             <div style={{ marginTop: 4, color: '#cbd5e1', fontSize: 13 }}>
-              Fast print-readiness actions
+              Print On Demand Checker
             </div>
             <div
               style={{
