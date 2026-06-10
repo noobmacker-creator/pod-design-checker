@@ -5,6 +5,7 @@ import {
   formatBytes,
   detectFakeTransparencyBackground,
   getImageDpi,
+  getColourProfile,
   detectBoundsAndCoverage,
   estimateThinLines,
   getEffectiveArtBounds,
@@ -811,6 +812,9 @@ export default function Page() {
   const [fileSize, setFileSize] = useState(0);
 
   const [dpiMetadata, setDpiMetadata] = useState<number | null>(null);
+  const [colourProfileStatus, setColourProfileStatus] = useState<
+    'srgb' | 'non-srgb' | 'unknown'
+  >('unknown');
   const [hasTransparency, setHasTransparency] = useState<boolean | null>(null);
   const [whitePixelRatio, setWhitePixelRatio] = useState(0);
   const [whiteBackgroundCheck, setWhiteBackgroundCheck] = useState<CheckItem | null>(null);
@@ -1656,6 +1660,7 @@ const drawY = SHIRT_PRINT_Y + previewTransform.offsetY * mapY + mockupOffsetY;
   
     const arrayBuffer = await selected.arrayBuffer();
     setDpiMetadata(getImageDpi(selected, arrayBuffer));
+    setColourProfileStatus(getColourProfile(selected, arrayBuffer));
   
     const url = URL.createObjectURL(selected);
     setFileUrl(url);
@@ -1772,6 +1777,7 @@ const drawY = SHIRT_PRINT_Y + previewTransform.offsetY * mapY + mockupOffsetY;
     setImgH(0);
     setFileSize(0);
     setDpiMetadata(null);
+    setColourProfileStatus('unknown');
     setHasTransparency(null);
     setWhitePixelRatio(0);
     setOriginalBounds(null);
@@ -1993,6 +1999,7 @@ gap: 16,
   downloadMessage={downloadMessage}
   file={file}
   fileSize={fileSize}
+  colourProfileStatus={colourProfileStatus}
   hasTransparency={hasTransparency}
   practicalPrintDpi={practicalPrintDpi}
   standardTargetLine={standardTargetLine}

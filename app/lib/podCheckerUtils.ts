@@ -166,6 +166,277 @@ export function detectFakeTransparencyBackground(imageData: ImageData) {
     if (type.includes('jpeg') || type.includes('jpg')) return parseJpegDpi(arrayBuffer);
     return null;
   }
+
+  export type ColourProfileStatus = 'srgb' | 'non-srgb' | 'unknown';
+
+  function profileTextHints(text: string): ColourProfileStatus | null {
+    const lower = text.toLowerCase();
+    if (
+      lower.includes('srgb') ||
+      lower.includes('iec 61966-2.1') ||
+      lower.includes('iec61966-2.1')
+    ) {
+      return 'srgb';
+    }
+    if (
+      lower.includes('adobe rgb') ||
+      lower.includes('display p3') ||
+      lower.includes('prophoto') ||
+      lower.includes('romm rgb') ||
+      lower.includes('rommrgb') ||
+      lower.includes('eci rgb') ||
+      lower.includes('fogra') ||
+      lower.includes('swop') ||
+      lower.includes('cmyk') ||
+      lower.includes('gray gamma') ||
+      lower.includes('grey gamma')
+    ) {
+      return 'non-srgb';
+    }
+    return null;
+  }
+
+  function scanBytesForProfileHints(bytes: Uint8Array): ColourProfileStatus | null {
+    const limit = Math.min(bytes.length, 128 * 1024);
+
+    let ascii = '';
+    for (let i = 0; i < limit; i++) {
+      const c = bytes[i];
+      ascii += c >= 32 && c <= 126 ? String.fromCharCode(c) : ' ';
+    }
+    const asciiHint = profileTextHints(ascii);
+    if (asciiHint) return asciiHint;
+
+    let utf16 = '';
+    for (let i = 0; i < limit - 1; i += 2) {
+      const code = (bytes[i] << 8) | bytes[i + 1];
+      utf16 += code >= 32 && code <= 126 ? String.fromCharCode(code) : ' ';
+    }
+    const utf16Hint = profileTextHints(utf16);
+    if (utf16Hint) return utf16Hint;
+
+    return null;
+  }
+
+  function parsePngColourProfile(arrayBuffer: ArrayBuffer): ColourProfileStatus {
+    try {
+      const bytes = new Uint8Array(arrayBuffer);
+      const pngSig = [137, 80, 78, 71, 13, 10, 26, 10];
+
+      for (let i = 0; i < pngSig.length; i++) {
+        if (bytes[i] !== pngSig[i]) return 'unknown';
+      }
+
+      let offset = 8;
+      let hasICCP = false;
+
+      while (offset + 12 <= bytes.length) {
+        const length =
+          (bytes[offset] << 24) |
+          (bytes[offset + 1] << 16) |
+          (bytes[offset + 2] << 8) |
+          bytes[offset + 3];
+
+        const type = String.fromCharCode(
+          bytes[offset + 4],
+          bytes[offset + 5],
+          bytes[offset + 6],
+          bytes[offset + 7]
+        );
+
+        if (type === 'sRGB') return 'srgb';
+
+        if (type === 'iCCP' && length > 2) {
+          hasICCP = true;
+          const dataOffset = offset + 8;
+          let name = '';
+          for (let i = dataOffset + 1; i < dataOffset + length && bytes[i] !== 0; i++) {
+            name += String.fromCharCode(bytes[i]);
+          }
+          const nameHint = profileTextHints(name);
+          if (nameHint) return nameHint;
+        }
+
+        offset += 12 + length;
+      }
+
+      return hasICCP ? 'unknown' : 'unknown';
+    } catch {
+      return 'unknown';
+    }
+  }
+
+  function readTiffU16(bytes: Uint8Array, offset: number, littleEndian: boolean): number {
+    if (littleEndian) {
+      return bytes[offset] | (bytes[offset + 1] << 8);
+    }
+    return (bytes[offset] << 8) | bytes[offset + 1];
+  }
+
+  function readTiffU32(bytes: Uint8Array, offset: number, littleEndian: boolean): number {
+    if (littleEndian) {
+      return (
+        bytes[offset] |
+        (bytes[offset + 1] << 8) |
+        (bytes[offset + 2] << 16) |
+        (bytes[offset + 3] << 24)
+      );
+    }
+    return (
+      (bytes[offset] << 24) |
+      (bytes[offset + 1] << 16) |
+      (bytes[offset + 2] << 8) |
+      bytes[offset + 3]
+    );
+  }
+
+  function findExifColorSpaceInIfd(
+    bytes: Uint8Array,
+    tiffStart: number,
+    ifdOffset: number,
+    segmentEnd: number,
+    littleEndian: boolean
+  ): number | null {
+    const ifd = tiffStart + ifdOffset;
+    if (ifd + 2 > segmentEnd) return null;
+
+    const entryCount = readTiffU16(bytes, ifd, littleEndian);
+    for (let i = 0; i < entryCount; i++) {
+      const entry = ifd + 2 + i * 12;
+      if (entry + 12 > segmentEnd) break;
+
+      const tag = readTiffU16(bytes, entry, littleEndian);
+      const type = readTiffU16(bytes, entry + 2, littleEndian);
+      const count = readTiffU32(bytes, entry + 4, littleEndian);
+
+      if (tag === 0xa001 && type === 3 && count >= 1) {
+        if (count === 1) {
+          return readTiffU16(bytes, entry + 8, littleEndian);
+        }
+        const valueOffset = readTiffU32(bytes, entry + 8, littleEndian);
+        const valuePos = tiffStart + valueOffset;
+        if (valuePos + 2 <= segmentEnd) {
+          return readTiffU16(bytes, valuePos, littleEndian);
+        }
+      }
+
+      if (tag === 0x8769 && count === 1) {
+        const exifIfdOffset = readTiffU32(bytes, entry + 8, littleEndian);
+        const nested = findExifColorSpaceInIfd(
+          bytes,
+          tiffStart,
+          exifIfdOffset,
+          segmentEnd,
+          littleEndian
+        );
+        if (nested !== null) return nested;
+      }
+    }
+
+    return null;
+  }
+
+  function parseJpegExifColorSpace(
+    bytes: Uint8Array,
+    segmentStart: number,
+    segmentLength: number
+  ): number | null {
+    const segmentEnd = segmentStart + segmentLength;
+    if (segmentEnd > bytes.length) return null;
+
+    const exifHeader = 'Exif\0\0';
+    for (let i = 0; i < exifHeader.length; i++) {
+      if (bytes[segmentStart + i] !== exifHeader.charCodeAt(i)) return null;
+    }
+
+    const tiffStart = segmentStart + 6;
+    if (tiffStart + 8 > segmentEnd) return null;
+
+    const littleEndian = bytes[tiffStart] === 0x49 && bytes[tiffStart + 1] === 0x49;
+    const bigEndian = bytes[tiffStart] === 0x4d && bytes[tiffStart + 1] === 0x4d;
+    if (!littleEndian && !bigEndian) return null;
+
+    if (readTiffU16(bytes, tiffStart + 2, littleEndian) !== 42) return null;
+
+    const ifd0Offset = readTiffU32(bytes, tiffStart + 4, littleEndian);
+    return findExifColorSpaceInIfd(bytes, tiffStart, ifd0Offset, segmentEnd, littleEndian);
+  }
+
+  function parseJpegColourProfile(arrayBuffer: ArrayBuffer): ColourProfileStatus {
+    try {
+      const view = new DataView(arrayBuffer);
+      const bytes = new Uint8Array(arrayBuffer);
+      if (view.getUint16(0) !== 0xffd8) return 'unknown';
+
+      const iccChunks: Uint8Array[] = [];
+      let exifColorSpace: number | null = null;
+      let offset = 2;
+
+      while (offset + 4 < view.byteLength) {
+        if (view.getUint8(offset) !== 0xff) break;
+
+        const marker = view.getUint8(offset + 1);
+        const length = view.getUint16(offset + 2);
+        if (length < 2 || offset + 2 + length > view.byteLength) break;
+
+        if (marker === 0xe2 && length >= 16) {
+          const isIccProfile =
+            bytes[offset + 4] === 0x49 &&
+            bytes[offset + 5] === 0x43 &&
+            bytes[offset + 6] === 0x43 &&
+            bytes[offset + 7] === 0x5f &&
+            bytes[offset + 8] === 0x50 &&
+            bytes[offset + 9] === 0x52 &&
+            bytes[offset + 10] === 0x4f &&
+            bytes[offset + 11] === 0x46 &&
+            bytes[offset + 12] === 0x49 &&
+            bytes[offset + 13] === 0x4c &&
+            bytes[offset + 14] === 0x45 &&
+            bytes[offset + 15] === 0x00;
+          if (isIccProfile) {
+            const profileStart = offset + 18;
+            const profileEnd = offset + 2 + length;
+            if (profileEnd <= bytes.length && profileStart < profileEnd) {
+              iccChunks.push(bytes.slice(profileStart, profileEnd));
+            }
+          }
+        }
+
+        if (marker === 0xe1) {
+          const colorSpace = parseJpegExifColorSpace(bytes, offset + 4, length - 2);
+          if (colorSpace !== null) exifColorSpace = colorSpace;
+        }
+
+        offset += 2 + length;
+      }
+
+      if (exifColorSpace === 1) return 'srgb';
+
+      if (iccChunks.length > 0) {
+        const totalLen = iccChunks.reduce((sum, chunk) => sum + chunk.length, 0);
+        const combined = new Uint8Array(totalLen);
+        let pos = 0;
+        for (const chunk of iccChunks) {
+          combined.set(chunk, pos);
+          pos += chunk.length;
+        }
+        const hint = scanBytesForProfileHints(combined);
+        if (hint) return hint;
+        return 'unknown';
+      }
+
+      return 'unknown';
+    } catch {
+      return 'unknown';
+    }
+  }
+
+  export function getColourProfile(file: File, arrayBuffer: ArrayBuffer): ColourProfileStatus {
+    const type = file.type.toLowerCase();
+    if (type.includes('png')) return parsePngColourProfile(arrayBuffer);
+    if (type.includes('jpeg') || type.includes('jpg')) return parseJpegColourProfile(arrayBuffer);
+    return 'unknown';
+  }
   
   export type Bounds = {
     x: number;

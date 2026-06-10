@@ -2,6 +2,7 @@
 
 import React from 'react';
 import type { CheckItem } from '../lib/podCheckerTypes';
+import type { ColourProfileStatus } from '../lib/podCheckerUtils';
 import type { RedbubblePresetId } from '../lib/redbubblePresets';
 import { redbubblePresets } from '../lib/redbubblePresets';
 import type { PrintfulPresetId } from '../lib/printfulPresets';
@@ -24,6 +25,7 @@ type IssueBucketsPanelProps = {
   downloadMessage?: string;
   file: File | null;
   fileSize: number;
+  colourProfileStatus: ColourProfileStatus;
   hasTransparency: boolean | null;
   practicalPrintDpi: number;
   standardTargetLine: string;
@@ -53,6 +55,7 @@ function getPrintfulPreflight(
   checks: CheckItem[] | undefined,
   file: File | null,
   fileSize: number,
+  colourProfileStatus: ColourProfileStatus,
   hasTransparency: boolean | null,
   practicalPrintDpi: number,
   uploadTarget: 'standard' | 'redbubble' | 'printful' | 'teepublic'
@@ -126,6 +129,18 @@ function getPrintfulPreflight(
       : 'fail';
   const fileSizeDetail = 'Printful upload max is 200 MB.';
 
+  let colourProfileMark: PreflightMark = 'info';
+  let colourProfileDetail =
+    'sRGB not detected in file metadata. Use sRGB for best Printful colour matching.';
+  if (colourProfileStatus === 'srgb') {
+    colourProfileMark = 'pass';
+    colourProfileDetail = 'sRGB detected';
+  } else if (colourProfileStatus === 'non-srgb') {
+    colourProfileMark = 'warn';
+    colourProfileDetail =
+      'Non-sRGB profile detected. Printful recommends sRGB for digital printing.';
+  }
+
   const items: PreflightItem[] = [
     {
       label: 'Design uploaded',
@@ -156,9 +171,9 @@ function getPrintfulPreflight(
       detail: fileSizeDetail,
     },
     {
-      label: 'sRGB note',
-      mark: 'info',
-      detail: 'sRGB recommended for Printful digital printing.',
+      label: 'Colour Profile',
+      mark: colourProfileMark,
+      detail: colourProfileDetail,
     },
   ];
 
@@ -197,6 +212,7 @@ export default function IssueBucketsPanel({
   downloadMessage,
   file,
   fileSize,
+  colourProfileStatus,
   hasTransparency,
   practicalPrintDpi,
   standardTargetLine,
@@ -429,6 +445,7 @@ export default function IssueBucketsPanel({
       checks,
       file,
       fileSize,
+      colourProfileStatus,
       hasTransparency,
       practicalPrintDpi,
       uploadTarget
