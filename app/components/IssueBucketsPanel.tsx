@@ -463,7 +463,7 @@ export default function IssueBucketsPanel({
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
-          <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 800 }}>Printful Preflight</div>
+          <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 800 }}>Printful Readiness Check</div>
           <div
             style={{
               fontSize: 10,
@@ -476,7 +476,7 @@ export default function IssueBucketsPanel({
           </div>
         </div>
         <div style={{ fontSize: 11, color: '#94a3b8', lineHeight: 1.4 }}>
-          Quick guide for Printful DTG/DTF apparel export — uses your current scan data.
+          Checks file type, transparency, DPI, file size, colour profile, and background box risk before Printful upload.
         </div>
         <div style={{ display: 'grid', gap: 6 }}>
           {items.map((item) => (
