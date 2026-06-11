@@ -156,6 +156,7 @@ export default function DesignPreviewPanel({
           ))}
           <label
             style={{
+              position: 'relative',
               display: 'inline-flex',
               alignItems: 'center',
               gap: 8,
@@ -189,40 +190,26 @@ export default function DesignPreviewPanel({
               }}
             />
             <span style={{ color: '#bae6fd', whiteSpace: 'nowrap' }}>Custom Colour</span>
-            <span
-              style={{
-                position: 'relative',
-                display: 'inline-flex',
-                width: 26,
-                height: 26,
-                borderRadius: 6,
-                overflow: 'hidden',
-                border: '1px solid rgba(148, 163, 184, 0.5)',
-                background: customPreviewColor,
-                flexShrink: 0,
+            <input
+              type="color"
+              value={customPreviewColor}
+              onChange={(e) => {
+                setCustomPreviewColor(e.target.value);
+                setPreviewBackground('custom');
+                setActionMessage(`Preview background set to custom colour ${e.target.value}.`);
               }}
-            >
-              <input
-                type="color"
-                value={customPreviewColor}
-                onChange={(e) => {
-                  setCustomPreviewColor(e.target.value);
-                  setPreviewBackground('custom');
-                  setActionMessage(`Preview background set to custom colour ${e.target.value}.`);
-                }}
-                style={{
-                  position: 'absolute',
-                  inset: 0,
-                  width: '100%',
-                  height: '100%',
-                  padding: 0,
-                  margin: 0,
-                  border: 'none',
-                  cursor: 'pointer',
-                  opacity: 0,
-                }}
-              />
-            </span>
+              style={{
+                position: 'absolute',
+                inset: 0,
+                width: '100%',
+                height: '100%',
+                padding: 0,
+                margin: 0,
+                border: 'none',
+                cursor: 'pointer',
+                opacity: 0,
+              }}
+            />
           </label>
         </div>
       </div>
