@@ -158,34 +158,58 @@ export default function DesignPreviewPanel({
             style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: 4,
+              gap: 8,
               fontSize: 12,
               fontWeight: previewBackground === 'custom' ? 800 : 600,
-              outline: previewBackground === 'custom' ? '2px solid #38bdf8' : undefined,
-              borderRadius: 6,
-              padding: '1px 2px',
+              borderRadius: 999,
+              padding: '5px 10px 5px 12px',
               cursor: 'pointer',
+              background: 'rgba(15, 23, 42, 0.72)',
+              border:
+                previewBackground === 'custom'
+                  ? '1px solid rgba(56, 189, 248, 0.55)'
+                  : '1px solid rgba(148, 163, 184, 0.35)',
+              boxShadow:
+                previewBackground === 'custom'
+                  ? '0 0 0 1px rgba(56, 189, 248, 0.15)'
+                  : 'none',
             }}
           >
-            <span style={{ color: '#bae6fd' }}>Custom colour</span>
-            <input
-              type="color"
-              value={customPreviewColor}
-              onChange={(e) => {
-                setCustomPreviewColor(e.target.value);
-                setPreviewBackground('custom');
-                setActionMessage(`Preview background set to custom colour ${e.target.value}.`);
-              }}
+            <span style={{ color: '#bae6fd', whiteSpace: 'nowrap' }}>Custom Colour</span>
+            <span
               style={{
-                width: 24,
-                height: 24,
-                padding: 0,
-                border: '1px solid rgba(148, 163, 184, 0.4)',
-                borderRadius: 5,
-                cursor: 'pointer',
-                background: 'transparent',
+                position: 'relative',
+                display: 'inline-flex',
+                width: 26,
+                height: 26,
+                borderRadius: 6,
+                overflow: 'hidden',
+                border: '1px solid rgba(148, 163, 184, 0.5)',
+                background: customPreviewColor,
+                flexShrink: 0,
               }}
-            />
+            >
+              <input
+                type="color"
+                value={customPreviewColor}
+                onChange={(e) => {
+                  setCustomPreviewColor(e.target.value);
+                  setPreviewBackground('custom');
+                  setActionMessage(`Preview background set to custom colour ${e.target.value}.`);
+                }}
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  width: '100%',
+                  height: '100%',
+                  padding: 0,
+                  margin: 0,
+                  border: 'none',
+                  cursor: 'pointer',
+                  opacity: 0,
+                }}
+              />
+            </span>
           </label>
         </div>
       </div>
