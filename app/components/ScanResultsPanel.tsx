@@ -3,6 +3,7 @@
 import React from 'react';
 import type { CheckItem } from '../lib/podCheckerTypes';
 import { statusColor, statusIcon } from '../lib/podCheckerUtils';
+import { podCheckerV4Notes } from '../content/podCheckerV4Notes';
 
 type Bounds = {
   x: number;
@@ -420,6 +421,58 @@ export default function ScanResultsPanel({
             <div style={{ marginTop: 4, color: '#cbd5e1', fontSize: 13 }}>
               Print On Demand Checker
             </div>
+            <details
+              style={{
+                marginTop: 8,
+                padding: 10,
+                borderRadius: 12,
+                background: 'rgba(15, 23, 42, 0.55)',
+                border: '1px solid rgba(148, 163, 184, 0.22)',
+              }}
+            >
+              <summary
+                style={{
+                  cursor: 'pointer',
+                  fontWeight: 800,
+                  fontSize: 13,
+                  color: '#e2e8f0',
+                  listStyle: 'none',
+                }}
+              >
+                {podCheckerV4Notes.title}
+              </summary>
+              <div
+                style={{
+                  marginTop: 8,
+                  display: 'grid',
+                  gap: 8,
+                  color: '#cbd5e1',
+                  fontSize: 12,
+                  lineHeight: 1.45,
+                }}
+              >
+                {podCheckerV4Notes.paragraphs.map((paragraph) => (
+                  <p key={paragraph} style={{ margin: 0 }}>
+                    {paragraph}
+                  </p>
+                ))}
+                <a
+                  href={podCheckerV4Notes.supportUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'inline-block',
+                    marginTop: 2,
+                    color: '#7dd3fc',
+                    fontWeight: 700,
+                    fontSize: 12,
+                    textDecoration: 'none',
+                  }}
+                >
+                  {podCheckerV4Notes.supportLabel}
+                </a>
+              </div>
+            </details>
             <div
               style={{
                 marginTop: 8,
