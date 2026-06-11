@@ -1231,7 +1231,7 @@ export default function ScanResultsPanel({
           lineHeight: 1.45,
         }}
       >
-        V2 supports DTG/DTF apparel export, Redbubble presets, and TeePublic all-products export. More POD tools coming soon.
+        POD Checker V4 includes DTG/DTF apparel export, Printful Readiness Check, Redbubble presets, TeePublic all-products export, and Shirt Colour Preview with custom colours. More POD tools coming soon.
       </div>
     </div>
   );
