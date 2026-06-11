@@ -175,6 +175,19 @@ export default function DesignPreviewPanel({
                   : 'none',
             }}
           >
+            <span
+              aria-hidden
+              style={{
+                display: 'inline-block',
+                width: 18,
+                height: 18,
+                borderRadius: 4,
+                flexShrink: 0,
+                border: '1px solid rgba(148, 163, 184, 0.45)',
+                background:
+                  'conic-gradient(red, orange, yellow, green, cyan, blue, purple, red)',
+              }}
+            />
             <span style={{ color: '#bae6fd', whiteSpace: 'nowrap' }}>Custom Colour</span>
             <span
               style={{
