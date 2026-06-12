@@ -637,6 +637,7 @@ export default function IssueBucketsPanel({
 
   return (
     <div
+      data-tour="export"
       style={{
         border: '1px solid rgba(255,255,255,0.08)',
         borderRadius: 20,
@@ -738,7 +739,7 @@ export default function IssueBucketsPanel({
         </div>
       )}
 
-      <div style={{ marginBottom: 14, display: 'grid', gap: 12 }}>
+      <div style={{ marginBottom: 14, display: 'grid', gap: 12 }} data-tour="download">
         {orderedExportTargets.map((target) => exportBoxRenderers[target]())}
       </div>
 

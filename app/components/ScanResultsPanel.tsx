@@ -40,6 +40,7 @@ type ScanResultsPanelProps = {
   practicalPrintDpi: number;
   targetCanvasW: number;
   targetCanvasH: number;
+  onOpenTutorial?: () => void;
 };
 
 type SectionProps = {
@@ -164,6 +165,7 @@ export default function ScanResultsPanel({
   practicalPrintDpi,
   targetCanvasW,
   targetCanvasH,
+  onOpenTutorial,
 }: ScanResultsPanelProps) {
   // Auto Fix detection: once Auto Fix has run, the placement/size issues it resolves
   // should disappear from the active scan report AND from the Result Summary, instead
@@ -415,8 +417,36 @@ export default function ScanResultsPanel({
           }}
         >
           <div>
-            <div style={{ fontSize: 20, fontWeight: 800, lineHeight: 1.1 }}>
-              POD Design Checker™
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 8,
+                flexWrap: 'wrap',
+              }}
+            >
+              <div style={{ fontSize: 20, fontWeight: 800, lineHeight: 1.1 }}>
+                POD Design Checker™
+              </div>
+              {onOpenTutorial ? (
+                <button
+                  type="button"
+                  onClick={onOpenTutorial}
+                  style={{
+                    padding: '5px 10px',
+                    borderRadius: 999,
+                    fontSize: 11,
+                    fontWeight: 800,
+                    background: 'rgba(37, 99, 235, 0.18)',
+                    color: '#93c5fd',
+                    border: '1px solid rgba(147, 197, 253, 0.35)',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Tutorial
+                </button>
+              ) : null}
             </div>
             <div style={{ marginTop: 4, color: '#cbd5e1', fontSize: 13 }}>
               Print On Demand Checker
@@ -571,7 +601,7 @@ export default function ScanResultsPanel({
         </div>
       </div>
 
-      <div style={{ display: 'grid', gap: 10 }}>
+      <div style={{ display: 'grid', gap: 10 }} data-tour="upload">
         <label
           htmlFor="design-upload"
           style={{
@@ -722,7 +752,7 @@ export default function ScanResultsPanel({
           ) : null}
         </div>
       </div>
-      <div style={{ display: 'grid', gap: 8 }}>
+      <div style={{ display: 'grid', gap: 8 }} data-tour="scan-results">
         <h2 style={{ margin: 0, fontSize: 20, fontWeight: 800 }}>Scan Report</h2>
       <div
         style={{
@@ -795,7 +825,7 @@ export default function ScanResultsPanel({
           />
         </div>
 
-        <div style={{ display: 'grid', gap: 8 }}>
+        <div style={{ display: 'grid', gap: 8 }} data-tour="autofix">
           <div
             style={{
               padding: '10px 12px',
@@ -851,6 +881,7 @@ export default function ScanResultsPanel({
               Run Auto Fix
             </button>
           ) : null}
+        </div>
 
           {showManualFixCard ? (
             <div
@@ -929,7 +960,6 @@ export default function ScanResultsPanel({
             </div>
           ) : null}
         </div>
-      </div>
       </div>
 
       {/* Final Upload Check: beginner-friendly readiness checklist using existing scan data. */}

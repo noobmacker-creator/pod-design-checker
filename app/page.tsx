@@ -21,6 +21,7 @@ import DesignPreviewPanel, { type PreviewBackground } from './components/DesignP
 
 import IssueBucketsPanel from './components/IssueBucketsPanel';
 import ScanResultsPanel from './components/ScanResultsPanel';
+import StartupTutorial, { type StartupTutorialHandle } from './components/StartupTutorial';
 
 type Bounds = {
   x: number;
@@ -859,6 +860,7 @@ export default function Page() {
   const [isScanning, setIsScanning] = useState(false);
   const [hasAutoFixApplied, setHasAutoFixApplied] = useState(false);
   const [uploadInputKey, setUploadInputKey] = useState(0);
+  const tutorialRef = useRef<StartupTutorialHandle>(null);
   const [selectedRedbubblePreset, setSelectedRedbubblePreset] = useState<RedbubblePresetId>('apparel');
   const [selectedPrintfulPreset, setSelectedPrintfulPreset] = useState<PrintfulPresetId>('dtg-dtf-apparel');
   const [activePresetSystem, setActivePresetSystem] = useState<'redbubble' | 'printful' | 'teepublic'>('redbubble');
@@ -1937,6 +1939,8 @@ const drawY = SHIRT_PRINT_Y + previewTransform.offsetY * mapY + mockupOffsetY;
         }
       `}</style>
 
+      <StartupTutorial ref={tutorialRef} />
+
 <div style={{ width: '100%', padding: '0 20px' }}>
 
 
@@ -1976,6 +1980,7 @@ gap: 16,
   practicalPrintDpi={practicalPrintDpi}
   targetCanvasW={targetCanvasW}
   targetCanvasH={targetCanvasH}
+  onOpenTutorial={() => tutorialRef.current?.open()}
 />
 </div>
 

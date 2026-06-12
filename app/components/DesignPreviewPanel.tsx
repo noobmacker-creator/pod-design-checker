@@ -136,6 +136,7 @@ export default function DesignPreviewPanel({
           gap: 4,
           marginBottom: 8,
         }}
+        data-tour="shirt-colour-preview"
       >
         <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6 }}>
           <span style={{ fontWeight: 700, color: '#bae6fd', fontSize: 13 }}>Shirt Colour Preview:</span>
