@@ -23,6 +23,18 @@ const TUTORIAL_STEPS: TutorialStep[] = [
     description: 'The Scan Report shows print readiness, critical issues, warnings, and helpful notes.',
   },
   {
+    target: 'passed-checks',
+    title: 'Show Passed Checks',
+    description:
+      'Turn on Show Passed Checks if you want to see everything the scan checked, including the items that passed.',
+  },
+  {
+    target: 'optional-notes',
+    title: 'Show Optional Notes',
+    description:
+      'Turn on Show Optional Notes for extra guidance and learning notes. These are helpful tips, not always things you must fix.',
+  },
+  {
     target: 'autofix',
     title: 'Use Auto Fix when available',
     description: 'If placement or sizing needs help, use Run Auto Fix from the Best Next Action area.',

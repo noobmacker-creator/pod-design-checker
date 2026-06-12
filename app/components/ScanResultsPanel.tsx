@@ -1195,6 +1195,7 @@ export default function ScanResultsPanel({
 
       {passedDisplay.length > 0 ? (
         <details
+          data-tour="passed-checks"
           style={{
             marginBottom: 8,
             padding: '8px 10px',
@@ -1219,6 +1220,7 @@ export default function ScanResultsPanel({
 
       {infoDisplay.length > 0 ? (
         <details
+          data-tour="optional-notes"
           style={{
             marginBottom: 8,
             padding: '8px 10px',
