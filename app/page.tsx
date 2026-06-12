@@ -872,6 +872,7 @@ export default function Page() {
   const [selectedRedbubblePreset, setSelectedRedbubblePreset] = useState<RedbubblePresetId>('apparel');
   const [selectedPrintfulPreset, setSelectedPrintfulPreset] = useState<PrintfulPresetId>('dtg-dtf-apparel');
   const [activePresetSystem, setActivePresetSystem] = useState<'redbubble' | 'printful' | 'teepublic'>('redbubble');
+  const [uploadTarget, setUploadTarget] = useState<'standard' | 'redbubble' | 'printful' | 'teepublic'>('standard');
 
   const previewCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -1755,7 +1756,11 @@ const drawY = SHIRT_PRINT_Y + previewTransform.offsetY * mapY + mockupOffsetY;
       offsetY: Math.round(y),
     });
   
-    setActionMessage('Auto Fix applied. Artwork was centered and moved into a safer print area. Review the preview, then download the fixed PNG.');
+    setActionMessage(
+      uploadTarget === 'standard'
+        ? 'Auto Fix applied.\nReview the preview, then download the fixed Standard 4200 × 4800 PNG.'
+        : 'Auto Fix applied. Review the preview, then download the fixed PNG at the selected export size.',
+    );
     setHasAutoFixApplied(true);
   }
 
@@ -1825,6 +1830,7 @@ const drawY = SHIRT_PRINT_Y + previewTransform.offsetY * mapY + mockupOffsetY;
     setActionMessage('Upload a design to begin.');
     setDownloadMessage('');
     setUploadInputKey((key) => key + 1);
+    setUploadTarget('standard');
   }
 
   function toSafeSlug(value: string) {
@@ -1861,7 +1867,9 @@ const drawY = SHIRT_PRINT_Y + previewTransform.offsetY * mapY + mockupOffsetY;
   const safeName = toSafeSlug(filenameLabel) || 'pod-checker-export';
   link.download = `${safeName}-${width}x${height}.png`;
   link.href = exportCanvas.toDataURL('image/png');
+  document.body.appendChild(link);
   link.click();
+  document.body.removeChild(link);
 
   setDownloadMessage(`Download ready. Use this fixed transparent PNG (${label} ${width}×${height}) for your POD upload.`);
   setActionMessage('Clean transparent PNG exported.');
@@ -1949,29 +1957,6 @@ const drawY = SHIRT_PRINT_Y + previewTransform.offsetY * mapY + mockupOffsetY;
 
       <StartupTutorial open={tutorialOpen} onOpenChange={setTutorialOpen} />
 
-      <button
-        type="button"
-        onClick={() => setTutorialOpen(true)}
-        aria-label="Open tutorial"
-        style={{
-          position: 'fixed',
-          top: 12,
-          right: 12,
-          zIndex: 99999,
-          padding: '8px 14px',
-          borderRadius: 10,
-          fontSize: 13,
-          fontWeight: 800,
-          background: 'rgba(15, 23, 42, 0.92)',
-          color: '#e2e8f0',
-          border: '1px solid rgba(148, 163, 184, 0.35)',
-          boxShadow: '0 4px 14px rgba(0, 0, 0, 0.35)',
-          cursor: 'pointer',
-        }}
-      >
-        Tutorial
-      </button>
-
 <div style={{ width: '100%', padding: '0 20px' }}>
 
 
@@ -2012,6 +1997,7 @@ gap: 16,
   targetCanvasW={targetCanvasW}
   targetCanvasH={targetCanvasH}
   onOpenTutorial={() => setTutorialOpen(true)}
+  uploadTarget={uploadTarget}
 />
 </div>
 
@@ -2050,6 +2036,8 @@ gap: 16,
   selectedPrintfulPreset={selectedPrintfulPreset}
   setSelectedPrintfulPreset={setSelectedPrintfulPreset}
   setActivePresetSystem={setActivePresetSystem}
+  uploadTarget={uploadTarget}
+  setUploadTarget={setUploadTarget}
   handleDownloadApparelPng={handleDownloadApparelPng}
   handleDownloadRedbubblePng={handleDownloadRedbubblePng}
   handleDownloadPrintfulPng={handleDownloadPrintfulPng}

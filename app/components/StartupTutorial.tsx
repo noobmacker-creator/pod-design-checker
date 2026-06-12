@@ -103,12 +103,13 @@ export default function StartupTutorial({ open, onOpenChange }: StartupTutorialP
   const isLastStep = stepIndex === TUTORIAL_STEPS.length - 1;
 
   const closeTutorial = useCallback(
-    (markSeen = true) => {
+    (markSeen = true, persistStartupPref = false) => {
       if (markSeen) writeHasSeenTutorial();
+      if (persistStartupPref && showOnStartup) writeShowOnStartup(true);
       onOpenChange(false);
       setStepIndex(0);
     },
-    [onOpenChange],
+    [onOpenChange, showOnStartup],
   );
 
   useEffect(() => {
@@ -330,7 +331,7 @@ export default function StartupTutorial({ open, onOpenChange }: StartupTutorialP
           ) : (
             <button
               type="button"
-              onClick={() => closeTutorial(true)}
+              onClick={() => closeTutorial(true, true)}
               style={{
                 padding: '8px 12px',
                 borderRadius: 10,

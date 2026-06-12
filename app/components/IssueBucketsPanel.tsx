@@ -42,6 +42,10 @@ type IssueBucketsPanelProps = {
   setActivePresetSystem: React.Dispatch<
     React.SetStateAction<'redbubble' | 'printful' | 'teepublic'>
   >;
+  uploadTarget: 'standard' | 'redbubble' | 'printful' | 'teepublic';
+  setUploadTarget: React.Dispatch<
+    React.SetStateAction<'standard' | 'redbubble' | 'printful' | 'teepublic'>
+  >;
   handleDownloadApparelPng: () => void;
   handleDownloadRedbubblePng: () => void;
   handleDownloadPrintfulPng: () => void;
@@ -227,6 +231,8 @@ export default function IssueBucketsPanel({
   selectedPrintfulPreset,
   setSelectedPrintfulPreset,
   setActivePresetSystem,
+  uploadTarget,
+  setUploadTarget,
   handleDownloadApparelPng,
   handleDownloadRedbubblePng,
   handleDownloadPrintfulPng,
@@ -264,7 +270,6 @@ export default function IssueBucketsPanel({
   };
 
   type UploadTarget = 'standard' | 'redbubble' | 'printful' | 'teepublic';
-  const [uploadTarget, setUploadTarget] = React.useState<UploadTarget>('standard');
 
   const uploadTargetOptions: { id: UploadTarget; label: string }[] = [
     { id: 'standard', label: 'Standard POD' },
@@ -342,6 +347,7 @@ export default function IssueBucketsPanel({
       </div>
       <div style={stepLabelStyle}>Download PNG</div>
       <button
+        type="button"
         onClick={() => {
           if (!img) return;
           handleDownloadApparelPng();
@@ -359,7 +365,7 @@ export default function IssueBucketsPanel({
           cursor: img ? 'pointer' : 'not-allowed',
         }}
       >
-        Download Standard Apparel PNG — 4200 × 4800
+        Download Standard 4200 × 4800 PNG
       </button>
       <div style={fileNameLineStyle}>File name: {standardFileName}</div>
     </div>
