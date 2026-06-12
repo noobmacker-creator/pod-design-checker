@@ -83,6 +83,16 @@ function writeHasSeenTutorial() {
   window.localStorage.setItem(HAS_SEEN_KEY, 'true');
 }
 
+/** Auto-open when show-on-startup is explicitly on, or on first visit (missing keys). */
+export function shouldAutoOpenStartupTutorial(): boolean {
+  if (typeof window === 'undefined') return false;
+  const showStartup = window.localStorage.getItem(SHOW_STARTUP_KEY);
+  const hasSeen = window.localStorage.getItem(HAS_SEEN_KEY) === 'true';
+  if (showStartup === 'true') return true;
+  if (showStartup === 'false') return false;
+  return !hasSeen;
+}
+
 export default function StartupTutorial({ open, onOpenChange }: StartupTutorialProps) {
   const [stepIndex, setStepIndex] = useState(0);
   const [showOnStartup, setShowOnStartup] = useState(true);
@@ -178,6 +188,7 @@ export default function StartupTutorial({ open, onOpenChange }: StartupTutorialP
   const handleDontShowAgain = () => {
     setShowOnStartup(false);
     writeShowOnStartup(false);
+    writeHasSeenTutorial();
     onOpenChange(false);
     setStepIndex(0);
   };

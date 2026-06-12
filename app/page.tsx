@@ -21,7 +21,7 @@ import DesignPreviewPanel, { type PreviewBackground } from './components/DesignP
 
 import IssueBucketsPanel from './components/IssueBucketsPanel';
 import ScanResultsPanel from './components/ScanResultsPanel';
-import StartupTutorial from './components/StartupTutorial';
+import StartupTutorial, { shouldAutoOpenStartupTutorial } from './components/StartupTutorial';
 
 type Bounds = {
   x: number;
@@ -864,9 +864,7 @@ export default function Page() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const hasSeen = window.localStorage.getItem('podCheckerHasSeenTutorial') === 'true';
-    const showStartup = window.localStorage.getItem('podCheckerShowStartupTutorial');
-    if (!hasSeen && showStartup !== 'false') {
+    if (shouldAutoOpenStartupTutorial()) {
       const timer = window.setTimeout(() => setTutorialOpen(true), 400);
       return () => window.clearTimeout(timer);
     }
