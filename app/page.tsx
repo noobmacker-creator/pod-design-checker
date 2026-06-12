@@ -848,13 +848,6 @@ export default function Page() {
     offsetX: 0,
     offsetY: 0,
   });
-  const [originalTransform, setOriginalTransform] = useState<{
-    scale: number;
-    offsetX: number;
-    offsetY: number;
-  } | null>(null);
-  const [autoFixPreviewMode, setAutoFixPreviewMode] = useState<'fixed' | 'original'>('fixed');
-
   const [actionMessage, setActionMessage] = useState('Upload a design to begin.');
   const [downloadMessage, setDownloadMessage] = useState('');
   const [isScanning, setIsScanning] = useState(false);
@@ -1034,16 +1027,9 @@ canvas.height = img.naturalHeight;
     return getDesignCanvasSize(effectiveBounds, img);
   }, [effectiveBounds, img]);
 
-  const previewTransform = useMemo(() => {
-    if (hasAutoFixApplied && autoFixPreviewMode === 'original' && originalTransform) {
-      return originalTransform;
-    }
-    return transform;
-  }, [hasAutoFixApplied, autoFixPreviewMode, originalTransform, transform]);
-
   const previewEffectiveBounds = useMemo(() => {
-    return getEffectiveArtBounds(originalBounds, previewTransform);
-  }, [originalBounds, previewTransform]);
+    return getEffectiveArtBounds(originalBounds, transform);
+  }, [originalBounds, transform]);
 
   const previewDesignCanvasSize = useMemo(() => {
     return getDesignCanvasSize(previewEffectiveBounds, img);
@@ -1589,10 +1575,10 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
       canvas.height = CANVAS_H;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      const drawW = img.naturalWidth * previewTransform.scale;
-      const drawH = img.naturalHeight * previewTransform.scale;
-      const drawX = previewTransform.offsetX;
-      const drawY = previewTransform.offsetY;
+      const drawW = img.naturalWidth * transform.scale;
+      const drawH = img.naturalHeight * transform.scale;
+      const drawX = transform.offsetX;
+      const drawY = transform.offsetY;
 
       ctx.drawImage(img, drawX, drawY, drawW, drawH);
     }
@@ -1606,8 +1592,8 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
       ctx.lineWidth = 3;
       ctx.strokeRect(12, 12, canvas.width - 24, canvas.height - 24);
 
-      const drawW = img.naturalWidth * previewTransform.scale;
-      const drawH = img.naturalHeight * previewTransform.scale;
+      const drawW = img.naturalWidth * transform.scale;
+      const drawH = img.naturalHeight * transform.scale;
 
       if (previewEffectiveBounds) {
         const targetX = (canvas.width - previewEffectiveBounds.w) / 2;
@@ -1616,8 +1602,8 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
         const shiftX = targetX - previewEffectiveBounds.x;
         const shiftY = targetY - previewEffectiveBounds.y;
 
-        const drawX = previewTransform.offsetX + shiftX;
-        const drawY = previewTransform.offsetY + shiftY;
+        const drawX = transform.offsetX + shiftX;
+        const drawY = transform.offsetY + shiftY;
 
         ctx.drawImage(img, drawX, drawY, drawW, drawH);
       } else {
@@ -1645,14 +1631,14 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
       const mapX = SHIRT_PRINT_W / CANVAS_W;
       const mapY = SHIRT_PRINT_H / CANVAS_H;
 
-      const drawW = img.naturalWidth * previewTransform.scale * mapX * mockupScale;
-const drawH = img.naturalHeight * previewTransform.scale * mapY * mockupScale;
-const drawX = SHIRT_PRINT_X + previewTransform.offsetX * mapX + mockupOffsetX;
-const drawY = SHIRT_PRINT_Y + previewTransform.offsetY * mapY + mockupOffsetY;
+      const drawW = img.naturalWidth * transform.scale * mapX * mockupScale;
+const drawH = img.naturalHeight * transform.scale * mapY * mockupScale;
+const drawX = SHIRT_PRINT_X + transform.offsetX * mapX + mockupOffsetX;
+const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
 
       ctx.drawImage(img, drawX, drawY, drawW, drawH);
     }
-  }, [img, shirtImg, previewTransform, previewEffectiveBounds, viewMode, previewDesignCanvasSize, mockupOffsetX, mockupOffsetY, mockupScale]);
+  }, [img, shirtImg, transform, previewEffectiveBounds, viewMode, previewDesignCanvasSize, mockupOffsetX, mockupOffsetY, mockupScale]);
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const selected = e.target.files?.[0];
@@ -1660,8 +1646,6 @@ const drawY = SHIRT_PRINT_Y + previewTransform.offsetY * mapY + mockupOffsetY;
   
     setIsScanning(true);
     setHasAutoFixApplied(false);
-    setOriginalTransform(null);
-    setAutoFixPreviewMode('fixed');
     setPreviewBackground('checker');
 
     if (fileUrl) URL.revokeObjectURL(fileUrl);
@@ -1721,8 +1705,6 @@ const drawY = SHIRT_PRINT_Y + previewTransform.offsetY * mapY + mockupOffsetY;
   function handleQuickFix() {
     if (!originalBounds) return;
 
-    setOriginalTransform({ ...transform });
-    setAutoFixPreviewMode('fixed');
     setViewMode('pod');
   
     const availableW = CANVAS_W - SAFE_BOX * 2;
@@ -1816,8 +1798,6 @@ const drawY = SHIRT_PRINT_Y + previewTransform.offsetY * mapY + mockupOffsetY;
     setSolidBackgroundBoxCheck(null);
 
     setHasAutoFixApplied(false);
-    setOriginalTransform(null);
-    setAutoFixPreviewMode('fixed');
     setIsScanning(false);
     setTransform({ scale: 1, offsetX: 0, offsetY: 0 });
     setMockupOffsetX(0);
@@ -2009,9 +1989,6 @@ gap: 16,
   previewBackground={previewBackground}
   setPreviewBackground={setPreviewBackground}
   setActionMessage={setActionMessage}
-  autoFixApplied={hasAutoFixApplied}
-  autoFixPreviewMode={autoFixPreviewMode}
-  setAutoFixPreviewMode={setAutoFixPreviewMode}
   isScanning={isScanning}
 />
 <IssueBucketsPanel
