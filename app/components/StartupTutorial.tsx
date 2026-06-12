@@ -48,6 +48,12 @@ const TUTORIAL_STEPS: TutorialStep[] = [
     title: 'Download the final PNG',
     description: 'Choose a size, then press the blue download button to export your fixed transparent PNG.',
   },
+  {
+    target: 'support',
+    title: 'Support POD Checker',
+    description:
+      'POD Checker is built from a lot of real print-prep testing, fixes, and platform checks. Support helps keep the tool improving and helps fund more POD tools. Use the Support POD Checker button when you are ready.',
+  },
 ];
 
 type StartupTutorialProps = {
@@ -101,11 +107,7 @@ export default function StartupTutorial({ open, onOpenChange }: StartupTutorialP
 
   useEffect(() => {
     setShowOnStartup(readShowOnStartup());
-    if (!readHasSeenTutorial() && readShowOnStartup()) {
-      const timer = window.setTimeout(() => onOpenChange(true), 400);
-      return () => window.clearTimeout(timer);
-    }
-  }, [onOpenChange]);
+  }, []);
 
   const updateTargetPosition = useCallback(() => {
     if (!open || !currentStep) {
@@ -176,43 +178,11 @@ export default function StartupTutorial({ open, onOpenChange }: StartupTutorialP
   const handleDontShowAgain = () => {
     setShowOnStartup(false);
     writeShowOnStartup(false);
-    closeTutorial(true);
+    onOpenChange(false);
+    setStepIndex(0);
   };
 
   if (!open) return null;
-
-  const cardTop = typeof cardStyle.top === 'number' ? cardStyle.top : 0;
-  const cardLeft = typeof cardStyle.left === 'number' ? cardStyle.left : 0;
-  const cardWidth = typeof cardStyle.width === 'number' ? cardStyle.width : 320;
-  const cardHeight = 240;
-  const pointerStyle: React.CSSProperties | null = targetRect
-    ? (() => {
-        const targetCenterY = targetRect.top + targetRect.height / 2;
-        const cardCenterY = cardTop + cardHeight / 2;
-        const targetBelowCard = targetCenterY > cardCenterY;
-        const borderColor = 'rgba(125, 211, 252, 0.45)';
-        return {
-          position: 'fixed' as const,
-          left: cardLeft + cardWidth / 2 - 7,
-          top: targetBelowCard ? cardTop + cardHeight - 1 : cardTop - 7,
-          width: 0,
-          height: 0,
-          borderLeft: '7px solid transparent',
-          borderRight: '7px solid transparent',
-          ...(targetBelowCard
-            ? {
-                borderTop: `8px solid ${borderColor}`,
-                filter: 'drop-shadow(0 1px 0 rgba(125, 211, 252, 0.25))',
-              }
-            : {
-                borderBottom: `8px solid ${borderColor}`,
-                filter: 'drop-shadow(0 -1px 0 rgba(125, 211, 252, 0.25))',
-              }),
-          zIndex: 9991,
-          pointerEvents: 'none' as const,
-        };
-      })()
-    : null;
 
   return (
     <>
@@ -257,8 +227,6 @@ export default function StartupTutorial({ open, onOpenChange }: StartupTutorialP
           }}
         />
       ) : null}
-
-      {pointerStyle ? <div aria-hidden style={pointerStyle} /> : null}
 
       <div
         role="dialog"

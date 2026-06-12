@@ -861,6 +861,16 @@ export default function Page() {
   const [hasAutoFixApplied, setHasAutoFixApplied] = useState(false);
   const [uploadInputKey, setUploadInputKey] = useState(0);
   const [tutorialOpen, setTutorialOpen] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const hasSeen = window.localStorage.getItem('podCheckerHasSeenTutorial') === 'true';
+    const showStartup = window.localStorage.getItem('podCheckerShowStartupTutorial');
+    if (!hasSeen && showStartup !== 'false') {
+      const timer = window.setTimeout(() => setTutorialOpen(true), 400);
+      return () => window.clearTimeout(timer);
+    }
+  }, []);
   const [selectedRedbubblePreset, setSelectedRedbubblePreset] = useState<RedbubblePresetId>('apparel');
   const [selectedPrintfulPreset, setSelectedPrintfulPreset] = useState<PrintfulPresetId>('dtg-dtf-apparel');
   const [activePresetSystem, setActivePresetSystem] = useState<'redbubble' | 'printful' | 'teepublic'>('redbubble');

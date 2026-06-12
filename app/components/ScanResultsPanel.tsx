@@ -496,6 +496,7 @@ export default function ScanResultsPanel({
               </div>
             </details>
             <div
+              data-tour="support"
               style={{
                 marginTop: 8,
                 padding: 10,
