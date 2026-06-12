@@ -5,10 +5,16 @@ import React, { useCallback, useEffect, useState } from 'react';
 const SHOW_STARTUP_KEY = 'podCheckerShowStartupTutorial';
 const HAS_SEEN_KEY = 'podCheckerHasSeenTutorial';
 
+type TutorialOption = {
+  label: string;
+  text: string;
+};
+
 type TutorialStep = {
   target: string;
   title: string;
   description: string;
+  options?: TutorialOption[];
 };
 
 const TUTORIAL_STEPS: TutorialStep[] = [
@@ -23,16 +29,20 @@ const TUTORIAL_STEPS: TutorialStep[] = [
     description: 'The Scan Report shows print readiness, critical issues, warnings, and helpful notes.',
   },
   {
-    target: 'passed-checks',
-    title: 'Show Passed Checks',
+    target: 'scan-results',
+    title: 'Scan display options',
     description:
-      'Turn on Show Passed Checks if you want to see everything the scan checked, including the items that passed.',
-  },
-  {
-    target: 'optional-notes',
-    title: 'Show Optional Notes',
-    description:
-      'Turn on Show Optional Notes for extra guidance and learning notes. These are helpful tips, not always things you must fix.',
+      'After you upload a design, the Scan Results panel shows extra display options.',
+    options: [
+      {
+        label: 'Show Passed Checks',
+        text: 'Show Passed Checks lets you see every check the app ran, including checks that passed.',
+      },
+      {
+        label: 'Show Optional Notes',
+        text: 'Show Optional Notes shows extra guidance and learning notes. These are helpful tips, not always urgent problems.',
+      },
+    ],
   },
   {
     target: 'autofix',
@@ -145,7 +155,9 @@ export default function StartupTutorial({ open, onOpenChange }: StartupTutorialP
         top: '50%',
         left: '50%',
         transform: 'translate(-50%, -50%)',
-        maxWidth: 360,
+        width: 320,
+        maxWidth: 'calc(100vw - 32px)',
+        maxHeight: 'calc(100vh - 32px)',
       });
       return;
     }
@@ -154,7 +166,7 @@ export default function StartupTutorial({ open, onOpenChange }: StartupTutorialP
     setTargetRect(rect);
 
     const cardWidth = 320;
-    const cardHeight = 240;
+    const cardMaxHeight = window.innerHeight - 32;
     const margin = 16;
     const viewportW = window.innerWidth;
     const viewportH = window.innerHeight;
@@ -162,18 +174,22 @@ export default function StartupTutorial({ open, onOpenChange }: StartupTutorialP
     let top = rect.bottom + margin;
     let left = rect.left + rect.width / 2 - cardWidth / 2;
 
-    if (top + cardHeight > viewportH - margin) {
-      top = rect.top - cardHeight - margin;
+    if (top + cardMaxHeight > viewportH - margin) {
+      top = rect.top - cardMaxHeight - margin;
     }
     if (left < margin) left = margin;
     if (left + cardWidth > viewportW - margin) left = viewportW - cardWidth - margin;
     if (top < margin) top = margin;
+    if (top + cardMaxHeight > viewportH - margin) {
+      top = Math.max(margin, viewportH - cardMaxHeight - margin);
+    }
 
     setCardStyle({
       top,
       left,
       width: cardWidth,
       maxWidth: 'calc(100vw - 32px)',
+      maxHeight: 'calc(100vh - 32px)',
     });
   }, [currentStep, open]);
 
@@ -265,51 +281,96 @@ export default function StartupTutorial({ open, onOpenChange }: StartupTutorialP
           background: 'rgba(15, 23, 42, 0.96)',
           border: '1px solid rgba(125, 211, 252, 0.45)',
           boxShadow: '0 18px 40px rgba(0, 0, 0, 0.45)',
-          display: 'grid',
-          gap: 10,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 0,
+          overflow: 'hidden',
+          boxSizing: 'border-box',
         }}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
-          <div style={{ fontSize: 11, fontWeight: 800, color: '#7dd3fc', letterSpacing: 0.04 }}>
-            Step {stepIndex + 1} of {TUTORIAL_STEPS.length}
+        <div
+          style={{
+            flex: 1,
+            minHeight: 0,
+            overflowY: 'auto',
+            display: 'grid',
+            gap: 10,
+            paddingBottom: 10,
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+            <div style={{ fontSize: 11, fontWeight: 800, color: '#7dd3fc', letterSpacing: 0.04 }}>
+              Step {stepIndex + 1} of {TUTORIAL_STEPS.length}
+            </div>
           </div>
+
+          <div
+            id="pod-checker-tutorial-title"
+            style={{
+              fontSize: 16,
+              fontWeight: 800,
+              color: '#f8fafc',
+              lineHeight: 1.3,
+              textDecoration: 'none',
+            }}
+          >
+            {currentStep.title}
+          </div>
+
+          <div style={{ fontSize: 13, lineHeight: 1.5, color: '#cbd5e1' }}>{currentStep.description}</div>
+
+          {currentStep.options?.length ? (
+            <div style={{ display: 'grid', gap: 10 }}>
+              {currentStep.options.map((option) => (
+                <div
+                  key={option.label}
+                  style={{
+                    padding: '8px 10px',
+                    borderRadius: 10,
+                    background: 'rgba(15, 23, 42, 0.55)',
+                    border: '1px solid rgba(148, 163, 184, 0.18)',
+                  }}
+                >
+                  <div style={{ fontSize: 12, fontWeight: 800, color: '#7dd3fc', marginBottom: 4 }}>
+                    {option.label}
+                  </div>
+                  <div style={{ fontSize: 12, lineHeight: 1.45, color: '#cbd5e1' }}>{option.text}</div>
+                </div>
+              ))}
+            </div>
+          ) : null}
+
+          <label
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              fontSize: 12,
+              color: '#94a3b8',
+              cursor: 'pointer',
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={showOnStartup}
+              onChange={handleToggleStartup}
+              style={{ accentColor: '#38bdf8' }}
+            />
+            Show tutorial on startup
+          </label>
         </div>
 
         <div
-          id="pod-checker-tutorial-title"
           style={{
-            fontSize: 16,
-            fontWeight: 800,
-            color: '#f8fafc',
-            lineHeight: 1.3,
-            textDecoration: 'none',
-          }}
-        >
-          {currentStep.title}
-        </div>
-
-        <div style={{ fontSize: 13, lineHeight: 1.5, color: '#cbd5e1' }}>{currentStep.description}</div>
-
-        <label
-          style={{
+            flexShrink: 0,
             display: 'flex',
+            flexWrap: 'wrap',
+            gap: 6,
             alignItems: 'center',
-            gap: 8,
-            fontSize: 12,
-            color: '#94a3b8',
-            cursor: 'pointer',
+            paddingTop: 10,
+            borderTop: '1px solid rgba(148, 163, 184, 0.18)',
           }}
         >
-          <input
-            type="checkbox"
-            checked={showOnStartup}
-            onChange={handleToggleStartup}
-            style={{ accentColor: '#38bdf8' }}
-          />
-          Show tutorial on startup
-        </label>
-
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'center' }}>
           <button
             type="button"
             onClick={() => setStepIndex((i) => Math.max(0, i - 1))}
