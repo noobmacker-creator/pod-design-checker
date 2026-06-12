@@ -549,6 +549,7 @@ export default function ScanResultsPanel({
               display: 'grid',
               gap: 8,
             }}
+            data-tour="detail-zoom"
           >
             <div style={{ display: 'grid', gap: 4 }}>
               <span style={{ fontWeight: 800, color: '#bae6fd', fontSize: 12 }}>

@@ -44,6 +44,12 @@ const TUTORIAL_STEPS: TutorialStep[] = [
     description: 'Test your design on light, dark, and custom shirt colours before export.',
   },
   {
+    target: 'detail-zoom',
+    title: 'Inspect details with Detail Zoom',
+    description:
+      'Use 100%, 200%, 400%, or 800% zoom to check edges, small marks, thin lines, and print risks more closely.',
+  },
+  {
     target: 'download',
     title: 'Download the final PNG',
     description: 'Choose a size, then press the blue download button to export your fixed transparent PNG.',
