@@ -21,7 +21,7 @@ import DesignPreviewPanel, { type PreviewBackground } from './components/DesignP
 
 import IssueBucketsPanel from './components/IssueBucketsPanel';
 import ScanResultsPanel from './components/ScanResultsPanel';
-import StartupTutorial, { type StartupTutorialHandle } from './components/StartupTutorial';
+import StartupTutorial from './components/StartupTutorial';
 
 type Bounds = {
   x: number;
@@ -860,7 +860,7 @@ export default function Page() {
   const [isScanning, setIsScanning] = useState(false);
   const [hasAutoFixApplied, setHasAutoFixApplied] = useState(false);
   const [uploadInputKey, setUploadInputKey] = useState(0);
-  const tutorialRef = useRef<StartupTutorialHandle>(null);
+  const [tutorialOpen, setTutorialOpen] = useState(false);
   const [selectedRedbubblePreset, setSelectedRedbubblePreset] = useState<RedbubblePresetId>('apparel');
   const [selectedPrintfulPreset, setSelectedPrintfulPreset] = useState<PrintfulPresetId>('dtg-dtf-apparel');
   const [activePresetSystem, setActivePresetSystem] = useState<'redbubble' | 'printful' | 'teepublic'>('redbubble');
@@ -1939,7 +1939,30 @@ const drawY = SHIRT_PRINT_Y + previewTransform.offsetY * mapY + mockupOffsetY;
         }
       `}</style>
 
-      <StartupTutorial ref={tutorialRef} />
+      <StartupTutorial open={tutorialOpen} onOpenChange={setTutorialOpen} />
+
+      <button
+        type="button"
+        onClick={() => setTutorialOpen(true)}
+        aria-label="Open tutorial"
+        style={{
+          position: 'fixed',
+          top: 12,
+          right: 12,
+          zIndex: 99999,
+          padding: '8px 14px',
+          borderRadius: 10,
+          fontSize: 13,
+          fontWeight: 800,
+          background: 'rgba(15, 23, 42, 0.92)',
+          color: '#e2e8f0',
+          border: '1px solid rgba(148, 163, 184, 0.35)',
+          boxShadow: '0 4px 14px rgba(0, 0, 0, 0.35)',
+          cursor: 'pointer',
+        }}
+      >
+        Tutorial
+      </button>
 
 <div style={{ width: '100%', padding: '0 20px' }}>
 
@@ -1980,7 +2003,7 @@ gap: 16,
   practicalPrintDpi={practicalPrintDpi}
   targetCanvasW={targetCanvasW}
   targetCanvasH={targetCanvasH}
-  onOpenTutorial={() => tutorialRef.current?.open()}
+  onOpenTutorial={() => setTutorialOpen(true)}
 />
 </div>
 

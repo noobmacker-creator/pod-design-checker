@@ -417,40 +417,32 @@ export default function ScanResultsPanel({
           }}
         >
           <div>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: 8,
-                flexWrap: 'wrap',
-              }}
-            >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
               <div style={{ fontSize: 20, fontWeight: 800, lineHeight: 1.1 }}>
                 POD Design Checker™
               </div>
-              {onOpenTutorial ? (
-                <button
-                  type="button"
-                  onClick={onOpenTutorial}
-                  style={{
-                    padding: '5px 10px',
-                    borderRadius: 999,
-                    fontSize: 11,
-                    fontWeight: 800,
-                    background: 'rgba(37, 99, 235, 0.18)',
-                    color: '#93c5fd',
-                    border: '1px solid rgba(147, 197, 253, 0.35)',
-                    cursor: 'pointer',
-                  }}
-                >
-                  Tutorial
-                </button>
-              ) : null}
             </div>
             <div style={{ marginTop: 4, color: '#cbd5e1', fontSize: 13 }}>
               Print On Demand Checker
             </div>
+            <button
+              type="button"
+              onClick={() => onOpenTutorial?.()}
+              style={{
+                marginTop: 8,
+                padding: '7px 12px',
+                borderRadius: 999,
+                fontSize: 12,
+                fontWeight: 800,
+                background: 'rgba(37, 99, 235, 0.22)',
+                color: '#bfdbfe',
+                border: '1px solid rgba(147, 197, 253, 0.45)',
+                cursor: 'pointer',
+                width: 'fit-content',
+              }}
+            >
+              Tutorial
+            </button>
             <details
               style={{
                 marginTop: 8,

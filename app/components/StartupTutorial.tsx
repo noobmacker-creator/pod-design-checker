@@ -1,12 +1,6 @@
 'use client';
 
-import React, {
-  forwardRef,
-  useCallback,
-  useEffect,
-  useImperativeHandle,
-  useState,
-} from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 const SHOW_STARTUP_KEY = 'podCheckerShowStartupTutorial';
 const HAS_SEEN_KEY = 'podCheckerHasSeenTutorial';
@@ -56,8 +50,9 @@ const TUTORIAL_STEPS: TutorialStep[] = [
   },
 ];
 
-export type StartupTutorialHandle = {
-  open: () => void;
+type StartupTutorialProps = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 };
 
 function readShowOnStartup(): boolean {
@@ -82,8 +77,7 @@ function writeHasSeenTutorial() {
   window.localStorage.setItem(HAS_SEEN_KEY, 'true');
 }
 
-const StartupTutorial = forwardRef<StartupTutorialHandle>(function StartupTutorial(_props, ref) {
-  const [isOpen, setIsOpen] = useState(false);
+export default function StartupTutorial({ open, onOpenChange }: StartupTutorialProps) {
   const [stepIndex, setStepIndex] = useState(0);
   const [showOnStartup, setShowOnStartup] = useState(true);
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
@@ -92,29 +86,29 @@ const StartupTutorial = forwardRef<StartupTutorialHandle>(function StartupTutori
   const currentStep = TUTORIAL_STEPS[stepIndex];
   const isLastStep = stepIndex === TUTORIAL_STEPS.length - 1;
 
-  const closeTutorial = useCallback((markSeen = true) => {
-    if (markSeen) writeHasSeenTutorial();
-    setIsOpen(false);
-    setStepIndex(0);
-  }, []);
+  const closeTutorial = useCallback(
+    (markSeen = true) => {
+      if (markSeen) writeHasSeenTutorial();
+      onOpenChange(false);
+      setStepIndex(0);
+    },
+    [onOpenChange],
+  );
 
-  const openTutorial = useCallback(() => {
-    setStepIndex(0);
-    setIsOpen(true);
-  }, []);
-
-  useImperativeHandle(ref, () => ({ open: openTutorial }), [openTutorial]);
+  useEffect(() => {
+    if (open) setStepIndex(0);
+  }, [open]);
 
   useEffect(() => {
     setShowOnStartup(readShowOnStartup());
     if (!readHasSeenTutorial() && readShowOnStartup()) {
-      const timer = window.setTimeout(() => setIsOpen(true), 400);
+      const timer = window.setTimeout(() => onOpenChange(true), 400);
       return () => window.clearTimeout(timer);
     }
-  }, []);
+  }, [onOpenChange]);
 
   const updateTargetPosition = useCallback(() => {
-    if (!isOpen || !currentStep) {
+    if (!open || !currentStep) {
       setTargetRect(null);
       return;
     }
@@ -156,11 +150,11 @@ const StartupTutorial = forwardRef<StartupTutorialHandle>(function StartupTutori
       width: cardWidth,
       maxWidth: 'calc(100vw - 32px)',
     });
-  }, [currentStep, isOpen]);
+  }, [currentStep, open]);
 
   useEffect(() => {
     updateTargetPosition();
-    if (!isOpen) return;
+    if (!open) return;
 
     window.addEventListener('resize', updateTargetPosition);
     window.addEventListener('scroll', updateTargetPosition, true);
@@ -171,7 +165,7 @@ const StartupTutorial = forwardRef<StartupTutorialHandle>(function StartupTutori
       window.removeEventListener('scroll', updateTargetPosition, true);
       window.clearInterval(timer);
     };
-  }, [isOpen, stepIndex, updateTargetPosition]);
+  }, [open, stepIndex, updateTargetPosition]);
 
   const handleToggleStartup = () => {
     const next = !showOnStartup;
@@ -185,52 +179,55 @@ const StartupTutorial = forwardRef<StartupTutorialHandle>(function StartupTutori
     closeTutorial(true);
   };
 
-  if (!isOpen) return null;
+  if (!open) return null;
 
-  const arrowStyle: React.CSSProperties = targetRect
+  const cardTop = typeof cardStyle.top === 'number' ? cardStyle.top : 0;
+  const cardLeft = typeof cardStyle.left === 'number' ? cardStyle.left : 0;
+  const cardWidth = typeof cardStyle.width === 'number' ? cardStyle.width : 320;
+  const cardHeight = 240;
+  const pointerStyle: React.CSSProperties | null = targetRect
     ? (() => {
-        const cardTop = typeof cardStyle.top === 'number' ? cardStyle.top : 0;
-        const cardLeft = typeof cardStyle.left === 'number' ? cardStyle.left : 0;
-        const cardWidth = typeof cardStyle.width === 'number' ? cardStyle.width : 320;
-        const targetCenterX = targetRect.left + targetRect.width / 2;
         const targetCenterY = targetRect.top + targetRect.height / 2;
-        const cardCenterX = cardLeft + cardWidth / 2;
-        const cardCenterY = cardTop + 120;
-        const dx = targetCenterX - cardCenterX;
-        const dy = targetCenterY - cardCenterY;
-        const angle = (Math.atan2(dy, dx) * 180) / Math.PI;
+        const cardCenterY = cardTop + cardHeight / 2;
+        const targetBelowCard = targetCenterY > cardCenterY;
+        const borderColor = 'rgba(125, 211, 252, 0.45)';
         return {
           position: 'fixed' as const,
-          left: cardCenterX,
-          top: cardCenterY,
-          width: 28,
-          height: 2,
-          background: 'rgba(125, 211, 252, 0.85)',
-          transformOrigin: '0 50%',
-          transform: `rotate(${angle}deg)`,
-          zIndex: 9993,
+          left: cardLeft + cardWidth / 2 - 7,
+          top: targetBelowCard ? cardTop + cardHeight - 1 : cardTop - 7,
+          width: 0,
+          height: 0,
+          borderLeft: '7px solid transparent',
+          borderRight: '7px solid transparent',
+          ...(targetBelowCard
+            ? {
+                borderTop: `8px solid ${borderColor}`,
+                filter: 'drop-shadow(0 1px 0 rgba(125, 211, 252, 0.25))',
+              }
+            : {
+                borderBottom: `8px solid ${borderColor}`,
+                filter: 'drop-shadow(0 -1px 0 rgba(125, 211, 252, 0.25))',
+              }),
+          zIndex: 9991,
           pointerEvents: 'none' as const,
         };
       })()
-    : { display: 'none' };
+    : null;
 
   return (
     <>
-      <style jsx global>{`
-        @keyframes podCheckerTutorialPulse {
-          0%,
-          100% {
-            box-shadow:
-              0 0 0 2px rgba(56, 189, 248, 0.55),
-              0 0 0 8px rgba(56, 189, 248, 0.12);
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `@keyframes podCheckerTutorialPulse {
+          0%, 100% {
+            box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.55), 0 0 0 8px rgba(56, 189, 248, 0.12);
           }
           50% {
-            box-shadow:
-              0 0 0 3px rgba(56, 189, 248, 0.85),
-              0 0 0 14px rgba(56, 189, 248, 0.2);
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.85), 0 0 0 14px rgba(56, 189, 248, 0.2);
           }
-        }
-      `}</style>
+        }`,
+        }}
+      />
 
       <div
         aria-hidden
@@ -261,7 +258,7 @@ const StartupTutorial = forwardRef<StartupTutorialHandle>(function StartupTutori
         />
       ) : null}
 
-      <div aria-hidden style={arrowStyle} />
+      {pointerStyle ? <div aria-hidden style={pointerStyle} /> : null}
 
       <div
         role="dialog"
@@ -286,7 +283,16 @@ const StartupTutorial = forwardRef<StartupTutorialHandle>(function StartupTutori
           </div>
         </div>
 
-        <div id="pod-checker-tutorial-title" style={{ fontSize: 16, fontWeight: 800, color: '#f8fafc', lineHeight: 1.3 }}>
+        <div
+          id="pod-checker-tutorial-title"
+          style={{
+            fontSize: 16,
+            fontWeight: 800,
+            color: '#f8fafc',
+            lineHeight: 1.3,
+            textDecoration: 'none',
+          }}
+        >
           {currentStep.title}
         </div>
 
@@ -378,6 +384,4 @@ const StartupTutorial = forwardRef<StartupTutorialHandle>(function StartupTutori
       </div>
     </>
   );
-});
-
-export default StartupTutorial;
+}
