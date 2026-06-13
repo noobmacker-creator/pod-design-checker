@@ -2252,7 +2252,6 @@ gap: 16,
   isScanning={isScanning}
 />
 <IssueBucketsPanel
-  isScanning={isScanning}
   img={img}
   checks={checks}
   downloadMessage={downloadMessage}

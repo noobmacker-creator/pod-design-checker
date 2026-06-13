@@ -19,7 +19,6 @@ type PreflightItem = {
 type PrintfulOverallStatus = 'NOT READY' | 'REVIEW FIRST' | 'PRINTFUL READY';
 
 type IssueBucketsPanelProps = {
-  isScanning: boolean;
   img: HTMLImageElement | null;
   checks?: CheckItem[];
   downloadMessage?: string;
@@ -310,7 +309,6 @@ function preflightStatusColor(status: PrintfulOverallStatus): string {
 }
 
 export default function IssueBucketsPanel({
-  isScanning,
   img,
   checks = [],
   downloadMessage,
@@ -1227,23 +1225,6 @@ export default function IssueBucketsPanel({
           {uploadTargetHelper[uploadTarget]}
         </div>
       </div>
-      {isScanning && (
-        <div
-          style={{
-            marginBottom: 14,
-            padding: '8px 12px',
-            borderRadius: 14,
-            background: 'rgba(59,130,246,0.14)',
-            border: '1px solid rgba(59,130,246,0.35)',
-            color: '#dbeafe',
-            fontWeight: 700,
-            fontSize: 13,
-            lineHeight: 1.4,
-          }}
-        >
-          Scanning design...
-        </div>
-      )}
 
       <div style={{ marginBottom: 14, display: 'grid', gap: 12 }} data-tour="download">
         {uploadTarget === 'presets' && renderProductPresetsPanel()}
