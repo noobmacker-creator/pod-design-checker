@@ -1905,13 +1905,17 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
     setDownloadMessage('Download ready: TeePublic PNG exported.');
   }
 
-  function handleDownloadCustomPng(width: number, height: number) {
+  function handleDownloadCustomPng(width: number, height: number, presetName?: string) {
+    const label = presetName ?? 'Custom';
+    const filenameSlug = presetName
+      ? `pod-checker-${toSafeSlug(presetName)}`
+      : 'pod-checker-custom';
     downloadPngForSize(
       width,
       height,
-      'Custom',
-      'pod-checker-custom',
-      `Download started: Custom ${width} × ${height} PNG. Check your Downloads folder.`
+      label,
+      filenameSlug,
+      `Download started: ${label} ${width} × ${height} PNG. Check your Downloads folder.`
     );
   }
 
