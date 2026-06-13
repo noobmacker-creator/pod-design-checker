@@ -868,6 +868,7 @@ export default function Page() {
   const [uploadTarget, setUploadTarget] = useState<
     'standard' | 'redbubble' | 'printful' | 'teepublic' | 'custom'
   >('standard');
+  const [customSizeFocusToken, setCustomSizeFocusToken] = useState(0);
 
   const previewCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -1916,9 +1917,7 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
 
   function handleOpenCustomSize() {
     setUploadTarget('custom');
-    window.setTimeout(() => {
-      document.getElementById('custom-size-export')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }, 0);
+    setCustomSizeFocusToken((value) => value + 1);
   }
 
   return (
@@ -2049,6 +2048,7 @@ gap: 16,
   handleDownloadPrintfulPng={handleDownloadPrintfulPng}
   handleDownloadTeePublicPng={handleDownloadTeePublicPng}
   handleDownloadCustomPng={handleDownloadCustomPng}
+  customSizeFocusToken={customSizeFocusToken}
 />
         </div>
         

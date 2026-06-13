@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import type { CheckItem } from '../lib/podCheckerTypes';
 import type { ColourProfileStatus } from '../lib/podCheckerUtils';
 import type { RedbubblePresetId } from '../lib/redbubblePresets';
@@ -51,6 +51,7 @@ type IssueBucketsPanelProps = {
   handleDownloadPrintfulPng: () => void;
   handleDownloadTeePublicPng: () => void;
   handleDownloadCustomPng: (width: number, height: number) => void;
+  customSizeFocusToken?: number;
 };
 
 const PRINTFUL_MAX_BYTES = 200 * 1024 * 1024;
@@ -263,10 +264,23 @@ export default function IssueBucketsPanel({
   handleDownloadPrintfulPng,
   handleDownloadTeePublicPng,
   handleDownloadCustomPng,
+  customSizeFocusToken = 0,
 }: IssueBucketsPanelProps) {
   const [customWidth, setCustomWidth] = useState('3000');
   const [customHeight, setCustomHeight] = useState('3000');
   const [customSizeError, setCustomSizeError] = useState('');
+  const customSizeRef = useRef<HTMLDivElement>(null);
+  const customWidthInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (customSizeFocusToken === 0) return;
+    window.setTimeout(() => {
+      customSizeRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      window.setTimeout(() => {
+        customWidthInputRef.current?.focus();
+      }, 250);
+    }, 100);
+  }, [customSizeFocusToken]);
   const toSafeSlug = (value: string) =>
     value
       .toLowerCase()
@@ -665,7 +679,12 @@ export default function IssueBucketsPanel({
       : 'pod-checker-custom-[width]x[height].png';
 
   const renderCustomExportBox = () => (
-    <div id="custom-size-export" key="custom" style={getBoxStyle('custom')}>
+    <div
+      id="custom-size-export"
+      key="custom"
+      ref={customSizeRef}
+      style={getBoxStyle('custom')}
+    >
       <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 800 }}>
         Custom Product Export
       </div>
@@ -685,6 +704,8 @@ export default function IssueBucketsPanel({
         <label style={{ display: 'grid', gap: 4 }}>
           <span style={{ fontSize: 11, fontWeight: 800, color: '#93c5fd' }}>Width</span>
           <input
+            ref={customWidthInputRef}
+            id="custom-size-width"
             type="number"
             min={CUSTOM_EXPORT_MIN}
             max={CUSTOM_EXPORT_MAX}
