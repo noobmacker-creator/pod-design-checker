@@ -1,11 +1,12 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import type { CheckItem } from '../lib/podCheckerTypes';
 import { statusColor, statusIcon } from '../lib/podCheckerUtils';
 import { podCheckerV4Notes } from '../content/podCheckerV4Notes';
 import BatchPODChecker from './BatchPODChecker';
 import BatchExportQueue from './BatchExportQueue';
+import PODUploadNotes from './PODUploadNotes';
 
 type Bounds = {
   x: number;
@@ -222,6 +223,7 @@ export default function ScanResultsPanel({
   onDownloadBatchExportZip,
   uploadTarget = 'standard',
 }: ScanResultsPanelProps) {
+  const [uploadNotesOpen, setUploadNotesOpen] = useState(false);
   // Auto Fix detection: once Auto Fix has run, the placement/size issues it resolves
   // should disappear from the active scan report AND from the Result Summary, instead
   // of being listed in a separate "Handled by Auto Fix" section.
@@ -587,12 +589,46 @@ export default function ScanResultsPanel({
               >
                 Batch Export Queue
               </button>
+              <button
+                type="button"
+                onClick={() => setUploadNotesOpen((open) => !open)}
+                style={{
+                  padding: '7px 12px',
+                  borderRadius: 999,
+                  fontSize: 12,
+                  fontWeight: 800,
+                  background: uploadNotesOpen
+                    ? 'rgba(37, 99, 235, 0.45)'
+                    : 'rgba(37, 99, 235, 0.22)',
+                  color: '#bfdbfe',
+                  border: '1px solid rgba(147, 197, 253, 0.45)',
+                  cursor: 'pointer',
+                  width: 'fit-content',
+                }}
+              >
+                Upload Notes
+              </button>
             </div>
             {batchCheckOpen && onLoadFileFromBatch && (
               <BatchPODChecker onOpenInChecker={onLoadFileFromBatch} />
             )}
             {batchExportOpen && onDownloadBatchExportZip && (
               <BatchExportQueue onDownloadBatchZip={onDownloadBatchExportZip} />
+            )}
+            {uploadNotesOpen && (
+              <PODUploadNotes
+                file={file}
+                img={img}
+                imgW={imgW}
+                imgH={imgH}
+                uploadTarget={uploadTarget}
+                targetCanvasW={targetCanvasW}
+                targetCanvasH={targetCanvasH}
+                hasTransparency={hasTransparency}
+                practicalPrintDpi={practicalPrintDpi}
+                autoFixApplied={autoFixApplied}
+                downloadMessage={downloadMessage}
+              />
             )}
             <details
               style={{
