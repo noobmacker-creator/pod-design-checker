@@ -42,9 +42,9 @@ type IssueBucketsPanelProps = {
   setActivePresetSystem: React.Dispatch<
     React.SetStateAction<'redbubble' | 'printful' | 'teepublic'>
   >;
-  uploadTarget: 'standard' | 'redbubble' | 'printful' | 'teepublic';
+  uploadTarget: 'standard' | 'redbubble' | 'printful' | 'teepublic' | 'custom';
   setUploadTarget: React.Dispatch<
-    React.SetStateAction<'standard' | 'redbubble' | 'printful' | 'teepublic'>
+    React.SetStateAction<'standard' | 'redbubble' | 'printful' | 'teepublic' | 'custom'>
   >;
   handleDownloadApparelPng: () => void;
   handleDownloadRedbubblePng: () => void;
@@ -87,7 +87,7 @@ function getPrintfulPreflight(
   colourProfileStatus: ColourProfileStatus,
   hasTransparency: boolean | null,
   practicalPrintDpi: number,
-  uploadTarget: 'standard' | 'redbubble' | 'printful' | 'teepublic'
+  uploadTarget: 'standard' | 'redbubble' | 'printful' | 'teepublic' | 'custom'
 ): { overall: PrintfulOverallStatus; items: PreflightItem[] } {
   const findCheck = (label: string) => checks?.find((c) => c.label === label);
 
@@ -298,13 +298,14 @@ export default function IssueBucketsPanel({
     letterSpacing: '0.04em',
   };
 
-  type UploadTarget = 'standard' | 'redbubble' | 'printful' | 'teepublic';
+  type UploadTarget = 'standard' | 'redbubble' | 'printful' | 'teepublic' | 'custom';
 
   const uploadTargetOptions: { id: UploadTarget; label: string }[] = [
     { id: 'standard', label: 'Standard POD' },
     { id: 'redbubble', label: 'Redbubble' },
     { id: 'printful', label: 'Printful' },
     { id: 'teepublic', label: 'TeePublic' },
+    { id: 'custom', label: 'Custom Size' },
   ];
 
   const uploadTargetHelper: Record<UploadTarget, string> = {
@@ -312,6 +313,7 @@ export default function IssueBucketsPanel({
     redbubble: 'Use this export when uploading apparel designs to Redbubble.',
     printful: 'Use this export when uploading DTG/DTF apparel designs to Printful.',
     teepublic: 'Use this export for TeePublic all-products upload.',
+    custom: 'Enter a custom width and height for mugs, stickers, posters, and other POD products.',
   };
 
   const baseBoxStyle: React.CSSProperties = {
@@ -663,10 +665,13 @@ export default function IssueBucketsPanel({
       : 'pod-checker-custom-[width]x[height].png';
 
   const renderCustomExportBox = () => (
-    <div key="custom" style={baseBoxStyle}>
+    <div id="custom-size-export" key="custom" style={getBoxStyle('custom')}>
       <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 800 }}>
         Custom Product Export
       </div>
+      {uploadTarget === 'custom' && (
+        <div style={recommendedLineStyle}>Recommended for your selected platform</div>
+      )}
       <div style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.4 }}>
         Choose a custom PNG size for mugs, stickers, posters, square designs, and other POD products.
       </div>
@@ -773,6 +778,7 @@ export default function IssueBucketsPanel({
     redbubble: renderRedbubbleExportBox,
     printful: renderPrintfulExportBox,
     teepublic: renderTeePublicExportBox,
+    custom: renderCustomExportBox,
   };
 
   const orderedExportTargets: UploadTarget[] = [
@@ -888,7 +894,6 @@ export default function IssueBucketsPanel({
 
       <div style={{ marginBottom: 14, display: 'grid', gap: 12 }} data-tour="download">
         {orderedExportTargets.map((target) => exportBoxRenderers[target]())}
-        {renderCustomExportBox()}
       </div>
 
     </div>

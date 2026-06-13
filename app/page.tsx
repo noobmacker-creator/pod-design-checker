@@ -865,7 +865,9 @@ export default function Page() {
   const [selectedRedbubblePreset, setSelectedRedbubblePreset] = useState<RedbubblePresetId>('apparel');
   const [selectedPrintfulPreset, setSelectedPrintfulPreset] = useState<PrintfulPresetId>('dtg-dtf-apparel');
   const [activePresetSystem, setActivePresetSystem] = useState<'redbubble' | 'printful' | 'teepublic'>('redbubble');
-  const [uploadTarget, setUploadTarget] = useState<'standard' | 'redbubble' | 'printful' | 'teepublic'>('standard');
+  const [uploadTarget, setUploadTarget] = useState<
+    'standard' | 'redbubble' | 'printful' | 'teepublic' | 'custom'
+  >('standard');
 
   const previewCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -1912,6 +1914,13 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
     );
   }
 
+  function handleOpenCustomSize() {
+    setUploadTarget('custom');
+    window.setTimeout(() => {
+      document.getElementById('custom-size-export')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 0);
+  }
+
   return (
     <main
       style={{
@@ -1996,6 +2005,7 @@ gap: 16,
   targetCanvasW={targetCanvasW}
   targetCanvasH={targetCanvasH}
   onOpenTutorial={() => setTutorialOpen(true)}
+  onOpenCustomSize={handleOpenCustomSize}
   uploadTarget={uploadTarget}
 />
 </div>
