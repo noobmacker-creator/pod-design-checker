@@ -358,6 +358,7 @@ export default function IssueBucketsPanel({
   });
   const [exportPackMessage, setExportPackMessage] = useState('');
   const [exportPackBusy, setExportPackBusy] = useState(false);
+  const [selectedProductPresetId, setSelectedProductPresetId] = useState('square');
   const customSizeRef = useRef<HTMLDivElement>(null);
   const customWidthInputRef = useRef<HTMLInputElement>(null);
   const productPresetsRef = useRef<HTMLDivElement>(null);
@@ -938,6 +939,11 @@ export default function IssueBucketsPanel({
     </div>
   );
 
+  const selectedProductPreset =
+    V5_PRODUCT_PRESETS.find((preset) => preset.id === selectedProductPresetId) ??
+    V5_PRODUCT_PRESETS[0];
+  const selectedProductPresetFileName = `pod-checker-${toSafeSlug(selectedProductPreset.name)}-${selectedProductPreset.width}x${selectedProductPreset.height}.png`;
+
   const renderProductPresetsPanel = () => (
     <div
       id="product-presets-export"
@@ -954,45 +960,51 @@ export default function IssueBucketsPanel({
         Choose a quick generic POD export size for common product shapes. These are generic POD
         presets — not official platform sizes.
       </div>
-
-      <div style={{ display: 'grid', gap: 8 }}>
-        {V5_PRODUCT_PRESETS.map((preset) => {
-          const presetFileName = `pod-checker-${toSafeSlug(preset.name)}-${preset.width}x${preset.height}.png`;
-          return (
-            <div
-              key={preset.id}
-              style={{
-                border: '1px solid rgba(148, 163, 184, 0.18)',
-                borderRadius: 12,
-                padding: 10,
-                background: 'rgba(15, 23, 42, 0.45)',
-                display: 'grid',
-                gap: 6,
-              }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
-                <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 800 }}>{preset.name}</div>
-                <div style={{ fontSize: 12, color: '#bae6fd', fontWeight: 800, flexShrink: 0 }}>
-                  {preset.width} × {preset.height} px
-                </div>
-              </div>
-              <div style={{ fontSize: 11, color: '#94a3b8', lineHeight: 1.4 }}>{preset.note}</div>
-              <button
-                type="button"
-                onClick={() => {
-                  if (!img) return;
-                  handleDownloadCustomPng(preset.width, preset.height, preset.name);
-                }}
-                aria-disabled={!img}
-                style={presetDownloadButtonStyle}
-              >
-                Download {preset.name} PNG
-              </button>
-              <div style={fileNameLineStyle}>File name: {presetFileName}</div>
-            </div>
-          );
-        })}
+      <div style={{ fontSize: 12, color: '#cbd5e1', fontWeight: 800 }}>
+        Choose a generic POD preset:
       </div>
+      <select
+        value={selectedProductPresetId}
+        onChange={(e) => setSelectedProductPresetId(e.target.value)}
+        style={{
+          width: '100%',
+          padding: '10px 12px',
+          borderRadius: 10,
+          border: '1px solid rgba(255,255,255,0.12)',
+          background: 'rgba(255,255,255,0.06)',
+          color: '#fff',
+          fontSize: 14,
+          fontWeight: 600,
+          outline: 'none',
+          boxSizing: 'border-box',
+        }}
+      >
+        {V5_PRODUCT_PRESETS.map((preset) => (
+          <option key={preset.id} value={preset.id}>
+            {preset.name} — {preset.width} × {preset.height}
+          </option>
+        ))}
+      </select>
+      <div style={{ fontSize: 11, color: '#94a3b8', lineHeight: 1.4 }}>{selectedProductPreset.note}</div>
+      <div style={{ fontSize: 12, color: '#bae6fd', fontWeight: 800 }}>
+        Target: {selectedProductPreset.width} × {selectedProductPreset.height} px
+      </div>
+      <button
+        type="button"
+        onClick={() => {
+          if (!img) return;
+          handleDownloadCustomPng(
+            selectedProductPreset.width,
+            selectedProductPreset.height,
+            selectedProductPreset.name
+          );
+        }}
+        aria-disabled={!img}
+        style={presetDownloadButtonStyle}
+      >
+        Download Preset PNG
+      </button>
+      <div style={fileNameLineStyle}>File name: {selectedProductPresetFileName}</div>
     </div>
   );
 
