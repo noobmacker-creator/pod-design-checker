@@ -51,6 +51,9 @@ type IssueBucketsPanelProps = {
   handleDownloadPrintfulPng: () => void;
   handleDownloadTeePublicPng: () => void;
   handleDownloadCustomPng: (width: number, height: number, presetName?: string) => void;
+  handleBuildExportPack: (
+    items: { label: string; width: number; height: number; filenameSlug: string }[]
+  ) => void | Promise<void>;
   customSizeFocusToken?: number;
   productPresetsFocusToken?: number;
 };
@@ -58,6 +61,22 @@ type IssueBucketsPanelProps = {
 const PRINTFUL_MAX_BYTES = 200 * 1024 * 1024;
 const CUSTOM_EXPORT_MIN = 500;
 const CUSTOM_EXPORT_MAX = 12000;
+const STANDARD_EXPORT_W = 4200;
+const STANDARD_EXPORT_H = 4800;
+const TEEPUBLIC_EXPORT_W = 5000;
+const TEEPUBLIC_EXPORT_H = 5500;
+
+type ExportPackOptionId =
+  | 'standard'
+  | 'redbubble'
+  | 'printful'
+  | 'teepublic'
+  | 'square'
+  | 'sticker'
+  | 'poster'
+  | 'mug'
+  | 'tote-bag'
+  | 'phone-case';
 
 type V5ProductPreset = {
   id: string;
@@ -318,12 +337,27 @@ export default function IssueBucketsPanel({
   handleDownloadPrintfulPng,
   handleDownloadTeePublicPng,
   handleDownloadCustomPng,
+  handleBuildExportPack,
   customSizeFocusToken = 0,
   productPresetsFocusToken = 0,
 }: IssueBucketsPanelProps) {
   const [customWidth, setCustomWidth] = useState('3000');
   const [customHeight, setCustomHeight] = useState('3000');
   const [customSizeError, setCustomSizeError] = useState('');
+  const [exportPackSelected, setExportPackSelected] = useState<Record<ExportPackOptionId, boolean>>({
+    standard: false,
+    redbubble: false,
+    printful: false,
+    teepublic: false,
+    square: false,
+    sticker: false,
+    poster: false,
+    mug: false,
+    'tote-bag': false,
+    'phone-case': false,
+  });
+  const [exportPackMessage, setExportPackMessage] = useState('');
+  const [exportPackBusy, setExportPackBusy] = useState(false);
   const customSizeRef = useRef<HTMLDivElement>(null);
   const customWidthInputRef = useRef<HTMLInputElement>(null);
   const productPresetsRef = useRef<HTMLDivElement>(null);
@@ -761,6 +795,149 @@ export default function IssueBucketsPanel({
     fontSize: 13,
   };
 
+  const exportPackOptions: {
+    id: ExportPackOptionId;
+    checkboxLabel: string;
+    label: string;
+    width: number;
+    height: number;
+    filenameSlug: string;
+  }[] = [
+    {
+      id: 'standard',
+      checkboxLabel: `Standard ${STANDARD_EXPORT_W} × ${STANDARD_EXPORT_H}`,
+      label: 'Standard',
+      width: STANDARD_EXPORT_W,
+      height: STANDARD_EXPORT_H,
+      filenameSlug: 'pod-checker-standard-apparel',
+    },
+    {
+      id: 'redbubble',
+      checkboxLabel: `Redbubble ${selectedRedbubblePresetData.width} × ${selectedRedbubblePresetData.height}`,
+      label: 'Redbubble',
+      width: selectedRedbubblePresetData.width,
+      height: selectedRedbubblePresetData.height,
+      filenameSlug: toSafeSlug(selectedRedbubblePresetData.label) || 'pod-checker-redbubble',
+    },
+    {
+      id: 'printful',
+      checkboxLabel: `Printful ${selectedPrintfulPresetData.width} × ${selectedPrintfulPresetData.height}`,
+      label: 'Printful',
+      width: selectedPrintfulPresetData.width,
+      height: selectedPrintfulPresetData.height,
+      filenameSlug: toSafeSlug(selectedPrintfulPresetData.label) || 'pod-checker-printful',
+    },
+    {
+      id: 'teepublic',
+      checkboxLabel: `TeePublic ${TEEPUBLIC_EXPORT_W} × ${TEEPUBLIC_EXPORT_H}`,
+      label: 'TeePublic All Products',
+      width: TEEPUBLIC_EXPORT_W,
+      height: TEEPUBLIC_EXPORT_H,
+      filenameSlug: 'teepublic',
+    },
+    ...V5_PRODUCT_PRESETS.map((preset) => ({
+      id: preset.id as ExportPackOptionId,
+      checkboxLabel: `${preset.name} ${preset.width} × ${preset.height}`,
+      label: preset.name,
+      width: preset.width,
+      height: preset.height,
+      filenameSlug: `pod-checker-${toSafeSlug(preset.name)}`,
+    })),
+  ];
+
+  const toggleExportPackOption = (id: ExportPackOptionId) => {
+    setExportPackSelected((prev) => ({ ...prev, [id]: !prev[id] }));
+    setExportPackMessage('');
+  };
+
+  const handleBuildExportPackClick = async () => {
+    if (!img) {
+      setExportPackMessage('Upload a design before building an export pack.');
+      return;
+    }
+
+    const selectedItems = exportPackOptions
+      .filter((option) => exportPackSelected[option.id])
+      .map(({ label, width, height, filenameSlug }) => ({
+        label,
+        width,
+        height,
+        filenameSlug,
+      }));
+
+    if (selectedItems.length === 0) {
+      setExportPackMessage('Choose at least one export size.');
+      return;
+    }
+
+    setExportPackMessage('');
+    setExportPackBusy(true);
+    try {
+      await handleBuildExportPack(selectedItems);
+    } finally {
+      setExportPackBusy(false);
+    }
+  };
+
+  const renderExportPackPanel = () => (
+    <div style={baseBoxStyle}>
+      <div style={{ fontSize: 14, color: '#e2e8f0', fontWeight: 800 }}>
+        One-Click POD Export Pack
+      </div>
+      <div style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.45 }}>
+        Choose the POD sizes you need, then export multiple transparent PNG files from one fixed
+        design.
+      </div>
+      <div style={{ display: 'grid', gap: 6 }}>
+        {exportPackOptions.map((option) => (
+          <label
+            key={option.id}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              fontSize: 12,
+              color: '#e2e8f0',
+              cursor: 'pointer',
+              lineHeight: 1.4,
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={exportPackSelected[option.id]}
+              onChange={() => toggleExportPackOption(option.id)}
+              style={{ width: 14, height: 14, flexShrink: 0 }}
+            />
+            <span>{option.checkboxLabel}</span>
+          </label>
+        ))}
+      </div>
+      {exportPackMessage && (
+        <div style={{ fontSize: 12, color: '#fbbf24', lineHeight: 1.4 }}>{exportPackMessage}</div>
+      )}
+      {downloadMessage &&
+        (downloadMessage.startsWith('Exporting ') || downloadMessage.includes('Export pack complete')) && (
+          <div style={{ fontSize: 12, color: '#86efac', lineHeight: 1.4, fontWeight: 700 }}>
+            {downloadMessage}
+          </div>
+        )}
+      <button
+        type="button"
+        onClick={() => {
+          void handleBuildExportPackClick();
+        }}
+        aria-disabled={!img || exportPackBusy}
+        style={{
+          ...presetDownloadButtonStyle,
+          opacity: img && !exportPackBusy ? 1 : 0.55,
+          cursor: img && !exportPackBusy ? 'pointer' : 'not-allowed',
+        }}
+      >
+        {exportPackBusy ? 'Building export pack...' : 'Build POD Export Pack'}
+      </button>
+    </div>
+  );
+
   const renderProductPresetsPanel = () => (
     <div
       id="product-presets-export"
@@ -1047,6 +1224,7 @@ export default function IssueBucketsPanel({
       <div style={{ marginBottom: 14, display: 'grid', gap: 12 }} data-tour="download">
         {uploadTarget === 'presets' && renderProductPresetsPanel()}
         {uploadTarget === 'custom' && renderCustomSizeExportBox()}
+        {renderExportPackPanel()}
         {orderedPlatformTargets.map((target) => exportBoxRenderers[target]())}
       </div>
 
