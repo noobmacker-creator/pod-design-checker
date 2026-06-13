@@ -42,9 +42,9 @@ type IssueBucketsPanelProps = {
   setActivePresetSystem: React.Dispatch<
     React.SetStateAction<'redbubble' | 'printful' | 'teepublic'>
   >;
-  uploadTarget: 'standard' | 'redbubble' | 'printful' | 'teepublic' | 'custom';
+  uploadTarget: 'standard' | 'redbubble' | 'printful' | 'teepublic' | 'custom' | 'presets';
   setUploadTarget: React.Dispatch<
-    React.SetStateAction<'standard' | 'redbubble' | 'printful' | 'teepublic' | 'custom'>
+    React.SetStateAction<'standard' | 'redbubble' | 'printful' | 'teepublic' | 'custom' | 'presets'>
   >;
   handleDownloadApparelPng: () => void;
   handleDownloadRedbubblePng: () => void;
@@ -52,6 +52,7 @@ type IssueBucketsPanelProps = {
   handleDownloadTeePublicPng: () => void;
   handleDownloadCustomPng: (width: number, height: number, presetName?: string) => void;
   customSizeFocusToken?: number;
+  productPresetsFocusToken?: number;
 };
 
 const PRINTFUL_MAX_BYTES = 200 * 1024 * 1024;
@@ -70,42 +71,42 @@ const V5_PRODUCT_PRESETS: V5ProductPreset[] = [
   {
     id: 'square',
     name: 'Square',
-    width: 3000,
-    height: 3000,
+    width: 4500,
+    height: 4500,
     note: 'Generic square preset for logos, icons, and square POD products.',
   },
   {
     id: 'sticker',
     name: 'Sticker',
-    width: 2800,
-    height: 2800,
+    width: 3000,
+    height: 3000,
     note: 'Generic square preset for sticker-style POD products.',
   },
   {
     id: 'poster',
     name: 'Poster',
-    width: 4500,
-    height: 5400,
+    width: 5400,
+    height: 7200,
     note: 'Generic tall preset for poster-style POD products.',
   },
   {
     id: 'mug',
     name: 'Mug',
     width: 2700,
-    height: 1050,
+    height: 1200,
     note: 'Generic wraparound preset for mug-style POD products.',
   },
   {
     id: 'tote-bag',
     name: 'Tote Bag',
-    width: 3900,
-    height: 3900,
-    note: 'Generic square preset for tote bag-style POD products.',
+    width: 4500,
+    height: 5400,
+    note: 'Generic tall preset for tote bag-style POD products.',
   },
   {
     id: 'phone-case',
     name: 'Phone Case',
-    width: 1800,
+    width: 2400,
     height: 3600,
     note: 'Generic tall preset for phone case-style POD products.',
   },
@@ -141,7 +142,7 @@ function getPrintfulPreflight(
   colourProfileStatus: ColourProfileStatus,
   hasTransparency: boolean | null,
   practicalPrintDpi: number,
-  uploadTarget: 'standard' | 'redbubble' | 'printful' | 'teepublic' | 'custom'
+  uploadTarget: 'standard' | 'redbubble' | 'printful' | 'teepublic' | 'custom' | 'presets'
 ): { overall: PrintfulOverallStatus; items: PreflightItem[] } {
   const findCheck = (label: string) => checks?.find((c) => c.label === label);
 
@@ -318,12 +319,14 @@ export default function IssueBucketsPanel({
   handleDownloadTeePublicPng,
   handleDownloadCustomPng,
   customSizeFocusToken = 0,
+  productPresetsFocusToken = 0,
 }: IssueBucketsPanelProps) {
   const [customWidth, setCustomWidth] = useState('3000');
   const [customHeight, setCustomHeight] = useState('3000');
   const [customSizeError, setCustomSizeError] = useState('');
   const customSizeRef = useRef<HTMLDivElement>(null);
   const customWidthInputRef = useRef<HTMLInputElement>(null);
+  const productPresetsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (customSizeFocusToken === 0) return;
@@ -334,6 +337,13 @@ export default function IssueBucketsPanel({
       }, 250);
     }, 100);
   }, [customSizeFocusToken]);
+
+  useEffect(() => {
+    if (productPresetsFocusToken === 0) return;
+    window.setTimeout(() => {
+      productPresetsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 100);
+  }, [productPresetsFocusToken]);
   const toSafeSlug = (value: string) =>
     value
       .toLowerCase()
@@ -365,7 +375,7 @@ export default function IssueBucketsPanel({
     letterSpacing: '0.04em',
   };
 
-  type UploadTarget = 'standard' | 'redbubble' | 'printful' | 'teepublic' | 'custom';
+  type UploadTarget = 'standard' | 'redbubble' | 'printful' | 'teepublic' | 'custom' | 'presets';
 
   const uploadTargetOptions: { id: UploadTarget; label: string }[] = [
     { id: 'standard', label: 'Standard POD' },
@@ -373,6 +383,7 @@ export default function IssueBucketsPanel({
     { id: 'printful', label: 'Printful' },
     { id: 'teepublic', label: 'TeePublic' },
     { id: 'custom', label: 'Custom Size' },
+    { id: 'presets', label: 'Product Presets' },
   ];
 
   const uploadTargetHelper: Record<UploadTarget, string> = {
@@ -381,6 +392,7 @@ export default function IssueBucketsPanel({
     printful: 'Use this export when uploading DTG/DTF apparel designs to Printful.',
     teepublic: 'Use this export for TeePublic all-products upload.',
     custom: 'Enter a custom width and height for mugs, stickers, posters, and other POD products.',
+    presets: 'Choose a quick generic POD export size for common product shapes.',
   };
 
   const baseBoxStyle: React.CSSProperties = {
@@ -398,8 +410,13 @@ export default function IssueBucketsPanel({
     background: 'rgba(37, 99, 235, 0.10)',
   };
 
-  const getBoxStyle = (target: UploadTarget): React.CSSProperties =>
+  const getBoxStyle = (target: Exclude<UploadTarget, 'custom' | 'presets'>): React.CSSProperties =>
     uploadTarget === target ? { ...baseBoxStyle, ...selectedBoxStyle } : baseBoxStyle;
+
+  const getExtraPanelStyle = (target: 'custom' | 'presets'): React.CSSProperties => ({
+    ...baseBoxStyle,
+    ...(uploadTarget === target ? selectedBoxStyle : {}),
+  });
 
   const recommendedLineStyle: React.CSSProperties = {
     fontSize: 11,
@@ -744,24 +761,20 @@ export default function IssueBucketsPanel({
     fontSize: 13,
   };
 
-  const renderV5ProductExportPresets = () => (
+  const renderProductPresetsPanel = () => (
     <div
-      id="custom-size-export"
-      ref={customSizeRef}
-      style={{
-        ...baseBoxStyle,
-        ...(uploadTarget === 'custom' ? selectedBoxStyle : {}),
-        marginTop: 4,
-      }}
+      id="product-presets-export"
+      ref={productPresetsRef}
+      style={getExtraPanelStyle('presets')}
     >
       <div style={{ fontSize: 14, color: '#e2e8f0', fontWeight: 800 }}>
         V5 Product Export Presets
       </div>
-      {uploadTarget === 'custom' && (
+      {uploadTarget === 'presets' && (
         <div style={recommendedLineStyle}>Recommended for your selected platform</div>
       )}
       <div style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.4 }}>
-        Choose a quick generic POD export size, or enter a custom size. These are generic POD
+        Choose a quick generic POD export size for common product shapes. These are generic POD
         presets — not official platform sizes.
       </div>
 
@@ -803,121 +816,124 @@ export default function IssueBucketsPanel({
           );
         })}
       </div>
-
-      <div
-        style={{
-          border: '1px solid rgba(148, 163, 184, 0.18)',
-          borderRadius: 12,
-          padding: 10,
-          background: 'rgba(15, 23, 42, 0.45)',
-          display: 'grid',
-          gap: 8,
-        }}
-      >
-        <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 800 }}>Custom Size</div>
-        <div style={{ fontSize: 11, color: '#94a3b8', lineHeight: 1.4 }}>
-          Enter any width and height for mugs, stickers, posters, and other POD products.
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-          <label style={{ display: 'grid', gap: 4 }}>
-            <span style={{ fontSize: 11, fontWeight: 800, color: '#93c5fd' }}>Width</span>
-            <input
-              ref={customWidthInputRef}
-              id="custom-size-width"
-              type="number"
-              min={CUSTOM_EXPORT_MIN}
-              max={CUSTOM_EXPORT_MAX}
-              value={customWidth}
-              onChange={(e) => {
-                setCustomWidth(e.target.value);
-                setCustomSizeError('');
-              }}
-              style={{
-                width: '100%',
-                padding: '8px 10px',
-                borderRadius: 10,
-                border: '1px solid rgba(255,255,255,0.12)',
-                background: 'rgba(255,255,255,0.06)',
-                color: '#fff',
-                fontSize: 14,
-                fontWeight: 600,
-                outline: 'none',
-                boxSizing: 'border-box',
-              }}
-            />
-          </label>
-          <label style={{ display: 'grid', gap: 4 }}>
-            <span style={{ fontSize: 11, fontWeight: 800, color: '#93c5fd' }}>Height</span>
-            <input
-              type="number"
-              min={CUSTOM_EXPORT_MIN}
-              max={CUSTOM_EXPORT_MAX}
-              value={customHeight}
-              onChange={(e) => {
-                setCustomHeight(e.target.value);
-                setCustomSizeError('');
-              }}
-              style={{
-                width: '100%',
-                padding: '8px 10px',
-                borderRadius: 10,
-                border: '1px solid rgba(255,255,255,0.12)',
-                background: 'rgba(255,255,255,0.06)',
-                color: '#fff',
-                fontSize: 14,
-                fontWeight: 600,
-                outline: 'none',
-                boxSizing: 'border-box',
-              }}
-            />
-          </label>
-        </div>
-        {customSizeParsed.valid && (
-          <div style={{ fontSize: 12, color: '#bae6fd', fontWeight: 800 }}>
-            Target: {customSizeParsed.width} × {customSizeParsed.height} px
-          </div>
-        )}
-        {customSizeError && (
-          <div style={{ fontSize: 12, color: '#fbbf24', lineHeight: 1.4 }}>{customSizeError}</div>
-        )}
-        <button
-          type="button"
-          onClick={() => {
-            if (!img) return;
-            const parsed = parseCustomExportSize(customWidth, customHeight);
-            if (!parsed.valid) {
-              setCustomSizeError(parsed.error);
-              return;
-            }
-            setCustomSizeError('');
-            handleDownloadCustomPng(parsed.width, parsed.height);
-          }}
-          aria-disabled={!img}
-          style={presetDownloadButtonStyle}
-        >
-          Download Custom PNG
-        </button>
-        <div style={fileNameLineStyle}>File name: {customFileName}</div>
-      </div>
     </div>
   );
 
-  const exportBoxRenderers: Record<Exclude<UploadTarget, 'custom'>, () => React.JSX.Element> = {
+  const renderCustomSizeExportBox = () => (
+    <div
+      id="custom-size-export"
+      ref={customSizeRef}
+      style={getExtraPanelStyle('custom')}
+    >
+      <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 800 }}>Custom Size Export</div>
+      {uploadTarget === 'custom' && (
+        <div style={recommendedLineStyle}>Recommended for your selected platform</div>
+      )}
+      <div style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.4 }}>
+        Choose a custom PNG size for mugs, stickers, posters, square designs, and other POD products.
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+        <label style={{ display: 'grid', gap: 4 }}>
+          <span style={{ fontSize: 11, fontWeight: 800, color: '#93c5fd' }}>Width</span>
+          <input
+            ref={customWidthInputRef}
+            id="custom-size-width"
+            type="number"
+            min={CUSTOM_EXPORT_MIN}
+            max={CUSTOM_EXPORT_MAX}
+            value={customWidth}
+            onChange={(e) => {
+              setCustomWidth(e.target.value);
+              setCustomSizeError('');
+            }}
+            style={{
+              width: '100%',
+              padding: '8px 10px',
+              borderRadius: 10,
+              border: '1px solid rgba(255,255,255,0.12)',
+              background: 'rgba(255,255,255,0.06)',
+              color: '#fff',
+              fontSize: 14,
+              fontWeight: 600,
+              outline: 'none',
+              boxSizing: 'border-box',
+            }}
+          />
+        </label>
+        <label style={{ display: 'grid', gap: 4 }}>
+          <span style={{ fontSize: 11, fontWeight: 800, color: '#93c5fd' }}>Height</span>
+          <input
+            type="number"
+            min={CUSTOM_EXPORT_MIN}
+            max={CUSTOM_EXPORT_MAX}
+            value={customHeight}
+            onChange={(e) => {
+              setCustomHeight(e.target.value);
+              setCustomSizeError('');
+            }}
+            style={{
+              width: '100%',
+              padding: '8px 10px',
+              borderRadius: 10,
+              border: '1px solid rgba(255,255,255,0.12)',
+              background: 'rgba(255,255,255,0.06)',
+              color: '#fff',
+              fontSize: 14,
+              fontWeight: 600,
+              outline: 'none',
+              boxSizing: 'border-box',
+            }}
+          />
+        </label>
+      </div>
+      {customSizeParsed.valid && (
+        <div style={{ fontSize: 12, color: '#bae6fd', fontWeight: 800 }}>
+          Target: {customSizeParsed.width} × {customSizeParsed.height} px
+        </div>
+      )}
+      {customSizeError && (
+        <div style={{ fontSize: 12, color: '#fbbf24', lineHeight: 1.4 }}>{customSizeError}</div>
+      )}
+      <button
+        type="button"
+        onClick={() => {
+          if (!img) return;
+          const parsed = parseCustomExportSize(customWidth, customHeight);
+          if (!parsed.valid) {
+            setCustomSizeError(parsed.error);
+            return;
+          }
+          setCustomSizeError('');
+          handleDownloadCustomPng(parsed.width, parsed.height);
+        }}
+        aria-disabled={!img}
+        style={presetDownloadButtonStyle}
+      >
+        Download Custom PNG
+      </button>
+      <div style={fileNameLineStyle}>File name: {customFileName}</div>
+    </div>
+  );
+
+  const exportBoxRenderers: Record<
+    Exclude<UploadTarget, 'custom' | 'presets'>,
+    () => React.JSX.Element
+  > = {
     standard: renderStandardExportBox,
     redbubble: renderRedbubbleExportBox,
     printful: renderPrintfulExportBox,
     teepublic: renderTeePublicExportBox,
   };
 
-  const platformExportTargets: Exclude<UploadTarget, 'custom'>[] = [
+  const platformExportTargets: Exclude<UploadTarget, 'custom' | 'presets'>[] = [
     'standard',
     'redbubble',
     'printful',
     'teepublic',
   ];
 
-  const orderedPlatformTargets: Exclude<UploadTarget, 'custom'>[] =
-    uploadTarget === 'custom'
+  const orderedPlatformTargets: Exclude<UploadTarget, 'custom' | 'presets'>[] =
+    uploadTarget === 'custom' || uploadTarget === 'presets'
       ? platformExportTargets
       : [
           uploadTarget,
@@ -1029,9 +1045,9 @@ export default function IssueBucketsPanel({
       )}
 
       <div style={{ marginBottom: 14, display: 'grid', gap: 12 }} data-tour="download">
-        {uploadTarget === 'custom' && renderV5ProductExportPresets()}
+        {uploadTarget === 'presets' && renderProductPresetsPanel()}
+        {uploadTarget === 'custom' && renderCustomSizeExportBox()}
         {orderedPlatformTargets.map((target) => exportBoxRenderers[target]())}
-        {uploadTarget !== 'custom' && renderV5ProductExportPresets()}
       </div>
 
     </div>

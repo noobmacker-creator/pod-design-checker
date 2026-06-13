@@ -866,9 +866,10 @@ export default function Page() {
   const [selectedPrintfulPreset, setSelectedPrintfulPreset] = useState<PrintfulPresetId>('dtg-dtf-apparel');
   const [activePresetSystem, setActivePresetSystem] = useState<'redbubble' | 'printful' | 'teepublic'>('redbubble');
   const [uploadTarget, setUploadTarget] = useState<
-    'standard' | 'redbubble' | 'printful' | 'teepublic' | 'custom'
+    'standard' | 'redbubble' | 'printful' | 'teepublic' | 'custom' | 'presets'
   >('standard');
   const [customSizeFocusToken, setCustomSizeFocusToken] = useState(0);
+  const [productPresetsFocusToken, setProductPresetsFocusToken] = useState(0);
 
   const previewCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -1924,6 +1925,11 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
     setCustomSizeFocusToken((value) => value + 1);
   }
 
+  function handleOpenProductPresets() {
+    setUploadTarget('presets');
+    setProductPresetsFocusToken((value) => value + 1);
+  }
+
   return (
     <main
       style={{
@@ -2009,6 +2015,7 @@ gap: 16,
   targetCanvasH={targetCanvasH}
   onOpenTutorial={() => setTutorialOpen(true)}
   onOpenCustomSize={handleOpenCustomSize}
+  onOpenProductPresets={handleOpenProductPresets}
   uploadTarget={uploadTarget}
 />
 </div>
@@ -2053,6 +2060,7 @@ gap: 16,
   handleDownloadTeePublicPng={handleDownloadTeePublicPng}
   handleDownloadCustomPng={handleDownloadCustomPng}
   customSizeFocusToken={customSizeFocusToken}
+  productPresetsFocusToken={productPresetsFocusToken}
 />
         </div>
         

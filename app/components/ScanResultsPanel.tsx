@@ -42,11 +42,12 @@ type ScanResultsPanelProps = {
   targetCanvasH: number;
   onOpenTutorial?: () => void;
   onOpenCustomSize?: () => void;
-  uploadTarget?: 'standard' | 'redbubble' | 'printful' | 'teepublic' | 'custom';
+  onOpenProductPresets?: () => void;
+  uploadTarget?: 'standard' | 'redbubble' | 'printful' | 'teepublic' | 'custom' | 'presets';
 };
 
 function getPostAutoFixDownloadText(
-  uploadTarget: 'standard' | 'redbubble' | 'printful' | 'teepublic' | 'custom',
+  uploadTarget: 'standard' | 'redbubble' | 'printful' | 'teepublic' | 'custom' | 'presets',
 ): string {
   if (uploadTarget === 'standard') {
     return 'Review the preview, then download the fixed Standard 4200 × 4800 PNG.';
@@ -55,7 +56,7 @@ function getPostAutoFixDownloadText(
 }
 
 function getAutoFixAppliedText(
-  uploadTarget: 'standard' | 'redbubble' | 'printful' | 'teepublic' | 'custom',
+  uploadTarget: 'standard' | 'redbubble' | 'printful' | 'teepublic' | 'custom' | 'presets',
 ): string {
   if (uploadTarget === 'standard') {
     return 'Auto Fix applied.\nReview the preview, then download the fixed Standard 4200 × 4800 PNG.';
@@ -64,7 +65,7 @@ function getAutoFixAppliedText(
 }
 
 function getFixedDownloadButtonText(
-  uploadTarget: 'standard' | 'redbubble' | 'printful' | 'teepublic' | 'custom',
+  uploadTarget: 'standard' | 'redbubble' | 'printful' | 'teepublic' | 'custom' | 'presets',
 ): string {
   if (uploadTarget === 'standard') {
     return 'Download Standard 4200 × 4800 PNG';
@@ -196,6 +197,7 @@ export default function ScanResultsPanel({
   targetCanvasH,
   onOpenTutorial,
   onOpenCustomSize,
+  onOpenProductPresets,
   uploadTarget = 'standard',
 }: ScanResultsPanelProps) {
   // Auto Fix detection: once Auto Fix has run, the placement/size issues it resolves
@@ -490,6 +492,23 @@ export default function ScanResultsPanel({
                 }}
               >
                 Custom Size
+              </button>
+              <button
+                type="button"
+                onClick={() => onOpenProductPresets?.()}
+                style={{
+                  padding: '7px 12px',
+                  borderRadius: 999,
+                  fontSize: 12,
+                  fontWeight: 800,
+                  background: 'rgba(37, 99, 235, 0.22)',
+                  color: '#bfdbfe',
+                  border: '1px solid rgba(147, 197, 253, 0.45)',
+                  cursor: 'pointer',
+                  width: 'fit-content',
+                }}
+              >
+                Product Presets
               </button>
             </div>
             <details
