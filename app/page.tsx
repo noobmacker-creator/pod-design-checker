@@ -871,6 +871,7 @@ export default function Page() {
   const [customSizeFocusToken, setCustomSizeFocusToken] = useState(0);
   const [productPresetsFocusToken, setProductPresetsFocusToken] = useState(0);
   const [exportPackZipFocusToken, setExportPackZipFocusToken] = useState(0);
+  const [batchCheckOpen, setBatchCheckOpen] = useState(false);
 
   const previewCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -1645,66 +1646,74 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
     }
   }, [img, shirtImg, transform, previewEffectiveBounds, viewMode, previewDesignCanvasSize, mockupOffsetX, mockupOffsetY, mockupScale]);
 
-  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const selected = e.target.files?.[0];
-    if (!selected) return;
-  
+  async function loadDesignFile(selected: File) {
     setIsScanning(true);
     setHasAutoFixApplied(false);
     setPreviewBackground('checker');
 
     if (fileUrl) URL.revokeObjectURL(fileUrl);
-  
+
     setFile(selected);
     setFileSize(selected.size);
-  
+
     const arrayBuffer = await selected.arrayBuffer();
     setDpiMetadata(getImageDpi(selected, arrayBuffer));
     setColourProfileStatus(getColourProfile(selected, arrayBuffer));
-  
+
     const url = URL.createObjectURL(selected);
     setFileUrl(url);
-  
+
     setActionMessage('Scanning design...');
-  
+
     const image = new Image();
-  
+
     image.onload = () => {
       setImg(image);
       setImgW(image.naturalWidth);
       setImgH(image.naturalHeight);
-  
+
       const scaleX = CANVAS_W / image.naturalWidth;
       const scaleY = CANVAS_H / image.naturalHeight;
       const scale = Math.min(scaleX, scaleY);
-  
+
       const scaledW = image.naturalWidth * scale;
       const scaledH = image.naturalHeight * scale;
-  
+
       setTransform({
         scale,
         offsetX: Math.round((CANVAS_W - scaledW) / 2),
         offsetY: Math.round((CANVAS_H - scaledH) / 2),
       });
-  
+
       setMockupOffsetX(0);
       setMockupOffsetY(0);
       setMockupScale(1);
-  
+
       setInspectZoom(1);
       setActionMessage('Design uploaded and centered on the POD canvas.');
       setDownloadMessage('');
       setViewMode('design');
       setPreviewSize(0.15);
+      setUploadInputKey((key) => key + 1);
       setTimeout(() => setIsScanning(false), 600);
     };
-  
+
     image.onerror = () => {
       setActionMessage('Could not load that image.');
       setTimeout(() => setIsScanning(false), 600);
     };
-  
+
     image.src = url;
+  }
+
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const selected = e.target.files?.[0];
+    if (!selected) return;
+    await loadDesignFile(selected);
+  }
+
+  async function handleLoadFileFromBatch(selected: File) {
+    await loadDesignFile(selected);
   }
 
   function handleQuickFix() {
@@ -1986,6 +1995,10 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
     setExportPackZipFocusToken((value) => value + 1);
   }
 
+  function handleOpenBatchCheck() {
+    setBatchCheckOpen((open) => !open);
+  }
+
   return (
     <main
       style={{
@@ -2073,6 +2086,9 @@ gap: 16,
   onOpenCustomSize={handleOpenCustomSize}
   onOpenProductPresets={handleOpenProductPresets}
   onOpenExportPackZip={handleOpenExportPackZip}
+  onOpenBatchCheck={handleOpenBatchCheck}
+  batchCheckOpen={batchCheckOpen}
+  onLoadFileFromBatch={handleLoadFileFromBatch}
   uploadTarget={uploadTarget}
 />
 </div>
