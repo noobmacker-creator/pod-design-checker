@@ -872,6 +872,7 @@ export default function Page() {
   const [productPresetsFocusToken, setProductPresetsFocusToken] = useState(0);
   const [exportPackZipFocusToken, setExportPackZipFocusToken] = useState(0);
   const [batchCheckOpen, setBatchCheckOpen] = useState(false);
+  const [batchExportOpen, setBatchExportOpen] = useState(false);
 
   const previewCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -1949,6 +1950,115 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
     );
   }
 
+  function loadImageFromFile(selected: File): Promise<HTMLImageElement | null> {
+    return new Promise((resolve) => {
+      const url = URL.createObjectURL(selected);
+      const image = new Image();
+
+      image.onload = () => {
+        URL.revokeObjectURL(url);
+        resolve(image);
+      };
+
+      image.onerror = () => {
+        URL.revokeObjectURL(url);
+        resolve(null);
+      };
+
+      image.src = url;
+    });
+  }
+
+  function createExportBlobFromImage(
+    image: HTMLImageElement,
+    exportWidth: number,
+    exportHeight: number,
+  ): Promise<Blob | null> {
+    const scaleX = CANVAS_W / image.naturalWidth;
+    const scaleY = CANVAS_H / image.naturalHeight;
+    const fitScaleToCanvas = Math.min(scaleX, scaleY);
+    const scaledW = image.naturalWidth * fitScaleToCanvas;
+    const scaledH = image.naturalHeight * fitScaleToCanvas;
+    const offsetX = Math.round((CANVAS_W - scaledW) / 2);
+    const offsetY = Math.round((CANVAS_H - scaledH) / 2);
+
+    const exportCanvas = document.createElement('canvas');
+    exportCanvas.width = exportWidth;
+    exportCanvas.height = exportHeight;
+
+    const ctx = exportCanvas.getContext('2d', { alpha: true });
+    if (!ctx) return Promise.resolve(null);
+
+    ctx.clearRect(0, 0, exportWidth, exportHeight);
+
+    const canvasFitScale = Math.min(exportWidth / CANVAS_W, exportHeight / CANVAS_H);
+    const padX = (exportWidth - CANVAS_W * canvasFitScale) / 2;
+    const padY = (exportHeight - CANVAS_H * canvasFitScale) / 2;
+    const drawW = image.naturalWidth * fitScaleToCanvas * canvasFitScale;
+    const drawH = image.naturalHeight * fitScaleToCanvas * canvasFitScale;
+    const drawX = offsetX * canvasFitScale + padX;
+    const drawY = offsetY * canvasFitScale + padY;
+
+    ctx.drawImage(image, drawX, drawY, drawW, drawH);
+
+    return new Promise((resolve) => {
+      exportCanvas.toBlob((blob) => resolve(blob), 'image/png');
+    });
+  }
+
+  async function handleDownloadBatchExportZip(
+    files: File[],
+    exportLabel: string,
+    width: number,
+    height: number,
+    onProgress: (message: string) => void,
+  ) {
+    if (files.length === 0) return;
+
+    const JSZip = (await import('jszip')).default;
+    const zip = new JSZip();
+    let addedCount = 0;
+
+    onProgress('Building batch export...');
+
+    for (let i = 0; i < files.length; i++) {
+      const selectedFile = files[i];
+      onProgress(`Adding ${i + 1} of ${files.length}: ${selectedFile.name}`);
+
+      const image = await loadImageFromFile(selectedFile);
+      if (!image) continue;
+
+      const blob = await createExportBlobFromImage(image, width, height);
+      if (!blob) continue;
+
+      const baseName =
+        toSafeSlug(selectedFile.name.replace(/\.[^.]+$/, '')) || `design-${i + 1}`;
+      zip.file(`${baseName}-${width}x${height}.png`, blob);
+      addedCount += 1;
+    }
+
+    if (addedCount === 0) {
+      onProgress('Could not export any selected designs. Check that the files can be loaded.');
+      return;
+    }
+
+    const zipBlob = await zip.generateAsync({ type: 'blob' });
+    const link = document.createElement('a');
+    link.download = 'pod-checker-batch-export.zip';
+    const objectUrl = URL.createObjectURL(zipBlob);
+    link.href = objectUrl;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(objectUrl);
+
+    onProgress('Batch export ready. Check your Downloads folder.');
+    setDownloadMessage(
+      `Download started: Batch ${exportLabel} PNG (${addedCount} file${addedCount === 1 ? '' : 's'}). Check your Downloads folder.`,
+    );
+    setActionMessage('Batch export ZIP downloaded.');
+  }
+
   async function handleDownloadExportPackZip(
     items: { label: string; width: number; height: number; filenameSlug: string }[]
   ) {
@@ -1997,6 +2107,10 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
 
   function handleOpenBatchCheck() {
     setBatchCheckOpen((open) => !open);
+  }
+
+  function handleOpenBatchExport() {
+    setBatchExportOpen((open) => !open);
   }
 
   return (
@@ -2089,6 +2203,9 @@ gap: 16,
   onOpenBatchCheck={handleOpenBatchCheck}
   batchCheckOpen={batchCheckOpen}
   onLoadFileFromBatch={handleLoadFileFromBatch}
+  onOpenBatchExport={handleOpenBatchExport}
+  batchExportOpen={batchExportOpen}
+  onDownloadBatchExportZip={handleDownloadBatchExportZip}
   uploadTarget={uploadTarget}
 />
 </div>

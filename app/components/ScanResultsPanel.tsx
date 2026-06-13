@@ -5,6 +5,7 @@ import type { CheckItem } from '../lib/podCheckerTypes';
 import { statusColor, statusIcon } from '../lib/podCheckerUtils';
 import { podCheckerV4Notes } from '../content/podCheckerV4Notes';
 import BatchPODChecker from './BatchPODChecker';
+import BatchExportQueue from './BatchExportQueue';
 
 type Bounds = {
   x: number;
@@ -48,6 +49,15 @@ type ScanResultsPanelProps = {
   onOpenBatchCheck?: () => void;
   batchCheckOpen?: boolean;
   onLoadFileFromBatch?: (file: File) => void;
+  onOpenBatchExport?: () => void;
+  batchExportOpen?: boolean;
+  onDownloadBatchExportZip?: (
+    files: File[],
+    exportLabel: string,
+    width: number,
+    height: number,
+    onProgress: (message: string) => void,
+  ) => Promise<void>;
   uploadTarget?: 'standard' | 'redbubble' | 'printful' | 'teepublic' | 'custom' | 'presets';
 };
 
@@ -207,6 +217,9 @@ export default function ScanResultsPanel({
   onOpenBatchCheck,
   batchCheckOpen = false,
   onLoadFileFromBatch,
+  onOpenBatchExport,
+  batchExportOpen = false,
+  onDownloadBatchExportZip,
   uploadTarget = 'standard',
 }: ScanResultsPanelProps) {
   // Auto Fix detection: once Auto Fix has run, the placement/size issues it resolves
@@ -555,9 +568,31 @@ export default function ScanResultsPanel({
               >
                 Batch Check
               </button>
+              <button
+                type="button"
+                onClick={() => onOpenBatchExport?.()}
+                style={{
+                  padding: '7px 12px',
+                  borderRadius: 999,
+                  fontSize: 12,
+                  fontWeight: 800,
+                  background: batchExportOpen
+                    ? 'rgba(37, 99, 235, 0.45)'
+                    : 'rgba(37, 99, 235, 0.22)',
+                  color: '#bfdbfe',
+                  border: '1px solid rgba(147, 197, 253, 0.45)',
+                  cursor: 'pointer',
+                  width: 'fit-content',
+                }}
+              >
+                Batch Export Queue
+              </button>
             </div>
             {batchCheckOpen && onLoadFileFromBatch && (
               <BatchPODChecker onOpenInChecker={onLoadFileFromBatch} />
+            )}
+            {batchExportOpen && onDownloadBatchExportZip && (
+              <BatchExportQueue onDownloadBatchZip={onDownloadBatchExportZip} />
             )}
             <details
               style={{
