@@ -1940,28 +1940,6 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
     );
   }
 
-  async function handleBuildExportPack(
-    items: { label: string; width: number; height: number; filenameSlug: string }[]
-  ) {
-    if (!img || items.length === 0) return;
-
-    for (let i = 0; i < items.length; i++) {
-      const item = items[i];
-      downloadPngForSize(
-        item.width,
-        item.height,
-        item.label,
-        item.filenameSlug,
-        `Exporting ${i + 1} of ${items.length}: ${item.label} ${item.width} × ${item.height} PNG`
-      );
-      if (i < items.length - 1) {
-        await new Promise((resolve) => window.setTimeout(resolve, 300));
-      }
-    }
-
-    setDownloadMessage('Export pack complete. Check your Downloads folder.');
-  }
-
   async function handleDownloadExportPackZip(
     items: { label: string; width: number; height: number; filenameSlug: string }[]
   ) {
@@ -2138,7 +2116,6 @@ gap: 16,
   handleDownloadPrintfulPng={handleDownloadPrintfulPng}
   handleDownloadTeePublicPng={handleDownloadTeePublicPng}
   handleDownloadCustomPng={handleDownloadCustomPng}
-  handleBuildExportPack={handleBuildExportPack}
   handleDownloadExportPackZip={handleDownloadExportPackZip}
   customSizeFocusToken={customSizeFocusToken}
   productPresetsFocusToken={productPresetsFocusToken}
