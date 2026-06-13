@@ -730,6 +730,8 @@ export default function ScanResultsPanel({
                 practicalPrintDpi={practicalPrintDpi}
                 autoFixApplied={autoFixApplied}
                 downloadMessage={downloadMessage}
+                displayScore={displayScore}
+                scanStatus={riskLabel}
               />
             )}
           </div>
