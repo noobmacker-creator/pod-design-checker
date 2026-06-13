@@ -120,6 +120,26 @@ export default function BatchPODChecker({ onOpenInChecker }: BatchPODCheckerProp
     e.target.value = '';
   }
 
+  function removeItem(id: string) {
+    setItems((prev) => prev.filter((item) => item.id !== id));
+  }
+
+  function clearAll() {
+    setItems([]);
+  }
+
+  const removeButtonStyle: React.CSSProperties = {
+    padding: '7px 12px',
+    borderRadius: 10,
+    fontSize: 12,
+    fontWeight: 800,
+    background: 'rgba(148, 163, 184, 0.12)',
+    color: '#cbd5e1',
+    border: '1px solid rgba(148, 163, 184, 0.28)',
+    cursor: 'pointer',
+    width: 'fit-content',
+  };
+
   return (
     <div
       id="batch-pod-checker"
@@ -166,8 +186,17 @@ export default function BatchPODChecker({ onOpenInChecker }: BatchPODCheckerProp
       >
         {busy ? 'Scanning files...' : 'Choose PNG / JPG files'}
       </button>
-      {items.length > 0 && (
+      {items.length === 0 ? (
+        <div style={{ fontSize: 12, color: '#94a3b8', lineHeight: 1.45 }}>
+          No batch files added yet.
+        </div>
+      ) : (
         <div style={{ display: 'grid', gap: 8 }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            <button type="button" onClick={clearAll} style={removeButtonStyle}>
+              Clear All
+            </button>
+          </div>
           {items.map((item) => (
             <div
               key={item.id}
@@ -235,23 +264,32 @@ export default function BatchPODChecker({ onOpenInChecker }: BatchPODCheckerProp
                     ? 'yes'
                     : 'no'}
               </div>
-              <button
-                type="button"
-                onClick={() => onOpenInChecker(item.file)}
-                style={{
-                  padding: '7px 12px',
-                  borderRadius: 10,
-                  fontSize: 12,
-                  fontWeight: 800,
-                  background: '#2563eb',
-                  color: '#ffffff',
-                  border: 'none',
-                  cursor: 'pointer',
-                  width: 'fit-content',
-                }}
-              >
-                Open in Checker
-              </button>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
+                <button
+                  type="button"
+                  onClick={() => onOpenInChecker(item.file)}
+                  style={{
+                    padding: '7px 12px',
+                    borderRadius: 10,
+                    fontSize: 12,
+                    fontWeight: 800,
+                    background: '#2563eb',
+                    color: '#ffffff',
+                    border: 'none',
+                    cursor: 'pointer',
+                    width: 'fit-content',
+                  }}
+                >
+                  Open in Checker
+                </button>
+                <button
+                  type="button"
+                  onClick={() => removeItem(item.id)}
+                  style={removeButtonStyle}
+                >
+                  Remove
+                </button>
+              </div>
             </div>
           ))}
         </div>

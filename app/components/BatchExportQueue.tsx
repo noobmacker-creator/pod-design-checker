@@ -92,6 +92,18 @@ export default function BatchExportQueue({ onDownloadBatchZip }: BatchExportQueu
     BATCH_EXPORT_SIZE_OPTIONS.find((option) => option.id === selectedSizeId) ??
     BATCH_EXPORT_SIZE_OPTIONS[0];
 
+  const removeButtonStyle: React.CSSProperties = {
+    padding: '6px 10px',
+    borderRadius: 10,
+    fontSize: 11,
+    fontWeight: 800,
+    background: 'rgba(148, 163, 184, 0.12)',
+    color: '#cbd5e1',
+    border: '1px solid rgba(148, 163, 184, 0.28)',
+    cursor: 'pointer',
+    flexShrink: 0,
+  };
+
   async function handleFilesSelected(e: React.ChangeEvent<HTMLInputElement>) {
     const fileList = e.target.files;
     if (!fileList || fileList.length === 0) return;
@@ -114,6 +126,20 @@ export default function BatchExportQueue({ onDownloadBatchZip }: BatchExportQueu
     setItems(analyzed);
     setBusy(false);
     e.target.value = '';
+  }
+
+  function removeItem(id: string) {
+    setItems((prev) => prev.filter((item) => item.id !== id));
+  }
+
+  function removeSelected() {
+    setItems((prev) => prev.filter((item) => !item.selected));
+  }
+
+  function clearAll() {
+    setItems([]);
+    setMessage('');
+    setProgressMessage('');
   }
 
   function toggleItem(id: string) {
@@ -220,10 +246,31 @@ export default function BatchExportQueue({ onDownloadBatchZip }: BatchExportQueu
           </option>
         ))}
       </select>
-      {items.length > 0 && (
+      {items.length === 0 ? (
+        <div style={{ fontSize: 12, color: '#94a3b8', lineHeight: 1.45 }}>
+          No batch files added yet.
+        </div>
+      ) : (
         <div style={{ display: 'grid', gap: 6 }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            <button
+              type="button"
+              onClick={removeSelected}
+              disabled={busy || !items.some((item) => item.selected)}
+              style={{
+                ...removeButtonStyle,
+                opacity: busy || !items.some((item) => item.selected) ? 0.55 : 1,
+                cursor: busy || !items.some((item) => item.selected) ? 'not-allowed' : 'pointer',
+              }}
+            >
+              Remove selected
+            </button>
+            <button type="button" onClick={clearAll} disabled={busy} style={removeButtonStyle}>
+              Clear All
+            </button>
+          </div>
           {items.map((item) => (
-            <label
+            <div
               key={item.id}
               style={{
                 display: 'grid',
@@ -232,34 +279,59 @@ export default function BatchExportQueue({ onDownloadBatchZip }: BatchExportQueu
                 borderRadius: 10,
                 background: 'rgba(15, 23, 42, 0.55)',
                 border: '1px solid rgba(148, 163, 184, 0.22)',
-                cursor: item.loadError ? 'not-allowed' : 'pointer',
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <input
-                  type="checkbox"
-                  checked={item.selected}
-                  disabled={item.loadError || busy}
-                  onChange={() => toggleItem(item.id)}
-                  style={{ width: 14, height: 14, flexShrink: 0 }}
-                />
-                <span
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: 8,
+                }}
+              >
+                <label
                   style={{
-                    fontSize: 12,
-                    fontWeight: 800,
-                    color: '#e2e8f0',
-                    wordBreak: 'break-all',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    flex: 1,
+                    minWidth: 0,
+                    cursor: item.loadError ? 'not-allowed' : 'pointer',
                   }}
                 >
-                  {item.fileName}
-                </span>
+                  <input
+                    type="checkbox"
+                    checked={item.selected}
+                    disabled={item.loadError || busy}
+                    onChange={() => toggleItem(item.id)}
+                    style={{ width: 14, height: 14, flexShrink: 0 }}
+                  />
+                  <span
+                    style={{
+                      fontSize: 12,
+                      fontWeight: 800,
+                      color: '#e2e8f0',
+                      wordBreak: 'break-all',
+                    }}
+                  >
+                    {item.fileName}
+                  </span>
+                </label>
+                <button
+                  type="button"
+                  onClick={() => removeItem(item.id)}
+                  disabled={busy}
+                  style={removeButtonStyle}
+                >
+                  Remove
+                </button>
               </div>
               <div style={{ fontSize: 11, color: '#94a3b8', lineHeight: 1.45, paddingLeft: 22 }}>
                 {item.loadError
                   ? 'Could not load image — skipped from export'
                   : `${item.width} × ${item.height} px · ${item.fileType}`}
               </div>
-            </label>
+            </div>
           ))}
         </div>
       )}
