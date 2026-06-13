@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import type { CheckItem } from '../lib/podCheckerTypes';
 import type { ColourProfileStatus } from '../lib/podCheckerUtils';
 import type { RedbubblePresetId } from '../lib/redbubblePresets';
@@ -50,9 +50,34 @@ type IssueBucketsPanelProps = {
   handleDownloadRedbubblePng: () => void;
   handleDownloadPrintfulPng: () => void;
   handleDownloadTeePublicPng: () => void;
+  handleDownloadCustomPng: (width: number, height: number) => void;
 };
 
 const PRINTFUL_MAX_BYTES = 200 * 1024 * 1024;
+const CUSTOM_EXPORT_MIN = 500;
+const CUSTOM_EXPORT_MAX = 12000;
+
+function parseCustomExportSize(
+  widthStr: string,
+  heightStr: string
+): { valid: true; width: number; height: number } | { valid: false; error: string } {
+  const width = Number.parseInt(widthStr, 10);
+  const height = Number.parseInt(heightStr, 10);
+  if (
+    !Number.isFinite(width) ||
+    !Number.isFinite(height) ||
+    width < CUSTOM_EXPORT_MIN ||
+    width > CUSTOM_EXPORT_MAX ||
+    height < CUSTOM_EXPORT_MIN ||
+    height > CUSTOM_EXPORT_MAX
+  ) {
+    return {
+      valid: false,
+      error: 'Enter a width and height between 500 and 12000 px.',
+    };
+  }
+  return { valid: true, width, height };
+}
 
 function getPrintfulPreflight(
   img: HTMLImageElement | null,
@@ -237,7 +262,11 @@ export default function IssueBucketsPanel({
   handleDownloadRedbubblePng,
   handleDownloadPrintfulPng,
   handleDownloadTeePublicPng,
+  handleDownloadCustomPng,
 }: IssueBucketsPanelProps) {
+  const [customWidth, setCustomWidth] = useState('3000');
+  const [customHeight, setCustomHeight] = useState('3000');
+  const [customSizeError, setCustomSizeError] = useState('');
   const toSafeSlug = (value: string) =>
     value
       .toLowerCase()
@@ -627,6 +656,118 @@ export default function IssueBucketsPanel({
     </div>
   );
 
+  const customSizeParsed = parseCustomExportSize(customWidth, customHeight);
+  const customFileName =
+    customSizeParsed.valid
+      ? `pod-checker-custom-${customSizeParsed.width}x${customSizeParsed.height}.png`
+      : 'pod-checker-custom-[width]x[height].png';
+
+  const renderCustomExportBox = () => (
+    <div key="custom" style={baseBoxStyle}>
+      <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 800 }}>
+        Custom Product Export
+      </div>
+      <div style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.4 }}>
+        Choose a custom PNG size for mugs, stickers, posters, square designs, and other POD products.
+      </div>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gap: 8,
+        }}
+      >
+        <label style={{ display: 'grid', gap: 4 }}>
+          <span style={{ fontSize: 11, fontWeight: 800, color: '#93c5fd' }}>Width</span>
+          <input
+            type="number"
+            min={CUSTOM_EXPORT_MIN}
+            max={CUSTOM_EXPORT_MAX}
+            value={customWidth}
+            onChange={(e) => {
+              setCustomWidth(e.target.value);
+              setCustomSizeError('');
+            }}
+            style={{
+              width: '100%',
+              padding: '8px 10px',
+              borderRadius: 10,
+              border: '1px solid rgba(255,255,255,0.12)',
+              background: 'rgba(255,255,255,0.06)',
+              color: '#fff',
+              fontSize: 14,
+              fontWeight: 600,
+              outline: 'none',
+              boxSizing: 'border-box',
+            }}
+          />
+        </label>
+        <label style={{ display: 'grid', gap: 4 }}>
+          <span style={{ fontSize: 11, fontWeight: 800, color: '#93c5fd' }}>Height</span>
+          <input
+            type="number"
+            min={CUSTOM_EXPORT_MIN}
+            max={CUSTOM_EXPORT_MAX}
+            value={customHeight}
+            onChange={(e) => {
+              setCustomHeight(e.target.value);
+              setCustomSizeError('');
+            }}
+            style={{
+              width: '100%',
+              padding: '8px 10px',
+              borderRadius: 10,
+              border: '1px solid rgba(255,255,255,0.12)',
+              background: 'rgba(255,255,255,0.06)',
+              color: '#fff',
+              fontSize: 14,
+              fontWeight: 600,
+              outline: 'none',
+              boxSizing: 'border-box',
+            }}
+          />
+        </label>
+      </div>
+      {customSizeParsed.valid && (
+        <div style={{ fontSize: 12, color: '#bae6fd', fontWeight: 800 }}>
+          Target: {customSizeParsed.width} × {customSizeParsed.height} px
+        </div>
+      )}
+      {customSizeError && (
+        <div style={{ fontSize: 12, color: '#fbbf24', lineHeight: 1.4 }}>{customSizeError}</div>
+      )}
+      <div style={stepLabelStyle}>Download PNG</div>
+      <button
+        type="button"
+        onClick={() => {
+          if (!img) return;
+          const parsed = parseCustomExportSize(customWidth, customHeight);
+          if (!parsed.valid) {
+            setCustomSizeError(parsed.error);
+            return;
+          }
+          setCustomSizeError('');
+          handleDownloadCustomPng(parsed.width, parsed.height);
+        }}
+        aria-disabled={!img}
+        style={{
+          width: '100%',
+          background: '#2563eb',
+          color: '#ffffff',
+          fontWeight: 800,
+          borderRadius: 12,
+          padding: '12px 16px',
+          opacity: img ? 1 : 0.55,
+          boxShadow: img ? '0 10px 20px rgba(37, 99, 235, 0.30)' : 'none',
+          cursor: img ? 'pointer' : 'not-allowed',
+        }}
+      >
+        Download Custom PNG
+      </button>
+      <div style={fileNameLineStyle}>File name: {customFileName}</div>
+    </div>
+  );
+
   const exportBoxRenderers: Record<UploadTarget, () => React.JSX.Element> = {
     standard: renderStandardExportBox,
     redbubble: renderRedbubbleExportBox,
@@ -747,6 +888,7 @@ export default function IssueBucketsPanel({
 
       <div style={{ marginBottom: 14, display: 'grid', gap: 12 }} data-tour="download">
         {orderedExportTargets.map((target) => exportBoxRenderers[target]())}
+        {renderCustomExportBox()}
       </div>
 
     </div>

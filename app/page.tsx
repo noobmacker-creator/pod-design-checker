@@ -1820,7 +1820,13 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
       .replace(/^-+|-+$/g, '');
   }
   
-  function downloadPngForSize(width: number, height: number, label: string, filenameLabel: string) {
+  function downloadPngForSize(
+    width: number,
+    height: number,
+    label: string,
+    filenameLabel: string,
+    successMessage?: string
+  ) {
     if (!img) return;
 
   const exportCanvas = document.createElement('canvas');
@@ -1851,7 +1857,10 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
   link.click();
   document.body.removeChild(link);
 
-  setDownloadMessage(`Download ready. Use this fixed transparent PNG (${label} ${width}×${height}) for your POD upload.`);
+  setDownloadMessage(
+    successMessage ??
+      `Download ready. Use this fixed transparent PNG (${label} ${width}×${height}) for your POD upload.`
+  );
   setActionMessage('Clean transparent PNG exported.');
 }
 
@@ -1891,6 +1900,16 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
       'teepublic'
     );
     setDownloadMessage('Download ready: TeePublic PNG exported.');
+  }
+
+  function handleDownloadCustomPng(width: number, height: number) {
+    downloadPngForSize(
+      width,
+      height,
+      'Custom',
+      'pod-checker-custom',
+      `Download started: Custom ${width} × ${height} PNG. Check your Downloads folder.`
+    );
   }
 
   return (
@@ -2019,6 +2038,7 @@ gap: 16,
   handleDownloadRedbubblePng={handleDownloadRedbubblePng}
   handleDownloadPrintfulPng={handleDownloadPrintfulPng}
   handleDownloadTeePublicPng={handleDownloadTeePublicPng}
+  handleDownloadCustomPng={handleDownloadCustomPng}
 />
         </div>
         
