@@ -54,8 +54,12 @@ type IssueBucketsPanelProps = {
   handleBuildExportPack: (
     items: { label: string; width: number; height: number; filenameSlug: string }[]
   ) => void | Promise<void>;
+  handleDownloadExportPackZip: (
+    items: { label: string; width: number; height: number; filenameSlug: string }[]
+  ) => void | Promise<void>;
   customSizeFocusToken?: number;
   productPresetsFocusToken?: number;
+  exportPackZipFocusToken?: number;
 };
 
 const PRINTFUL_MAX_BYTES = 200 * 1024 * 1024;
@@ -338,8 +342,10 @@ export default function IssueBucketsPanel({
   handleDownloadTeePublicPng,
   handleDownloadCustomPng,
   handleBuildExportPack,
+  handleDownloadExportPackZip,
   customSizeFocusToken = 0,
   productPresetsFocusToken = 0,
+  exportPackZipFocusToken = 0,
 }: IssueBucketsPanelProps) {
   const [customWidth, setCustomWidth] = useState('3000');
   const [customHeight, setCustomHeight] = useState('3000');
@@ -358,10 +364,13 @@ export default function IssueBucketsPanel({
   });
   const [exportPackMessage, setExportPackMessage] = useState('');
   const [exportPackBusy, setExportPackBusy] = useState(false);
+  const [exportZipMessage, setExportZipMessage] = useState('');
+  const [exportZipBusy, setExportZipBusy] = useState(false);
   const [selectedProductPresetId, setSelectedProductPresetId] = useState('square');
   const customSizeRef = useRef<HTMLDivElement>(null);
   const customWidthInputRef = useRef<HTMLInputElement>(null);
   const productPresetsRef = useRef<HTMLDivElement>(null);
+  const exportPackZipRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (customSizeFocusToken === 0) return;
@@ -379,6 +388,13 @@ export default function IssueBucketsPanel({
       productPresetsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }, 100);
   }, [productPresetsFocusToken]);
+
+  useEffect(() => {
+    if (exportPackZipFocusToken === 0) return;
+    window.setTimeout(() => {
+      exportPackZipRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 100);
+  }, [exportPackZipFocusToken]);
   const toSafeSlug = (value: string) =>
     value
       .toLowerCase()
@@ -880,6 +896,35 @@ export default function IssueBucketsPanel({
     }
   };
 
+  const handleDownloadExportPackZipClick = async () => {
+    if (!img) {
+      setExportZipMessage('Upload a design before building an export pack.');
+      return;
+    }
+
+    const selectedItems = exportPackOptions
+      .filter((option) => exportPackSelected[option.id])
+      .map(({ label, width, height, filenameSlug }) => ({
+        label,
+        width,
+        height,
+        filenameSlug,
+      }));
+
+    if (selectedItems.length === 0) {
+      setExportZipMessage('Choose at least one export size.');
+      return;
+    }
+
+    setExportZipMessage('');
+    setExportZipBusy(true);
+    try {
+      await handleDownloadExportPackZip(selectedItems);
+    } finally {
+      setExportZipBusy(false);
+    }
+  };
+
   const renderExportPackPanel = () => (
     <div style={baseBoxStyle}>
       <div style={{ fontSize: 14, color: '#e2e8f0', fontWeight: 800 }}>
@@ -936,6 +981,67 @@ export default function IssueBucketsPanel({
       >
         {exportPackBusy ? 'Building export pack...' : 'Build POD Export Pack'}
       </button>
+    </div>
+  );
+
+  const renderExportPackZipPanel = () => (
+    <div id="export-pack-zip" ref={exportPackZipRef} style={baseBoxStyle}>
+      <div style={{ fontSize: 14, color: '#e2e8f0', fontWeight: 800 }}>
+        POD Export Pack ZIP
+      </div>
+      <div style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.45 }}>
+        Choose export sizes and download one ZIP file with ready-to-upload transparent PNGs.
+      </div>
+      <div style={{ display: 'grid', gap: 6 }}>
+        {exportPackOptions.map((option) => (
+          <label
+            key={`zip-${option.id}`}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              fontSize: 12,
+              color: '#e2e8f0',
+              cursor: 'pointer',
+              lineHeight: 1.4,
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={exportPackSelected[option.id]}
+              onChange={() => toggleExportPackOption(option.id)}
+              style={{ width: 14, height: 14, flexShrink: 0 }}
+            />
+            <span>{option.checkboxLabel}</span>
+          </label>
+        ))}
+      </div>
+      {exportZipMessage && (
+        <div style={{ fontSize: 12, color: '#fbbf24', lineHeight: 1.4 }}>{exportZipMessage}</div>
+      )}
+      {downloadMessage &&
+        (downloadMessage.startsWith('Building export pack') ||
+          downloadMessage.startsWith('Adding ') ||
+          downloadMessage.includes('Export pack ready')) && (
+          <div style={{ fontSize: 12, color: '#86efac', lineHeight: 1.4, fontWeight: 700 }}>
+            {downloadMessage}
+          </div>
+        )}
+      <button
+        type="button"
+        onClick={() => {
+          void handleDownloadExportPackZipClick();
+        }}
+        aria-disabled={!img || exportZipBusy}
+        style={{
+          ...presetDownloadButtonStyle,
+          opacity: img && !exportZipBusy ? 1 : 0.55,
+          cursor: img && !exportZipBusy ? 'pointer' : 'not-allowed',
+        }}
+      >
+        {exportZipBusy ? 'Building export pack...' : 'Download Export Pack ZIP'}
+      </button>
+      <div style={fileNameLineStyle}>ZIP file name: pod-checker-export-pack.zip</div>
     </div>
   );
 
@@ -1237,6 +1343,7 @@ export default function IssueBucketsPanel({
         {uploadTarget === 'presets' && renderProductPresetsPanel()}
         {uploadTarget === 'custom' && renderCustomSizeExportBox()}
         {renderExportPackPanel()}
+        {renderExportPackZipPanel()}
         {orderedPlatformTargets.map((target) => exportBoxRenderers[target]())}
       </div>
 

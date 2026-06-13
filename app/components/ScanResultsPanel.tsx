@@ -43,6 +43,7 @@ type ScanResultsPanelProps = {
   onOpenTutorial?: () => void;
   onOpenCustomSize?: () => void;
   onOpenProductPresets?: () => void;
+  onOpenExportPackZip?: () => void;
   uploadTarget?: 'standard' | 'redbubble' | 'printful' | 'teepublic' | 'custom' | 'presets';
 };
 
@@ -198,6 +199,7 @@ export default function ScanResultsPanel({
   onOpenTutorial,
   onOpenCustomSize,
   onOpenProductPresets,
+  onOpenExportPackZip,
   uploadTarget = 'standard',
 }: ScanResultsPanelProps) {
   // Auto Fix detection: once Auto Fix has run, the placement/size issues it resolves
@@ -509,6 +511,23 @@ export default function ScanResultsPanel({
                 }}
               >
                 Product Presets
+              </button>
+              <button
+                type="button"
+                onClick={() => onOpenExportPackZip?.()}
+                style={{
+                  padding: '7px 12px',
+                  borderRadius: 999,
+                  fontSize: 12,
+                  fontWeight: 800,
+                  background: 'rgba(37, 99, 235, 0.22)',
+                  color: '#bfdbfe',
+                  border: '1px solid rgba(147, 197, 253, 0.45)',
+                  cursor: 'pointer',
+                  width: 'fit-content',
+                }}
+              >
+                Export Pack ZIP
               </button>
             </div>
             <details

@@ -870,6 +870,7 @@ export default function Page() {
   >('standard');
   const [customSizeFocusToken, setCustomSizeFocusToken] = useState(0);
   const [productPresetsFocusToken, setProductPresetsFocusToken] = useState(0);
+  const [exportPackZipFocusToken, setExportPackZipFocusToken] = useState(0);
 
   const previewCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -1824,6 +1825,45 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
       .replace(/^-+|-+$/g, '');
   }
   
+  function createExportCanvas(width: number, height: number): HTMLCanvasElement | null {
+    if (!img) return null;
+
+    const exportCanvas = document.createElement('canvas');
+    exportCanvas.width = width;
+    exportCanvas.height = height;
+
+    const ctx = exportCanvas.getContext('2d', { alpha: true });
+    if (!ctx) return null;
+
+    ctx.clearRect(0, 0, exportCanvas.width, exportCanvas.height);
+
+    const fitScale = Math.min(exportCanvas.width / CANVAS_W, exportCanvas.height / CANVAS_H);
+    const padX = (exportCanvas.width - CANVAS_W * fitScale) / 2;
+    const padY = (exportCanvas.height - CANVAS_H * fitScale) / 2;
+
+    const drawW = img.naturalWidth * transform.scale * fitScale;
+    const drawH = img.naturalHeight * transform.scale * fitScale;
+    const drawX = transform.offsetX * fitScale + padX;
+    const drawY = transform.offsetY * fitScale + padY;
+
+    ctx.drawImage(img, drawX, drawY, drawW, drawH);
+    return exportCanvas;
+  }
+
+  function getExportFileName(filenameLabel: string, width: number, height: number) {
+    const safeName = toSafeSlug(filenameLabel) || 'pod-checker-export';
+    return `${safeName}-${width}x${height}.png`;
+  }
+
+  function generatePngBlobForSize(width: number, height: number): Promise<Blob | null> {
+    const exportCanvas = createExportCanvas(width, height);
+    if (!exportCanvas) return Promise.resolve(null);
+
+    return new Promise((resolve) => {
+      exportCanvas.toBlob((blob) => resolve(blob), 'image/png');
+    });
+  }
+
   function downloadPngForSize(
     width: number,
     height: number,
@@ -1831,42 +1871,22 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
     filenameLabel: string,
     successMessage?: string
   ) {
-    if (!img) return;
+    const exportCanvas = createExportCanvas(width, height);
+    if (!exportCanvas) return;
 
-  const exportCanvas = document.createElement('canvas');
-  exportCanvas.width = width;
-  exportCanvas.height = height;
+    const link = document.createElement('a');
+    link.download = getExportFileName(filenameLabel, width, height);
+    link.href = exportCanvas.toDataURL('image/png');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 
-  const ctx = exportCanvas.getContext('2d', { alpha: true });
-  if (!ctx) return;
-
-  ctx.clearRect(0, 0, exportCanvas.width, exportCanvas.height);
-
-  const fitScale = Math.min(exportCanvas.width / CANVAS_W, exportCanvas.height / CANVAS_H);
-  const padX = (exportCanvas.width - CANVAS_W * fitScale) / 2;
-  const padY = (exportCanvas.height - CANVAS_H * fitScale) / 2;
-
-  const drawW = img.naturalWidth * transform.scale * fitScale;
-  const drawH = img.naturalHeight * transform.scale * fitScale;
-  const drawX = transform.offsetX * fitScale + padX;
-  const drawY = transform.offsetY * fitScale + padY;
-
-  ctx.drawImage(img, drawX, drawY, drawW, drawH);
-
-  const link = document.createElement('a');
-  const safeName = toSafeSlug(filenameLabel) || 'pod-checker-export';
-  link.download = `${safeName}-${width}x${height}.png`;
-  link.href = exportCanvas.toDataURL('image/png');
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-
-  setDownloadMessage(
-    successMessage ??
-      `Download ready. Use this fixed transparent PNG (${label} ${width}×${height}) for your POD upload.`
-  );
-  setActionMessage('Clean transparent PNG exported.');
-}
+    setDownloadMessage(
+      successMessage ??
+        `Download ready. Use this fixed transparent PNG (${label} ${width}×${height}) for your POD upload.`
+    );
+    setActionMessage('Clean transparent PNG exported.');
+  }
 
   function handleDownloadApparelPng() {
     downloadPngForSize(CANVAS_W, CANVAS_H, 'DTG/DTF Apparel', 'pod-checker-standard-apparel');
@@ -1942,6 +1962,38 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
     setDownloadMessage('Export pack complete. Check your Downloads folder.');
   }
 
+  async function handleDownloadExportPackZip(
+    items: { label: string; width: number; height: number; filenameSlug: string }[]
+  ) {
+    if (!img || items.length === 0) return;
+
+    const JSZip = (await import('jszip')).default;
+    const zip = new JSZip();
+
+    setDownloadMessage('Building export pack...');
+
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      setDownloadMessage(`Adding ${item.label} ${item.width} × ${item.height} PNG...`);
+      const blob = await generatePngBlobForSize(item.width, item.height);
+      if (!blob) continue;
+      zip.file(getExportFileName(item.filenameSlug, item.width, item.height), blob);
+    }
+
+    const zipBlob = await zip.generateAsync({ type: 'blob' });
+    const link = document.createElement('a');
+    link.download = 'pod-checker-export-pack.zip';
+    const objectUrl = URL.createObjectURL(zipBlob);
+    link.href = objectUrl;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(objectUrl);
+
+    setDownloadMessage('Export pack ready. Check your Downloads folder.');
+    setActionMessage('Export pack ZIP downloaded.');
+  }
+
   function handleOpenCustomSize() {
     setUploadTarget('custom');
     setCustomSizeFocusToken((value) => value + 1);
@@ -1950,6 +2002,10 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
   function handleOpenProductPresets() {
     setUploadTarget('presets');
     setProductPresetsFocusToken((value) => value + 1);
+  }
+
+  function handleOpenExportPackZip() {
+    setExportPackZipFocusToken((value) => value + 1);
   }
 
   return (
@@ -2038,6 +2094,7 @@ gap: 16,
   onOpenTutorial={() => setTutorialOpen(true)}
   onOpenCustomSize={handleOpenCustomSize}
   onOpenProductPresets={handleOpenProductPresets}
+  onOpenExportPackZip={handleOpenExportPackZip}
   uploadTarget={uploadTarget}
 />
 </div>
@@ -2082,8 +2139,10 @@ gap: 16,
   handleDownloadTeePublicPng={handleDownloadTeePublicPng}
   handleDownloadCustomPng={handleDownloadCustomPng}
   handleBuildExportPack={handleBuildExportPack}
+  handleDownloadExportPackZip={handleDownloadExportPackZip}
   customSizeFocusToken={customSizeFocusToken}
   productPresetsFocusToken={productPresetsFocusToken}
+  exportPackZipFocusToken={exportPackZipFocusToken}
 />
         </div>
         
