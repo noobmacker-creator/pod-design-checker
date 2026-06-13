@@ -15,6 +15,42 @@ type BatchItem = {
   quickStatus: 'Ready' | 'Review';
 };
 
+type BatchFilter =
+  | 'all'
+  | 'ready'
+  | 'review'
+  | 'png'
+  | 'jpg'
+  | 'no-transparency'
+  | 'small-canvas';
+
+const BATCH_FILTERS: { id: BatchFilter; label: string }[] = [
+  { id: 'all', label: 'Show All' },
+  { id: 'ready', label: 'Ready Only' },
+  { id: 'review', label: 'Review Only' },
+  { id: 'png', label: 'PNG Only' },
+  { id: 'jpg', label: 'JPG Only' },
+  { id: 'no-transparency', label: 'No Transparency' },
+  { id: 'small-canvas', label: 'Small Canvas' },
+];
+
+function matchesBatchFilter(item: BatchItem, filter: BatchFilter): boolean {
+  if (filter === 'all') return true;
+  if (filter === 'ready') return item.quickStatus === 'Ready';
+  if (filter === 'review') return item.quickStatus === 'Review';
+  if (filter === 'png') return item.fileType === 'PNG';
+  if (filter === 'jpg') return item.fileType === 'JPEG';
+  if (filter === 'no-transparency') return item.hasTransparency === false;
+  if (filter === 'small-canvas') {
+    return (
+      item.width !== null &&
+      item.height !== null &&
+      (item.width < 2000 || item.height < 2000)
+    );
+  }
+  return true;
+}
+
 type BatchPODCheckerProps = {
   onOpenInChecker: (file: File) => void;
 };
@@ -97,6 +133,7 @@ export default function BatchPODChecker({ onOpenInChecker }: BatchPODCheckerProp
   const inputRef = useRef<HTMLInputElement>(null);
   const [items, setItems] = useState<BatchItem[]>([]);
   const [busy, setBusy] = useState(false);
+  const [filter, setFilter] = useState<BatchFilter>('all');
 
   async function handleFilesSelected(e: React.ChangeEvent<HTMLInputElement>) {
     const fileList = e.target.files;
@@ -127,6 +164,21 @@ export default function BatchPODChecker({ onOpenInChecker }: BatchPODCheckerProp
   function clearAll() {
     setItems([]);
   }
+
+  const filteredItems = items.filter((item) => matchesBatchFilter(item, filter));
+
+  const filterButtonStyle = (active: boolean): React.CSSProperties => ({
+    padding: '5px 9px',
+    borderRadius: 999,
+    fontSize: 11,
+    fontWeight: 800,
+    background: active ? 'rgba(37, 99, 235, 0.28)' : 'rgba(148, 163, 184, 0.10)',
+    color: active ? '#bfdbfe' : '#94a3b8',
+    border: active
+      ? '1px solid rgba(147, 197, 253, 0.45)'
+      : '1px solid rgba(148, 163, 184, 0.22)',
+    cursor: 'pointer',
+  });
 
   const removeButtonStyle: React.CSSProperties = {
     padding: '7px 12px',
@@ -192,12 +244,32 @@ export default function BatchPODChecker({ onOpenInChecker }: BatchPODCheckerProp
         </div>
       ) : (
         <div style={{ display: 'grid', gap: 8 }}>
+          <div style={{ display: 'grid', gap: 6 }}>
+            <div style={{ fontSize: 11, fontWeight: 800, color: '#93c5fd' }}>Quick filter:</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {BATCH_FILTERS.map((option) => (
+                <button
+                  key={option.id}
+                  type="button"
+                  onClick={() => setFilter(option.id)}
+                  style={filterButtonStyle(filter === option.id)}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
             <button type="button" onClick={clearAll} style={removeButtonStyle}>
               Clear All
             </button>
           </div>
-          {items.map((item) => (
+          {filteredItems.length === 0 ? (
+            <div style={{ fontSize: 12, color: '#94a3b8', lineHeight: 1.45 }}>
+              No files match this filter.
+            </div>
+          ) : (
+            filteredItems.map((item) => (
             <div
               key={item.id}
               style={{
@@ -291,7 +363,8 @@ export default function BatchPODChecker({ onOpenInChecker }: BatchPODCheckerProp
                 </button>
               </div>
             </div>
-          ))}
+            ))
+          )}
         </div>
       )}
     </div>

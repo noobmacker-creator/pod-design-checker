@@ -9,9 +9,47 @@ type BatchExportItem = {
   width: number | null;
   height: number | null;
   fileType: string;
+  hasTransparency: boolean | null;
+  quickStatus: 'Ready' | 'Review';
   selected: boolean;
   loadError: boolean;
 };
+
+type BatchFilter =
+  | 'all'
+  | 'ready'
+  | 'review'
+  | 'png'
+  | 'jpg'
+  | 'no-transparency'
+  | 'small-canvas';
+
+const BATCH_FILTERS: { id: BatchFilter; label: string }[] = [
+  { id: 'all', label: 'Show All' },
+  { id: 'ready', label: 'Ready Only' },
+  { id: 'review', label: 'Review Only' },
+  { id: 'png', label: 'PNG Only' },
+  { id: 'jpg', label: 'JPG Only' },
+  { id: 'no-transparency', label: 'No Transparency' },
+  { id: 'small-canvas', label: 'Small Canvas' },
+];
+
+function matchesBatchFilter(item: BatchExportItem, filter: BatchFilter): boolean {
+  if (filter === 'all') return true;
+  if (filter === 'ready') return item.quickStatus === 'Ready';
+  if (filter === 'review') return item.quickStatus === 'Review';
+  if (filter === 'png') return item.fileType === 'PNG';
+  if (filter === 'jpg') return item.fileType === 'JPEG';
+  if (filter === 'no-transparency') return item.hasTransparency === false;
+  if (filter === 'small-canvas') {
+    return (
+      item.width !== null &&
+      item.height !== null &&
+      (item.width < 2000 || item.height < 2000)
+    );
+  }
+  return true;
+}
 
 export type BatchExportSizeOption = {
   id: string;
@@ -49,18 +87,42 @@ function getFileTypeLabel(file: File): string {
 
 async function loadBatchExportItem(file: File): Promise<Omit<BatchExportItem, 'id' | 'file' | 'selected'>> {
   const fileType = getFileTypeLabel(file);
+  const isPng = fileType === 'PNG';
 
   return new Promise((resolve) => {
     const url = URL.createObjectURL(file);
     const image = new Image();
 
     image.onload = () => {
+      let hasTransparency = false;
+      const canvas = document.createElement('canvas');
+      canvas.width = image.naturalWidth;
+      canvas.height = image.naturalHeight;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(image, 0, 0);
+        const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+        for (let i = 3; i < data.length; i += 4) {
+          if (data[i] < 255) {
+            hasTransparency = true;
+            break;
+          }
+        }
+      }
+
       URL.revokeObjectURL(url);
+
+      const verySmall = image.naturalWidth < 2000 || image.naturalHeight < 2000;
+      const quickStatus: 'Ready' | 'Review' =
+        isPng && hasTransparency && !verySmall ? 'Ready' : 'Review';
+
       resolve({
         fileName: file.name,
         width: image.naturalWidth,
         height: image.naturalHeight,
         fileType,
+        hasTransparency,
+        quickStatus,
         loadError: false,
       });
     };
@@ -72,6 +134,8 @@ async function loadBatchExportItem(file: File): Promise<Omit<BatchExportItem, 'i
         width: null,
         height: null,
         fileType,
+        hasTransparency: null,
+        quickStatus: 'Review',
         loadError: true,
       });
     };
@@ -87,10 +151,26 @@ export default function BatchExportQueue({ onDownloadBatchZip }: BatchExportQueu
   const [selectedSizeId, setSelectedSizeId] = useState(BATCH_EXPORT_SIZE_OPTIONS[0].id);
   const [message, setMessage] = useState('');
   const [progressMessage, setProgressMessage] = useState('');
+  const [filter, setFilter] = useState<BatchFilter>('all');
 
   const selectedSize =
     BATCH_EXPORT_SIZE_OPTIONS.find((option) => option.id === selectedSizeId) ??
     BATCH_EXPORT_SIZE_OPTIONS[0];
+
+  const filteredItems = items.filter((item) => matchesBatchFilter(item, filter));
+
+  const filterButtonStyle = (active: boolean): React.CSSProperties => ({
+    padding: '5px 9px',
+    borderRadius: 999,
+    fontSize: 11,
+    fontWeight: 800,
+    background: active ? 'rgba(37, 99, 235, 0.28)' : 'rgba(148, 163, 184, 0.10)',
+    color: active ? '#bfdbfe' : '#94a3b8',
+    border: active
+      ? '1px solid rgba(147, 197, 253, 0.45)'
+      : '1px solid rgba(148, 163, 184, 0.22)',
+    cursor: 'pointer',
+  });
 
   const removeButtonStyle: React.CSSProperties = {
     padding: '6px 10px',
@@ -252,6 +332,21 @@ export default function BatchExportQueue({ onDownloadBatchZip }: BatchExportQueu
         </div>
       ) : (
         <div style={{ display: 'grid', gap: 6 }}>
+          <div style={{ display: 'grid', gap: 6 }}>
+            <div style={{ fontSize: 11, fontWeight: 800, color: '#93c5fd' }}>Quick filter:</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {BATCH_FILTERS.map((option) => (
+                <button
+                  key={option.id}
+                  type="button"
+                  onClick={() => setFilter(option.id)}
+                  style={filterButtonStyle(filter === option.id)}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
             <button
               type="button"
@@ -269,7 +364,12 @@ export default function BatchExportQueue({ onDownloadBatchZip }: BatchExportQueu
               Clear All
             </button>
           </div>
-          {items.map((item) => (
+          {filteredItems.length === 0 ? (
+            <div style={{ fontSize: 12, color: '#94a3b8', lineHeight: 1.45 }}>
+              No files match this filter.
+            </div>
+          ) : (
+            filteredItems.map((item) => (
             <div
               key={item.id}
               style={{
@@ -332,7 +432,8 @@ export default function BatchExportQueue({ onDownloadBatchZip }: BatchExportQueu
                   : `${item.width} × ${item.height} px · ${item.fileType}`}
               </div>
             </div>
-          ))}
+            ))
+          )}
         </div>
       )}
       {message && (
