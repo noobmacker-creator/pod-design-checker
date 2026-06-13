@@ -473,16 +473,118 @@ export default function ScanResultsPanel({
             gap: 10,
           }}
         >
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
+          <div style={{ display: 'grid', gap: 8 }}>
+            <div
+              style={{
+                position: 'sticky',
+                top: 0,
+                zIndex: 2,
+                display: 'grid',
+                gap: 8,
+                paddingBottom: 8,
+                marginBottom: 2,
+                background: 'rgba(15, 23, 42, 0.97)',
+                borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
+              }}
+            >
               <div style={{ fontSize: 20, fontWeight: 800, lineHeight: 1.1 }}>
                 POD Design Checker™
               </div>
+              <div style={{ color: '#cbd5e1', fontSize: 13 }}>
+                Print On Demand Checker
+              </div>
+              <div
+                data-tour="support"
+                style={{
+                  padding: 10,
+                  borderRadius: 12,
+                  background: 'rgba(2,132,199,0.12)',
+                  border: '1px solid rgba(125,211,252,0.35)',
+                }}
+              >
+                <a
+                  href="https://buymeacoffee.com/poddesignchecker"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.boxShadow = '0 0 0 2px rgba(186,230,253,0.3), 0 0 16px rgba(56,189,248,0.35)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.boxShadow = '0 0 0 2px rgba(186,230,253,0.22), 0 0 12px rgba(56,189,248,0.25)';
+                  }}
+                  style={{
+                    display: 'inline-block',
+                    padding: '8px 12px',
+                    borderRadius: 10,
+                    background: '#0284c7',
+                    color: '#ffffff',
+                    fontSize: 13,
+                    fontWeight: 700,
+                    textDecoration: 'none',
+                    border: '1px solid rgba(255,255,255,0.2)',
+                    boxShadow: '0 0 0 2px rgba(186,230,253,0.22), 0 0 12px rgba(56,189,248,0.25)',
+                    transition: 'box-shadow 180ms ease',
+                  }}
+                >
+                  Support POD Checker
+                </a>
+                <div style={{ marginTop: 6, color: '#cbd5e1', fontSize: 12, lineHeight: 1.4 }}>
+                  Support POD Checker to help it grow and improve.
+                </div>
+              </div>
+              <details
+                style={{
+                  padding: 10,
+                  borderRadius: 12,
+                  background: 'rgba(15, 23, 42, 0.55)',
+                  border: '1px solid rgba(148, 163, 184, 0.22)',
+                }}
+              >
+                <summary
+                  style={{
+                    cursor: 'pointer',
+                    fontWeight: 800,
+                    fontSize: 13,
+                    color: '#e2e8f0',
+                    listStyle: 'none',
+                  }}
+                >
+                  {podCheckerV4Notes.title}
+                </summary>
+                <div
+                  style={{
+                    marginTop: 8,
+                    display: 'grid',
+                    gap: 8,
+                    color: '#cbd5e1',
+                    fontSize: 12,
+                    lineHeight: 1.45,
+                  }}
+                >
+                  {podCheckerV4Notes.paragraphs.map((paragraph) => (
+                    <p key={paragraph} style={{ margin: 0 }}>
+                      {paragraph}
+                    </p>
+                  ))}
+                  <a
+                    href={podCheckerV4Notes.supportUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: 'inline-block',
+                      marginTop: 2,
+                      color: '#7dd3fc',
+                      fontWeight: 700,
+                      fontSize: 12,
+                      textDecoration: 'none',
+                    }}
+                  >
+                    {podCheckerV4Notes.supportLabel}
+                  </a>
+                </div>
+              </details>
             </div>
-            <div style={{ marginTop: 4, color: '#cbd5e1', fontSize: 13 }}>
-              Print On Demand Checker
-            </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
               <button
                 type="button"
                 onClick={() => onOpenTutorial?.()}
@@ -630,98 +732,6 @@ export default function ScanResultsPanel({
                 downloadMessage={downloadMessage}
               />
             )}
-            <details
-              style={{
-                marginTop: 8,
-                padding: 10,
-                borderRadius: 12,
-                background: 'rgba(15, 23, 42, 0.55)',
-                border: '1px solid rgba(148, 163, 184, 0.22)',
-              }}
-            >
-              <summary
-                style={{
-                  cursor: 'pointer',
-                  fontWeight: 800,
-                  fontSize: 13,
-                  color: '#e2e8f0',
-                  listStyle: 'none',
-                }}
-              >
-                {podCheckerV4Notes.title}
-              </summary>
-              <div
-                style={{
-                  marginTop: 8,
-                  display: 'grid',
-                  gap: 8,
-                  color: '#cbd5e1',
-                  fontSize: 12,
-                  lineHeight: 1.45,
-                }}
-              >
-                {podCheckerV4Notes.paragraphs.map((paragraph) => (
-                  <p key={paragraph} style={{ margin: 0 }}>
-                    {paragraph}
-                  </p>
-                ))}
-                <a
-                  href={podCheckerV4Notes.supportUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    display: 'inline-block',
-                    marginTop: 2,
-                    color: '#7dd3fc',
-                    fontWeight: 700,
-                    fontSize: 12,
-                    textDecoration: 'none',
-                  }}
-                >
-                  {podCheckerV4Notes.supportLabel}
-                </a>
-              </div>
-            </details>
-            <div
-              data-tour="support"
-              style={{
-                marginTop: 8,
-                padding: 10,
-                borderRadius: 12,
-                background: 'rgba(2,132,199,0.12)',
-                border: '1px solid rgba(125,211,252,0.35)',
-              }}
-            >
-              <a
-                href="https://buymeacoffee.com/poddesignchecker"
-                target="_blank"
-                rel="noopener noreferrer"
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.boxShadow = '0 0 0 2px rgba(186,230,253,0.3), 0 0 16px rgba(56,189,248,0.35)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.boxShadow = '0 0 0 2px rgba(186,230,253,0.22), 0 0 12px rgba(56,189,248,0.25)';
-                }}
-                style={{
-                  display: 'inline-block',
-                  padding: '8px 12px',
-                  borderRadius: 10,
-                  background: '#0284c7',
-                  color: '#ffffff',
-                  fontSize: 13,
-                  fontWeight: 700,
-                  textDecoration: 'none',
-                  border: '1px solid rgba(255,255,255,0.2)',
-                  boxShadow: '0 0 0 2px rgba(186,230,253,0.22), 0 0 12px rgba(56,189,248,0.25)',
-                  transition: 'box-shadow 180ms ease',
-                }}
-              >
-                Support POD Checker
-              </a>
-              <div style={{ marginTop: 6, color: '#cbd5e1', fontSize: 12, lineHeight: 1.4 }}>
-                Support POD Checker to help it grow and improve.
-              </div>
-            </div>
           </div>
 
           <div
@@ -764,21 +774,6 @@ export default function ScanResultsPanel({
               </div>
             </div>
           </div>
-        </div>
-
-        <div>
-          <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800 }}>Summary</h2>
-          <p
-            style={{
-              marginTop: 6,
-              marginBottom: 0,
-              color: '#cbd5e1',
-              lineHeight: 1.5,
-              fontSize: 14,
-            }}
-          >
-            Upload your design, review the result, then fix issues before export.
-          </p>
         </div>
       </div>
 
