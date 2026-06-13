@@ -711,12 +711,6 @@ export default function ScanResultsPanel({
                 Upload Notes
               </button>
             </div>
-            {batchCheckOpen && onLoadFileFromBatch && (
-              <BatchPODChecker onOpenInChecker={onLoadFileFromBatch} />
-            )}
-            {batchExportOpen && onDownloadBatchExportZip && (
-              <BatchExportQueue onDownloadBatchZip={onDownloadBatchExportZip} />
-            )}
             {uploadNotesOpen && (
               <PODUploadNotes
                 file={file}
@@ -733,6 +727,12 @@ export default function ScanResultsPanel({
                 displayScore={displayScore}
                 scanStatus={riskLabel}
               />
+            )}
+            {batchCheckOpen && onLoadFileFromBatch && (
+              <BatchPODChecker onOpenInChecker={onLoadFileFromBatch} />
+            )}
+            {batchExportOpen && onDownloadBatchExportZip && (
+              <BatchExportQueue onDownloadBatchZip={onDownloadBatchExportZip} />
             )}
           </div>
 
