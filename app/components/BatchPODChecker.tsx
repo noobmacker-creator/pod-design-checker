@@ -53,7 +53,6 @@ function matchesBatchFilter(item: BatchItem, filter: BatchFilter): boolean {
 
 type BatchPODCheckerProps = {
   onOpenInChecker: (file: File) => void;
-  topSlot?: React.ReactNode;
 };
 
 function formatFileSize(bytes: number): string {
@@ -130,7 +129,7 @@ async function analyzeBatchFile(file: File): Promise<Omit<BatchItem, 'id' | 'fil
   });
 }
 
-export default function BatchPODChecker({ onOpenInChecker, topSlot }: BatchPODCheckerProps) {
+export default function BatchPODChecker({ onOpenInChecker }: BatchPODCheckerProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [items, setItems] = useState<BatchItem[]>([]);
   const [busy, setBusy] = useState(false);
@@ -210,7 +209,6 @@ export default function BatchPODChecker({ onOpenInChecker, topSlot }: BatchPODCh
       <div style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.45 }}>
         Quickly scan multiple POD designs and open any file in the main checker.
       </div>
-      {topSlot}
       <input
         ref={inputRef}
         type="file"

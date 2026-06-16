@@ -76,7 +76,6 @@ type BatchExportQueueProps = {
     height: number,
     onProgress: (message: string) => void,
   ) => Promise<void>;
-  topSlot?: React.ReactNode;
 };
 
 function getFileTypeLabel(file: File): string {
@@ -145,7 +144,7 @@ async function loadBatchExportItem(file: File): Promise<Omit<BatchExportItem, 'i
   });
 }
 
-export default function BatchExportQueue({ onDownloadBatchZip, topSlot }: BatchExportQueueProps) {
+export default function BatchExportQueue({ onDownloadBatchZip }: BatchExportQueueProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [items, setItems] = useState<BatchExportItem[]>([]);
   const [busy, setBusy] = useState(false);
@@ -274,7 +273,6 @@ export default function BatchExportQueue({ onDownloadBatchZip, topSlot }: BatchE
       <div style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.45 }}>
         Add multiple designs, choose an export size, then download one ZIP with ready PNG files.
       </div>
-      {topSlot}
       <input
         ref={inputRef}
         type="file"
