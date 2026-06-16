@@ -62,22 +62,16 @@ type ScanResultsPanelProps = {
   uploadTarget?: 'standard' | 'redbubble' | 'printful' | 'teepublic' | 'custom' | 'presets';
 };
 
-function getPostAutoFixDownloadText(
-  uploadTarget: 'standard' | 'redbubble' | 'printful' | 'teepublic' | 'custom' | 'presets',
-): string {
-  if (uploadTarget === 'standard') {
-    return 'Review the preview, then download the fixed Standard 4200 × 4800 PNG.';
-  }
-  return 'Review the preview, then download the fixed PNG at the selected export size.';
+function getPostAutoFixDownloadText(): string {
+  return 'Download Fixed PNG';
 }
 
-function getAutoFixAppliedText(
-  uploadTarget: 'standard' | 'redbubble' | 'printful' | 'teepublic' | 'custom' | 'presets',
-): string {
-  if (uploadTarget === 'standard') {
-    return 'Auto Fix applied.\nReview the preview, then download the fixed Standard 4200 × 4800 PNG.';
-  }
-  return 'Auto Fix applied. Review the preview, then download the fixed PNG at the selected export size.';
+function getAutoFixAppliedText(): string {
+  return 'Auto Fix applied.';
+}
+
+function getAutoFixNextStepText(): string {
+  return 'Review the preview, then download your fixed PNG.';
 }
 
 function getFixedDownloadButtonText(
@@ -424,7 +418,7 @@ export default function ScanResultsPanel({
     : mainPick.item
     ? actionByIssue[mainPick.key ?? ''] ?? 'Review the highlighted issue before uploading.'
     : autoFixApplied
-    ? getPostAutoFixDownloadText(uploadTarget)
+    ? getPostAutoFixDownloadText()
     : 'Download and upload.';
 
   // Manual Fix Guidance: issues Auto Fix CANNOT solve need a source-file/manual fix.
@@ -914,7 +908,7 @@ export default function ScanResultsPanel({
             {downloadMessage.includes('Download ready')
               ? 'Upload this fixed PNG to your POD platform, or check another design.'
               : autoFixApplied
-              ? getPostAutoFixDownloadText(uploadTarget)
+              ? getAutoFixNextStepText()
               : !img
               ? 'Upload a design to begin.'
               : 'Review the scan results.'}
@@ -1054,7 +1048,7 @@ export default function ScanResultsPanel({
               type="button"
               onClick={() => {
                 handleQuickFix();
-                setActionMessage(getAutoFixAppliedText(uploadTarget));
+                setActionMessage(getAutoFixAppliedText());
               }}
               style={{
                 width: '100%',
@@ -1116,8 +1110,8 @@ export default function ScanResultsPanel({
                 gap: 8,
               }}
             >
-              <div style={{ fontSize: 13, lineHeight: 1.45, color: '#7dd3fc', fontWeight: 700, whiteSpace: 'pre-line' }}>
-                {getAutoFixAppliedText(uploadTarget)}
+              <div style={{ fontSize: 13, lineHeight: 1.45, color: '#7dd3fc', fontWeight: 700 }}>
+                {getAutoFixAppliedText()} {getAutoFixNextStepText()}
               </div>
               <button
                 type="button"
@@ -1217,9 +1211,7 @@ export default function ScanResultsPanel({
             label: fixedDownloaded
               ? 'Fixed PNG downloaded'
               : img && noFailRemain && !hasWarnings
-              ? uploadTarget === 'standard'
-                ? 'Next: Download Standard 4200 × 4800 PNG'
-                : 'Next: Download fixed PNG'
+              ? 'Next: Download fixed PNG'
               : 'Download fixed PNG before upload',
             status: fixedDownloaded
               ? 'pass'

@@ -1753,11 +1753,7 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
       offsetY: Math.round(y),
     });
   
-    setActionMessage(
-      uploadTarget === 'standard'
-        ? 'Auto Fix applied.\nReview the preview, then download the fixed Standard 4200 × 4800 PNG.'
-        : 'Auto Fix applied. Review the preview, then download the fixed PNG at the selected export size.',
-    );
+    setActionMessage('Auto Fix applied.');
     setHasAutoFixApplied(true);
   }
 
