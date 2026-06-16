@@ -70,8 +70,8 @@ function getAutoFixAppliedText(): string {
   return 'Auto Fix applied.';
 }
 
-function getAutoFixNextStepText(): string {
-  return 'Review the preview, then download your fixed PNG.';
+function getAutoFixHelperText(): string {
+  return 'Review the preview first.';
 }
 
 function getFixedDownloadButtonText(
@@ -357,32 +357,6 @@ export default function ScanResultsPanel({
     return { key: bestKey, item: bestItem };
   };
 
-  const actionByIssue: Record<string, string> = {
-    'Solid Background Box Risk':
-      'Use a transparent PNG or remove the solid rectangle background before uploading.',
-    'White Background Risk': 'Use a transparent PNG before uploading to dark shirts.',
-    'Fake Transparency Background':
-      'Replace the fake checkerboard background with real transparency.',
-    'File Type Risk': 'Use a transparent PNG source file for best POD results.',
-    'Aspect Ratio': 'Use the fixed export so the design fits the POD canvas correctly.',
-    'Cut-Off Edge Risk':
-      'Use the original uncropped artwork or add transparent space around the design.',
-    'Artwork Near Canvas Edge':
-      'Run Auto Fix to add safer breathing room around the design, then download the fixed PNG.',
-    'Empty Padding Risk': 'Crop empty space or use Auto Fix before uploading.',
-    'Uneven Padding Risk': 'Center the artwork or crop the file more evenly.',
-    'Design Too Small': 'Use Auto Fix or upload a larger artwork source.',
-    'Print Safety Border': 'Use Auto Fix to move the artwork inside the safe print area.',
-    'White Edge / Halo Risk': 'Clean the design edges before uploading to dark shirts.',
-    'Compression Artifact Risk': 'Use a cleaner PNG source before uploading.',
-    'Low Contrast Risk': 'Increase contrast so details print clearly.',
-    'Line Thickness': 'Thicken fine lines before printing.',
-    'Stray Speck Check':
-      'Remove unwanted floating marks from empty transparent areas before upload.',
-    'Off-Center Design': 'Use Auto Fix to center the artwork.',
-    'Artwork Size': 'Check the artwork size before upload.',
-  };
-
   const mainPick = criticalActive.length
     ? pickMainIssue(criticalActive)
     : warningActive.length
@@ -413,13 +387,32 @@ export default function ScanResultsPanel({
     ? 'Placement and sizing issues handled'
     : 'No major issue found.';
 
-  const nextStep = !img
+  const shortActionByIssue: Record<string, string> = {
+    'Solid Background Box Risk': 'Fix source file',
+    'White Background Risk': 'Use transparent PNG',
+    'Fake Transparency Background': 'Fix fake transparency',
+    'File Type Risk': 'Use PNG source file',
+    'Aspect Ratio': 'Use fixed export',
+    'White Edge / Halo Risk': 'Clean design edges',
+    'Compression Artifact Risk': 'Use cleaner PNG',
+    'Low Contrast Risk': 'Increase contrast',
+    'Line Thickness': 'Thicken fine lines',
+    'Stray Speck Check': 'Remove stray marks',
+    'Artwork Size': 'Review artwork size',
+  };
+
+  const currentAction = !img
     ? 'Upload a design to begin.'
     : mainPick.item
-    ? actionByIssue[mainPick.key ?? ''] ?? 'Review the highlighted issue before uploading.'
+    ? isAutoFixableLabel(mainPick.key ?? mainPick.item.label)
+      ? 'Run Auto Fix'
+      : shortActionByIssue[mainPick.key ?? ''] ?? 'Review scan results'
     : autoFixApplied
     ? getPostAutoFixDownloadText()
     : 'Download and upload.';
+
+  const currentActionHelper =
+    autoFixApplied && !mainPick.item ? getAutoFixHelperText() : null;
 
   // Manual Fix Guidance: issues Auto Fix CANNOT solve need a source-file/manual fix.
   // (autoFixableIssues is defined near the top with the Auto Fix detection.)
@@ -891,29 +884,6 @@ export default function ScanResultsPanel({
             </div>
           ) : null}
 
-          <div
-            style={{
-              padding: '6px 10px',
-              borderRadius: 12,
-              background: 'rgba(15,23,42,0.82)',
-              border: '1px solid rgba(255,255,255,0.08)',
-              color: '#a7f3d0',
-              fontSize: 12,
-              fontWeight: 700,
-              width: '100%',
-              boxSizing: 'border-box',
-            }}
-          >
-            Next Step:{' '}
-            {downloadMessage.includes('Download ready')
-              ? 'Upload this fixed PNG to your POD platform, or check another design.'
-              : autoFixApplied
-              ? getAutoFixNextStepText()
-              : !img
-              ? 'Upload a design to begin.'
-              : 'Review the scan results.'}
-          </div>
-
           {img && handleResetDesign ? (
             <button
               onClick={handleResetDesign}
@@ -1031,7 +1001,12 @@ export default function ScanResultsPanel({
               lineHeight: 1.45,
             }}
           >
-            <span style={{ fontWeight: 800 }}>Best Next Action:</span> {nextStep}
+            <span style={{ fontWeight: 800 }}>Current Action:</span> {currentAction}
+            {currentActionHelper ? (
+              <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 6, fontWeight: 500 }}>
+                {currentActionHelper}
+              </div>
+            ) : null}
           </div>
 
           {img &&
@@ -1110,8 +1085,8 @@ export default function ScanResultsPanel({
                 gap: 8,
               }}
             >
-              <div style={{ fontSize: 13, lineHeight: 1.45, color: '#7dd3fc', fontWeight: 700 }}>
-                {getAutoFixAppliedText()} {getAutoFixNextStepText()}
+              <div style={{ fontSize: 12, lineHeight: 1.45, color: '#94a3b8' }}>
+                {getAutoFixHelperText()}
               </div>
               <button
                 type="button"
@@ -1133,6 +1108,11 @@ export default function ScanResultsPanel({
               >
                 {getFixedDownloadButtonText(uploadTarget)}
               </button>
+              {uploadTarget === 'standard' ? (
+                <div style={{ fontSize: 11, color: '#64748b', lineHeight: 1.4 }}>
+                  Exports as 4200 × 4800 transparent PNG.
+                </div>
+              ) : null}
 
               {autoFixHandledLabels.length > 0 ? (
                 <div style={{ display: 'grid', gap: 4 }}>
