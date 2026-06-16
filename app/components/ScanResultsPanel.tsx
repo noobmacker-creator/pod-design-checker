@@ -729,13 +729,21 @@ export default function ScanResultsPanel({
                 Upload Notes
               </button>
             </div>
-            {uploadNotesOpen && uploadNotesPanel}
             {batchCheckOpen && onLoadFileFromBatch && (
-              <BatchPODChecker onOpenInChecker={onLoadFileFromBatch} />
+              <BatchPODChecker
+                onOpenInChecker={onLoadFileFromBatch}
+                aboveFileControls={uploadNotesOpen ? uploadNotesPanel : undefined}
+              />
             )}
             {batchExportOpen && onDownloadBatchExportZip && (
-              <BatchExportQueue onDownloadBatchZip={onDownloadBatchExportZip} />
+              <BatchExportQueue
+                onDownloadBatchZip={onDownloadBatchExportZip}
+                aboveFileControls={
+                  uploadNotesOpen && !batchCheckOpen ? uploadNotesPanel : undefined
+                }
+              />
             )}
+            {uploadNotesOpen && !batchCheckOpen && !batchExportOpen && uploadNotesPanel}
           </div>
 
           <div
