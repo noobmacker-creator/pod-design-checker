@@ -445,6 +445,24 @@ export default function ScanResultsPanel({
   const displayScore =
     img && criticalActive.length === 0 && warningActive.length === 0 ? 100 : printScore;
 
+  const uploadNotesPanel = uploadNotesOpen ? (
+    <PODUploadNotes
+      file={file}
+      img={img}
+      imgW={imgW}
+      imgH={imgH}
+      uploadTarget={uploadTarget}
+      targetCanvasW={targetCanvasW}
+      targetCanvasH={targetCanvasH}
+      hasTransparency={hasTransparency}
+      practicalPrintDpi={practicalPrintDpi}
+      autoFixApplied={autoFixApplied}
+      downloadMessage={downloadMessage}
+      displayScore={displayScore}
+      scanStatus={riskLabel}
+    />
+  ) : null;
+
   return (
     <div
       style={{
@@ -711,28 +729,18 @@ export default function ScanResultsPanel({
                 Upload Notes
               </button>
             </div>
-            {uploadNotesOpen && (
-              <PODUploadNotes
-                file={file}
-                img={img}
-                imgW={imgW}
-                imgH={imgH}
-                uploadTarget={uploadTarget}
-                targetCanvasW={targetCanvasW}
-                targetCanvasH={targetCanvasH}
-                hasTransparency={hasTransparency}
-                practicalPrintDpi={practicalPrintDpi}
-                autoFixApplied={autoFixApplied}
-                downloadMessage={downloadMessage}
-                displayScore={displayScore}
-                scanStatus={riskLabel}
+            {uploadNotesOpen && !batchCheckOpen && !batchExportOpen && uploadNotesPanel}
+            {batchCheckOpen && onLoadFileFromBatch && (
+              <BatchPODChecker
+                onOpenInChecker={onLoadFileFromBatch}
+                topSlot={uploadNotesPanel}
               />
             )}
-            {batchCheckOpen && onLoadFileFromBatch && (
-              <BatchPODChecker onOpenInChecker={onLoadFileFromBatch} />
-            )}
             {batchExportOpen && onDownloadBatchExportZip && (
-              <BatchExportQueue onDownloadBatchZip={onDownloadBatchExportZip} />
+              <BatchExportQueue
+                onDownloadBatchZip={onDownloadBatchExportZip}
+                topSlot={!batchCheckOpen ? uploadNotesPanel : undefined}
+              />
             )}
           </div>
 
