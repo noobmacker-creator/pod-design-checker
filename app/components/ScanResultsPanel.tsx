@@ -74,12 +74,7 @@ function getAutoFixHelperText(): string {
   return 'Review the preview first.';
 }
 
-function getFixedDownloadButtonText(
-  uploadTarget: 'standard' | 'redbubble' | 'printful' | 'teepublic' | 'custom' | 'presets',
-): string {
-  if (uploadTarget === 'standard') {
-    return 'Download Standard 4200 × 4800 PNG';
-  }
+function getFixedDownloadButtonText(): string {
   return 'Download Fixed PNG';
 }
 
@@ -217,7 +212,31 @@ export default function ScanResultsPanel({
   onDownloadBatchExportZip,
   uploadTarget = 'standard',
 }: ScanResultsPanelProps) {
-  const [uploadNotesOpen, setUploadNotesOpen] = useState(false);
+  const [v5ToolsTab, setV5ToolsTab] = useState<'export' | 'batch' | 'notes' | 'tutorial'>('export');
+
+  const v5TabButtonStyle = (active: boolean): React.CSSProperties => ({
+    padding: '6px 10px',
+    borderRadius: 8,
+    fontSize: 11,
+    fontWeight: 800,
+    textTransform: 'uppercase',
+    letterSpacing: '0.03em',
+    background: active ? 'rgba(37, 99, 235, 0.45)' : 'rgba(37, 99, 235, 0.14)',
+    color: active ? '#ffffff' : '#bfdbfe',
+    border: '1px solid rgba(147, 197, 253, 0.35)',
+    cursor: 'pointer',
+  });
+
+  const v5ToolButtonStyle: React.CSSProperties = {
+    padding: '7px 12px',
+    borderRadius: 999,
+    fontSize: 12,
+    fontWeight: 800,
+    background: 'rgba(37, 99, 235, 0.22)',
+    color: '#bfdbfe',
+    border: '1px solid rgba(147, 197, 253, 0.45)',
+    cursor: 'pointer',
+  };
   // Auto Fix detection: once Auto Fix has run, the placement/size issues it resolves
   // should disappear from the active scan report AND from the Result Summary, instead
   // of being listed in a separate "Handled by Auto Fix" section.
@@ -432,7 +451,7 @@ export default function ScanResultsPanel({
   const displayScore =
     img && criticalActive.length === 0 && warningActive.length === 0 ? 100 : printScore;
 
-  const uploadNotesPanel = uploadNotesOpen ? (
+  const uploadNotesPanel = v5ToolsTab === 'notes' ? (
     <PODUploadNotes
       file={file}
       img={img}
@@ -589,151 +608,120 @@ export default function ScanResultsPanel({
                 </div>
               </details>
             </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-              <button
-                type="button"
-                onClick={() => onOpenTutorial?.()}
-                style={{
-                  padding: '7px 12px',
-                  borderRadius: 999,
-                  fontSize: 12,
-                  fontWeight: 800,
-                  background: 'rgba(37, 99, 235, 0.22)',
-                  color: '#bfdbfe',
-                  border: '1px solid rgba(147, 197, 253, 0.45)',
-                  cursor: 'pointer',
-                  width: 'fit-content',
-                }}
-              >
-                Tutorial
-              </button>
-              <button
-                type="button"
-                onClick={() => onOpenCustomSize?.()}
-                style={{
-                  padding: '7px 12px',
-                  borderRadius: 999,
-                  fontSize: 12,
-                  fontWeight: 800,
-                  background: 'rgba(37, 99, 235, 0.22)',
-                  color: '#bfdbfe',
-                  border: '1px solid rgba(147, 197, 253, 0.45)',
-                  cursor: 'pointer',
-                  width: 'fit-content',
-                }}
-              >
-                Custom Size
-              </button>
-              <button
-                type="button"
-                onClick={() => onOpenProductPresets?.()}
-                style={{
-                  padding: '7px 12px',
-                  borderRadius: 999,
-                  fontSize: 12,
-                  fontWeight: 800,
-                  background: 'rgba(37, 99, 235, 0.22)',
-                  color: '#bfdbfe',
-                  border: '1px solid rgba(147, 197, 253, 0.45)',
-                  cursor: 'pointer',
-                  width: 'fit-content',
-                }}
-              >
-                Product Presets
-              </button>
-              <button
-                type="button"
-                onClick={() => onOpenExportPackZip?.()}
-                style={{
-                  padding: '7px 12px',
-                  borderRadius: 999,
-                  fontSize: 12,
-                  fontWeight: 800,
-                  background: 'rgba(37, 99, 235, 0.22)',
-                  color: '#bfdbfe',
-                  border: '1px solid rgba(147, 197, 253, 0.45)',
-                  cursor: 'pointer',
-                  width: 'fit-content',
-                }}
-              >
-                Export Pack ZIP
-              </button>
-              <button
-                type="button"
-                onClick={() => onOpenBatchCheck?.()}
-                style={{
-                  padding: '7px 12px',
-                  borderRadius: 999,
-                  fontSize: 12,
-                  fontWeight: 800,
-                  background: batchCheckOpen
-                    ? 'rgba(37, 99, 235, 0.45)'
-                    : 'rgba(37, 99, 235, 0.22)',
-                  color: '#bfdbfe',
-                  border: '1px solid rgba(147, 197, 253, 0.45)',
-                  cursor: 'pointer',
-                  width: 'fit-content',
-                }}
-              >
-                Batch Check
-              </button>
-              <button
-                type="button"
-                onClick={() => onOpenBatchExport?.()}
-                style={{
-                  padding: '7px 12px',
-                  borderRadius: 999,
-                  fontSize: 12,
-                  fontWeight: 800,
-                  background: batchExportOpen
-                    ? 'rgba(37, 99, 235, 0.45)'
-                    : 'rgba(37, 99, 235, 0.22)',
-                  color: '#bfdbfe',
-                  border: '1px solid rgba(147, 197, 253, 0.45)',
-                  cursor: 'pointer',
-                  width: 'fit-content',
-                }}
-              >
-                Batch Export Queue
-              </button>
-              <button
-                type="button"
-                onClick={() => setUploadNotesOpen((open) => !open)}
-                style={{
-                  padding: '7px 12px',
-                  borderRadius: 999,
-                  fontSize: 12,
-                  fontWeight: 800,
-                  background: uploadNotesOpen
-                    ? 'rgba(37, 99, 235, 0.45)'
-                    : 'rgba(37, 99, 235, 0.22)',
-                  color: '#bfdbfe',
-                  border: '1px solid rgba(147, 197, 253, 0.45)',
-                  cursor: 'pointer',
-                  width: 'fit-content',
-                }}
-              >
-                Upload Notes
-              </button>
-            </div>
-            {batchCheckOpen && onLoadFileFromBatch && (
-              <BatchPODChecker
-                onOpenInChecker={onLoadFileFromBatch}
-                aboveFileControls={uploadNotesOpen ? uploadNotesPanel : undefined}
-              />
-            )}
-            {batchExportOpen && onDownloadBatchExportZip && (
-              <BatchExportQueue
-                onDownloadBatchZip={onDownloadBatchExportZip}
-                aboveFileControls={
-                  uploadNotesOpen && !batchCheckOpen ? uploadNotesPanel : undefined
-                }
-              />
-            )}
-            {uploadNotesOpen && !batchCheckOpen && !batchExportOpen && uploadNotesPanel}
-          </div>
 
-          <div
+            <div
+              style={{
+                padding: 10,
+                borderRadius: 12,
+                background: 'rgba(37, 99, 235, 0.08)',
+                border: '1px solid rgba(147, 197, 253, 0.22)',
+                display: 'grid',
+                gap: 4,
+              }}
+            >
+              <div style={{ fontWeight: 800, fontSize: 12, color: '#93c5fd' }}>Start Here</div>
+              <div style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.45 }}>
+                Upload your design, check the main issue, fix what matters, then export your PNG or ZIP.
+              </div>
+            </div>
+
+            <div
+              style={{
+                padding: 10,
+                borderRadius: 12,
+                background: 'rgba(15, 23, 42, 0.55)',
+                border: '1px solid rgba(148, 163, 184, 0.22)',
+                display: 'grid',
+                gap: 8,
+              }}
+            >
+              <div style={{ fontWeight: 800, fontSize: 12, color: '#93c5fd' }}>V5 Tools</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                {(
+                  [
+                    ['export', 'Export'],
+                    ['batch', 'Batch'],
+                    ['notes', 'Notes'],
+                    ['tutorial', 'Tutorial'],
+                  ] as const
+                ).map(([tab, label]) => (
+                  <button
+                    key={tab}
+                    type="button"
+                    onClick={() => setV5ToolsTab(tab)}
+                    style={v5TabButtonStyle(v5ToolsTab === tab)}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+
+              {v5ToolsTab === 'export' ? (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                  <button type="button" onClick={() => onOpenCustomSize?.()} style={v5ToolButtonStyle}>
+                    Custom Size
+                  </button>
+                  <button type="button" onClick={() => onOpenProductPresets?.()} style={v5ToolButtonStyle}>
+                    Product Presets
+                  </button>
+                  <button type="button" onClick={() => onOpenExportPackZip?.()} style={v5ToolButtonStyle}>
+                    Export Pack ZIP
+                  </button>
+                </div>
+              ) : null}
+
+              {v5ToolsTab === 'batch' ? (
+                <div style={{ display: 'grid', gap: 8 }}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                    <button
+                      type="button"
+                      onClick={() => onOpenBatchCheck?.()}
+                      style={{
+                        ...v5ToolButtonStyle,
+                        background: batchCheckOpen
+                          ? 'rgba(37, 99, 235, 0.45)'
+                          : 'rgba(37, 99, 235, 0.22)',
+                      }}
+                    >
+                      Batch Check
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onOpenBatchExport?.()}
+                      style={{
+                        ...v5ToolButtonStyle,
+                        background: batchExportOpen
+                          ? 'rgba(37, 99, 235, 0.45)'
+                          : 'rgba(37, 99, 235, 0.22)',
+                      }}
+                    >
+                      Batch Export Queue
+                    </button>
+                  </div>
+                  {batchCheckOpen && onLoadFileFromBatch ? (
+                    <BatchPODChecker onOpenInChecker={onLoadFileFromBatch} />
+                  ) : null}
+                  {batchExportOpen && onDownloadBatchExportZip ? (
+                    <BatchExportQueue onDownloadBatchZip={onDownloadBatchExportZip} />
+                  ) : null}
+                </div>
+              ) : null}
+
+              {v5ToolsTab === 'notes' ? uploadNotesPanel : null}
+
+              {v5ToolsTab === 'tutorial' ? (
+                <div style={{ display: 'grid', gap: 8 }}>
+                  <button type="button" onClick={() => onOpenTutorial?.()} style={v5ToolButtonStyle}>
+                    Open Tutorial
+                  </button>
+                  <div style={{ fontSize: 12, color: '#94a3b8', lineHeight: 1.45 }}>
+                    Step-by-step guide for upload, scan, Auto Fix, export, and shirt colour preview.
+                  </div>
+                </div>
+              ) : null}
+            </div>
+
+            <div
             style={{
               display: 'grid',
               gap: 8,
@@ -850,22 +838,6 @@ export default function ScanResultsPanel({
             </div>
           ) : null}
 
-          <div
-            style={{
-              padding: '6px 10px',
-              borderRadius: 12,
-              background: 'rgba(15,23,42,0.82)',
-              border: '1px solid rgba(255,255,255,0.08)',
-              color: '#cbd5e1',
-              fontSize: 12,
-              fontWeight: 700,
-              width: '100%',
-              boxSizing: 'border-box',
-            }}
-          >
-            Status: {actionMessage}
-          </div>
-
           {downloadMessage ? (
             <div
               style={{
@@ -904,6 +876,8 @@ export default function ScanResultsPanel({
           ) : null}
         </div>
       </div>
+      </div>
+
       <div style={{ display: 'grid', gap: 8 }} data-tour="scan-results">
         <h2 style={{ margin: 0, fontSize: 20, fontWeight: 800 }}>Scan Report</h2>
       <div
@@ -985,9 +959,18 @@ export default function ScanResultsPanel({
             border: '1px solid rgba(255,255,255,0.10)',
             fontSize: 14,
             lineHeight: 1.45,
+            display: 'grid',
+            gap: 8,
           }}
         >
-          <span style={{ fontWeight: 800 }}>Main Issue:</span> {mainIssue}
+          {autoFixApplied ? (
+            <div>
+              <span style={{ fontWeight: 800 }}>Status:</span> {getAutoFixAppliedText()}
+            </div>
+          ) : null}
+          <div>
+            <span style={{ fontWeight: 800 }}>Main Issue:</span> {mainIssue}
+          </div>
         </div>
 
         <div style={{ display: 'grid', gap: 8 }} data-tour="autofix">
@@ -1085,9 +1068,6 @@ export default function ScanResultsPanel({
                 gap: 8,
               }}
             >
-              <div style={{ fontSize: 12, lineHeight: 1.45, color: '#94a3b8' }}>
-                {getAutoFixHelperText()}
-              </div>
               <button
                 type="button"
                 onClick={() => {
@@ -1106,7 +1086,7 @@ export default function ScanResultsPanel({
                   cursor: img ? 'pointer' : 'not-allowed',
                 }}
               >
-                {getFixedDownloadButtonText(uploadTarget)}
+                {getFixedDownloadButtonText()}
               </button>
               {uploadTarget === 'standard' ? (
                 <div style={{ fontSize: 11, color: '#64748b', lineHeight: 1.4 }}>
@@ -1430,7 +1410,7 @@ export default function ScanResultsPanel({
           lineHeight: 1.45,
         }}
       >
-        POD Checker V4 includes DTG/DTF apparel export, Printful Readiness Check, Redbubble presets, TeePublic all-products export, and Shirt Colour Preview with custom colours. More POD tools coming soon.
+        POD Checker V5 includes DTG/DTF apparel export, Printful Readiness Check, Redbubble presets, TeePublic all-products export, Shirt Colour Preview with custom colours, and V5 export tools. More POD tools coming soon.
       </div>
     </div>
   );
