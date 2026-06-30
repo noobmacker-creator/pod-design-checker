@@ -211,6 +211,7 @@ export default function ScanResultsPanel({
   uploadTarget = 'standard',
 }: ScanResultsPanelProps) {
   const [toolsTab, setToolsTab] = useState<'export' | 'batch'>('export');
+  const [batchSubTab, setBatchSubTab] = useState<'check' | 'export'>('check');
   const [whatsNewOpen, setWhatsNewOpen] = useState(false);
 
   const toolsTabButtonStyle = (active: boolean): React.CSSProperties => ({
@@ -613,7 +614,6 @@ export default function ScanResultsPanel({
         width: '100%',
         maxWidth: '100%',
         minWidth: 0,
-        height: '100%',
         boxSizing: 'border-box',
         overflowX: 'hidden',
         wordBreak: 'break-word',
@@ -621,7 +621,7 @@ export default function ScanResultsPanel({
         alignSelf: 'stretch',
       }}
     >
-      <div style={{ display: 'grid', gap: 10, minWidth: 0, maxWidth: '100%' }}>
+      <div style={{ display: 'grid', gap: 10, minWidth: 0, maxWidth: '100%', overflow: 'hidden' }}>
         <div
           style={{
             padding: 10,
@@ -680,7 +680,10 @@ export default function ScanResultsPanel({
                 </button>
                 <button
                   type="button"
-                  onClick={() => setToolsTab('batch')}
+                  onClick={() => {
+                    setToolsTab('batch');
+                    setBatchSubTab('check');
+                  }}
                   style={toolsTabButtonStyle(toolsTab === 'batch')}
                 >
                   Batch
@@ -696,13 +699,13 @@ export default function ScanResultsPanel({
 
               {toolsTab === 'batch' ? (
                 <div style={{ display: 'grid', gap: 8, minWidth: 0 }}>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, minWidth: 0 }}>
+                  <div style={{ display: 'flex', flexWrap: 'nowrap', gap: 6, minWidth: 0, maxWidth: '100%' }}>
                     <button
                       type="button"
-                      onClick={() => onOpenBatchCheck?.()}
+                      onClick={() => setBatchSubTab('check')}
                       style={{
-                        ...toolsTabButtonStyle(batchCheckOpen),
-                        flex: '1 1 auto',
+                        ...toolsTabButtonStyle(batchSubTab === 'check'),
+                        flex: '1 1 0',
                         minWidth: 0,
                       }}
                     >
@@ -710,20 +713,20 @@ export default function ScanResultsPanel({
                     </button>
                     <button
                       type="button"
-                      onClick={() => onOpenBatchExport?.()}
+                      onClick={() => setBatchSubTab('export')}
                       style={{
-                        ...toolsTabButtonStyle(batchExportOpen),
-                        flex: '1 1 auto',
+                        ...toolsTabButtonStyle(batchSubTab === 'export'),
+                        flex: '1 1 0',
                         minWidth: 0,
                       }}
                     >
                       Batch Export
                     </button>
                   </div>
-                  {batchCheckOpen && onLoadFileFromBatch ? (
+                  {batchSubTab === 'check' && onLoadFileFromBatch ? (
                     <BatchPODChecker onOpenInChecker={onLoadFileFromBatch} />
                   ) : null}
-                  {batchExportOpen && onDownloadBatchExportZip ? (
+                  {batchSubTab === 'export' && onDownloadBatchExportZip ? (
                     <BatchExportQueue onDownloadBatchZip={onDownloadBatchExportZip} />
                   ) : null}
                   {uploadNotesPanel}
@@ -746,7 +749,7 @@ export default function ScanResultsPanel({
             <div
               style={{
                 display: 'flex',
-                flexWrap: 'wrap',
+                flexWrap: 'nowrap',
                 gap: 4,
                 alignItems: 'center',
                 minWidth: 0,
@@ -761,10 +764,10 @@ export default function ScanResultsPanel({
                     setActionMessage(`Inspect Zoom set to ${z * 100}%.`);
                   }}
                   style={{
-                    padding: '6px 4px',
+                    padding: '6px 2px',
                     minWidth: 0,
                     flex: '1 1 0',
-                    fontSize: 11,
+                    fontSize: 10,
                     fontWeight: inspectZoom === z ? 800 : 600,
                     outline: inspectZoom === z ? '2px solid #38bdf8' : undefined,
                   }}
@@ -773,6 +776,7 @@ export default function ScanResultsPanel({
                   {z * 100}%
                 </button>
               ))}
+            </div>
             </div>
           </div>
         </div>
@@ -917,7 +921,6 @@ export default function ScanResultsPanel({
             </button>
           ) : null}
         </div>
-      </div>
       </div>
 
       {img ? (

@@ -137,18 +137,9 @@ async function loadBatchExportItem(file: File): Promise<Omit<BatchExportItem, 'i
   });
 }
 
-const DEFAULT_SIZE_SELECTIONS: Record<string, boolean> = {
-  standard: true,
-  redbubble: false,
-  printful: false,
-  teepublic: false,
-  square: false,
-  sticker: false,
-  poster: false,
-  mug: false,
-  'tote-bag': false,
-  'phone-case': false,
-};
+const DEFAULT_SIZE_SELECTIONS: Record<string, boolean> = Object.fromEntries(
+  BATCH_MULTI_EXPORT_SIZE_OPTIONS.map((option) => [option.id, false]),
+);
 
 export default function BatchExportQueue({ onDownloadBatchZip, aboveFileControls }: BatchExportQueueProps) {
   const inputRef = useRef<HTMLInputElement>(null);
