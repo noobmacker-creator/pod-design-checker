@@ -1210,23 +1210,36 @@ export default function IssueBucketsPanel({
     (id) => !isPlatformTarget(uploadTarget) || id !== uploadTarget
   );
 
+  const directChildStyle: React.CSSProperties = {
+    width: '100%',
+    maxWidth: '100%',
+    minWidth: 0,
+    boxSizing: 'border-box',
+  };
+
   return (
     <div
       data-tour="export"
       style={{
         border: '1px solid rgba(255,255,255,0.08)',
         borderRadius: 20,
-        padding: 16,
+        padding: 12,
         background: 'rgba(255,255,255,0.04)',
-        boxShadow: '0 25px 70px rgba(0,0,0,0.35)',
+        boxShadow: '0 8px 24px rgba(0,0,0,0.18)',
+        display: 'grid',
+        gridAutoRows: 'max-content',
+        alignContent: 'start',
+        gap: 10,
         minWidth: 0,
         maxWidth: '100%',
+        width: '100%',
+        height: '100%',
+        minHeight: '100%',
         boxSizing: 'border-box',
         overflowX: 'hidden',
-        alignSelf: 'start',
       }}
     >
-      <div style={{ marginBottom: 12 }}>
+      <div style={directChildStyle}>
         <div style={{ margin: 0, fontSize: 20, fontWeight: 800 }}>Export & Download</div>
         <div style={{ marginTop: 4, color: '#cbd5e1', fontSize: 13, lineHeight: 1.4 }}>
           Choose a platform preset or download the standard apparel PNG.
@@ -1234,7 +1247,7 @@ export default function IssueBucketsPanel({
       </div>
       <div
         style={{
-          marginBottom: 12,
+          ...directChildStyle,
           fontSize: 12,
           color: img ? '#86efac' : '#facc15',
           fontWeight: 800,
@@ -1251,7 +1264,7 @@ export default function IssueBucketsPanel({
           ? 'Ready to export. Choose a size, then press the blue download button.'
           : 'Upload a design to enable downloads.'}
       </div>
-      <div style={{ marginBottom: 10, display: 'grid', gap: 10 }}>
+      <div style={{ ...directChildStyle, display: 'grid', gap: 10 }}>
         <div style={modeSectionStyle}>
           <div style={{ display: 'grid', gap: 4 }}>
             <div style={{ fontSize: 14, fontWeight: 800, color: '#e2e8f0' }}>1. PREPARE FOR PRINT</div>
@@ -1295,7 +1308,7 @@ export default function IssueBucketsPanel({
 
       </div>
 
-      <div style={{ marginBottom: 14, display: 'grid', gap: 10 }} data-tour="download">
+      <div style={{ ...directChildStyle, display: 'grid', gap: 10 }} data-tour="download">
         <div style={exportDownloadSectionStyle}>
           <div style={{ display: 'grid', gap: 4 }}>
             <div style={{ fontSize: 14, fontWeight: 800, color: '#e2e8f0' }}>2. EXPORT & DOWNLOAD</div>

@@ -601,6 +601,13 @@ export default function ScanResultsPanel({
     overflow: 'hidden',
   };
 
+  const directChildStyle: React.CSSProperties = {
+    width: '100%',
+    maxWidth: '100%',
+    minWidth: 0,
+    boxSizing: 'border-box',
+  };
+
   return (
     <div
       style={{
@@ -610,18 +617,21 @@ export default function ScanResultsPanel({
         background: 'rgba(255,255,255,0.04)',
         boxShadow: '0 8px 24px rgba(0,0,0,0.18)',
         display: 'grid',
-        gap: 14,
+        gridAutoRows: 'max-content',
+        alignContent: 'start',
+        gap: 10,
         width: '100%',
         maxWidth: '100%',
         minWidth: 0,
+        height: '100%',
+        minHeight: '100%',
         boxSizing: 'border-box',
         overflowX: 'hidden',
         wordBreak: 'break-word',
         overflowWrap: 'anywhere',
-        alignSelf: 'stretch',
       }}
     >
-      <div style={{ display: 'grid', gap: 10, minWidth: 0, maxWidth: '100%', overflow: 'hidden' }}>
+      <div style={{ ...directChildStyle, display: 'grid', gap: 10, overflow: 'hidden' }}>
         <div
           style={{
             padding: 10,
@@ -782,7 +792,7 @@ export default function ScanResultsPanel({
         </div>
       </div>
 
-      <div style={{ display: 'grid', gap: 10 }} data-tour="upload">
+      <div style={{ ...directChildStyle, display: 'grid', gap: 10 }} data-tour="upload">
         <label
           htmlFor="design-upload"
           style={{
@@ -924,7 +934,7 @@ export default function ScanResultsPanel({
       </div>
 
       {img ? (
-      <div style={{ display: 'grid', gap: 8, minWidth: 0, maxWidth: '100%' }} data-tour="scan-results">
+      <div style={{ ...directChildStyle, display: 'grid', gap: 8 }} data-tour="scan-results">
         <h2 style={{ margin: 0, fontSize: 16, fontWeight: 800, letterSpacing: '0.04em' }}>SCAN REPORT</h2>
         <div
           style={{
