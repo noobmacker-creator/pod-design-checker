@@ -420,7 +420,7 @@ export default function ScanResultsPanel({
     : 'No major issue found.';
 
   const shortActionByIssue: Record<string, string> = {
-    'Solid Background Box Risk': 'Fix source file',
+    'Solid Background Box Risk': 'Remove the solid background or upload a transparent PNG.',
     'White Background Risk': 'Use transparent PNG',
     'Fake Transparency Background': 'Fix fake transparency',
     'File Type Risk': 'Use PNG source file',
@@ -613,10 +613,12 @@ export default function ScanResultsPanel({
         width: '100%',
         maxWidth: '100%',
         minWidth: 0,
+        height: '100%',
         boxSizing: 'border-box',
         overflowX: 'hidden',
         wordBreak: 'break-word',
         overflowWrap: 'anywhere',
+        alignSelf: 'stretch',
       }}
     >
       <div style={{ display: 'grid', gap: 10, minWidth: 0, maxWidth: '100%' }}>
@@ -955,15 +957,21 @@ export default function ScanResultsPanel({
                 <strong style={{ color: '#e2e8f0' }}>{displayScore}%</strong>
               </div>
             ) : null}
-            {warningActive.length > 0 ? (
+            {criticalActive.length > 0 ? (
+              <div style={{ color: '#f9a8d4', fontWeight: 700 }}>
+                {criticalActive.length === 1
+                  ? '1 critical issue found'
+                  : `${criticalActive.length} critical issues found`}
+              </div>
+            ) : warningActive.length > 0 ? (
               <div style={{ color: '#fde68a', fontWeight: 700 }}>
                 {warningActive.length === 1
                   ? '1 item needs review'
                   : `${warningActive.length} items need review`}
               </div>
-            ) : criticalActive.length === 0 && warningActive.length === 0 ? (
+            ) : (
               <div style={{ color: '#86efac', fontWeight: 700 }}>No issues need review</div>
-            ) : null}
+            )}
           </div>
 
           {autoFixApplied ? (
