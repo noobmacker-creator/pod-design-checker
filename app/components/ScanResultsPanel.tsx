@@ -230,6 +230,19 @@ export default function ScanResultsPanel({
     textAlign: 'center',
   });
 
+  const whatsNewLinkStyle: React.CSSProperties = {
+    padding: 0,
+    border: 'none',
+    background: 'transparent',
+    color: '#94a3b8',
+    fontSize: 11,
+    fontWeight: 700,
+    cursor: 'pointer',
+    textAlign: 'left',
+    textDecoration: 'underline',
+    textUnderlineOffset: 2,
+  };
+
   const tutorialTextButtonStyle: React.CSSProperties = {
     padding: '4px 8px',
     borderRadius: 8,
@@ -455,7 +468,7 @@ export default function ScanResultsPanel({
   const displayScore =
     img && criticalActive.length === 0 && warningActive.length === 0 ? 100 : printScore;
 
-  const uploadNotesPanel = toolsTab === 'notes' ? (
+  const uploadNotesPanel = (
     <PODUploadNotes
       file={file}
       img={img}
@@ -471,7 +484,7 @@ export default function ScanResultsPanel({
       displayScore={displayScore}
       scanStatus={riskLabel}
     />
-  ) : null;
+  );
 
   return (
     <div
@@ -664,24 +677,30 @@ export default function ScanResultsPanel({
                   Tutorial
                 </button>
               </div>
-              <div style={{ display: 'flex', gap: 6, minWidth: 0, maxWidth: '100%' }}>
-                {(
-                  [
-                    ['export', 'Export'],
-                    ['batch', 'Batch'],
-                    ['notes', 'Notes'],
-                  ] as const
-                ).map(([tab, label]) => (
-                  <button
-                    key={tab}
-                    type="button"
-                    onClick={() => setToolsTab(tab)}
-                    style={toolsTabButtonStyle(toolsTab === tab)}
-                  >
-                    {label}
-                  </button>
-                ))}
+              <div style={{ display: 'flex', gap: 8, minWidth: 0, maxWidth: '100%' }}>
+                <button
+                  type="button"
+                  onClick={() => setToolsTab('export')}
+                  style={toolsTabButtonStyle(toolsTab === 'export')}
+                >
+                  Single Design
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setToolsTab('batch')}
+                  style={toolsTabButtonStyle(toolsTab === 'batch')}
+                >
+                  Batch
+                </button>
               </div>
+
+              <button
+                type="button"
+                onClick={() => setToolsTab('notes')}
+                style={whatsNewLinkStyle}
+              >
+                What&apos;s New
+              </button>
 
               {toolsTab === 'batch' ? (
                 <div style={{ display: 'grid', gap: 8, minWidth: 0 }}>
@@ -719,24 +738,6 @@ export default function ScanResultsPanel({
               ) : null}
 
               {toolsTab === 'notes' ? uploadNotesPanel : null}
-
-              <details>
-                <summary
-                  style={{
-                    cursor: 'pointer',
-                    fontSize: 11,
-                    fontWeight: 800,
-                    color: '#94a3b8',
-                    padding: '2px 0',
-                    listStyle: 'none',
-                  }}
-                >
-                  More Tools
-                </summary>
-                <div style={{ marginTop: 6, fontSize: 11, color: '#64748b', lineHeight: 1.4 }}>
-                  Custom Size, Product Presets, and Export Pack ZIP are in Export &amp; Download on the right.
-                </div>
-              </details>
             </div>
 
             <div
