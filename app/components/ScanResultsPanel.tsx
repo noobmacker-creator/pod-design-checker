@@ -54,9 +54,7 @@ type ScanResultsPanelProps = {
   batchExportOpen?: boolean;
   onDownloadBatchExportZip?: (
     files: File[],
-    exportLabel: string,
-    width: number,
-    height: number,
+    sizes: { label: string; width: number; height: number; folderSlug: string }[],
     onProgress: (message: string) => void,
   ) => Promise<void>;
   uploadTarget?: 'standard' | 'redbubble' | 'printful' | 'teepublic' | 'custom' | 'presets';
@@ -212,7 +210,8 @@ export default function ScanResultsPanel({
   onDownloadBatchExportZip,
   uploadTarget = 'standard',
 }: ScanResultsPanelProps) {
-  const [toolsTab, setToolsTab] = useState<'export' | 'batch' | 'notes'>('export');
+  const [toolsTab, setToolsTab] = useState<'export' | 'batch'>('export');
+  const [whatsNewOpen, setWhatsNewOpen] = useState(false);
 
   const toolsTabButtonStyle = (active: boolean): React.CSSProperties => ({
     flex: '1 1 0',
@@ -238,21 +237,18 @@ export default function ScanResultsPanel({
     fontSize: 11,
     fontWeight: 700,
     cursor: 'pointer',
-    textAlign: 'left',
     textDecoration: 'underline',
     textUnderlineOffset: 2,
   };
 
-  const tutorialTextButtonStyle: React.CSSProperties = {
-    padding: '4px 8px',
-    borderRadius: 8,
+  const secondaryLinkRowStyle: React.CSSProperties = {
+    display: 'flex',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
     fontSize: 11,
-    fontWeight: 700,
-    background: 'transparent',
-    color: '#93c5fd',
-    border: '1px solid rgba(147, 197, 253, 0.35)',
-    cursor: 'pointer',
-    flexShrink: 0,
+    color: '#64748b',
   };
   // Auto Fix detection: once Auto Fix has run, the placement/size issues it resolves
   // should disappear from the active scan report AND from the Result Summary, instead
@@ -486,12 +482,113 @@ export default function ScanResultsPanel({
     />
   );
 
+  const fixedDownloaded = downloadMessage.includes('Download ready');
+  const scanCompleted = Boolean(img) && checks.length > 0;
+  const autoFixNeeded = checks.some(
+    (item) => isAutoFixableLabel(item.label) && (item.status === 'fail' || item.status === 'warn'),
+  );
+  const hasWarnings = warningActive.length > 0;
+  const noFailRemain = criticalActive.length === 0;
+
+  let finalUploadLabel: string;
+  let finalUploadColor: string;
+  let finalUploadBg: string;
+  let finalUploadMsg: string;
+  if (!img || !noFailRemain) {
+    finalUploadLabel = 'NOT READY';
+    finalUploadColor = '#fca5a5';
+    finalUploadBg = 'rgba(127,29,29,0.45)';
+    finalUploadMsg = 'Fix the main issue before uploading.';
+  } else if (hasWarnings) {
+    finalUploadLabel = 'READY WITH NOTES';
+    finalUploadColor = '#fde68a';
+    finalUploadBg = 'rgba(120,53,15,0.45)';
+    finalUploadMsg = 'Your design may be usable, but review the notes before uploading.';
+  } else if (fixedDownloaded) {
+    finalUploadLabel = 'READY TO UPLOAD';
+    finalUploadColor = '#86efac';
+    finalUploadBg = 'rgba(20,83,45,0.55)';
+    finalUploadMsg = 'Your fixed PNG is ready for POD upload.';
+  } else {
+    finalUploadLabel = 'READY TO DOWNLOAD';
+    finalUploadColor = '#7dd3fc';
+    finalUploadBg = 'rgba(7,89,133,0.50)';
+    finalUploadMsg = 'No critical issues remain. Download the fixed PNG before uploading.';
+  }
+
+  const finalUploadChecklist = [
+    { label: img ? 'Design uploaded' : 'Upload a design', status: img ? 'pass' : 'fail' },
+    {
+      label: scanCompleted ? 'Scan completed' : 'Scan not completed',
+      status: scanCompleted ? 'pass' : 'fail',
+    },
+    {
+      label: noFailRemain ? 'Main issue reviewed' : 'Fix main issue first',
+      status: noFailRemain ? 'pass' : 'fail',
+    },
+    {
+      label: autoFixApplied
+        ? 'Auto Fix applied'
+        : autoFixNeeded
+        ? 'Run Auto Fix if needed'
+        : 'Auto Fix not needed',
+      status: autoFixApplied ? 'pass' : autoFixNeeded ? 'warn' : 'pass',
+    },
+    {
+      label: hasWarnings ? 'Review remaining warnings' : 'No warnings remaining',
+      status: hasWarnings ? 'warn' : 'pass',
+    },
+    {
+      label: fixedDownloaded
+        ? 'Fixed PNG downloaded'
+        : img && noFailRemain && !hasWarnings
+        ? 'Next: Download fixed PNG'
+        : 'Download fixed PNG before upload',
+      status: fixedDownloaded
+        ? 'pass'
+        : img && noFailRemain && !hasWarnings
+        ? 'next'
+        : img
+        ? 'warn'
+        : 'fail',
+    },
+  ];
+
+  const checklistMark = (s: string) =>
+    s === 'pass' ? '✓' : s === 'next' ? '→' : s === 'warn' ? '⚠' : '✕';
+  const checklistMarkColor = (s: string) =>
+    s === 'pass' ? '#86efac' : s === 'next' ? '#7dd3fc' : s === 'warn' ? '#fde68a' : '#fca5a5';
+
+  const showAutoFixButton =
+    Boolean(img) &&
+    [
+      'Design Too Small',
+      'Print Safety Border',
+      'Off-Center Design',
+      'Empty Padding Risk',
+      'Uneven Padding Risk',
+      'Artwork Near Canvas Edge',
+      'Cut-Off Edge Risk',
+    ].includes(mainIssue);
+
+  const compactRowStyle: React.CSSProperties = {
+    padding: '8px 10px',
+    borderRadius: 10,
+    background: 'rgba(15,23,42,0.68)',
+    border: '1px solid rgba(255,255,255,0.10)',
+    fontSize: 13,
+    lineHeight: 1.45,
+    minWidth: 0,
+    maxWidth: '100%',
+    overflow: 'hidden',
+  };
+
   return (
     <div
       style={{
         border: '1px solid rgba(255,255,255,0.08)',
         borderRadius: 20,
-        padding: 16,
+        padding: 12,
         background: 'rgba(255,255,255,0.04)',
         boxShadow: '0 8px 24px rgba(0,0,0,0.18)',
         alignSelf: 'start',
@@ -509,7 +606,7 @@ export default function ScanResultsPanel({
       <div style={{ display: 'grid', gap: 10, minWidth: 0, maxWidth: '100%' }}>
         <div
           style={{
-            padding: 12,
+            padding: 10,
             borderRadius: 16,
             background: 'rgba(15,23,42,0.72)',
             border: '1px solid rgba(255,255,255,0.08)',
@@ -520,134 +617,12 @@ export default function ScanResultsPanel({
             overflow: 'hidden',
           }}
         >
-          <div style={{ display: 'grid', gap: 8, minWidth: 0, maxWidth: '100%' }}>
-            <div
-              style={{
-                position: 'sticky',
-                top: 0,
-                zIndex: 2,
-                display: 'grid',
-                gap: 8,
-                paddingBottom: 8,
-                marginBottom: 2,
-                background: 'rgba(15, 23, 42, 0.97)',
-                borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
-                minWidth: 0,
-                maxWidth: '100%',
-              }}
-            >
-              <div style={{ fontSize: 20, fontWeight: 800, lineHeight: 1.1 }}>
-                POD Design Checker™
-              </div>
-              <div style={{ color: '#cbd5e1', fontSize: 13 }}>
-                Print On Demand Checker
-              </div>
-              <div
-                data-tour="support"
-                style={{
-                  padding: 10,
-                  borderRadius: 12,
-                  background: 'rgba(2,132,199,0.12)',
-                  border: '1px solid rgba(125,211,252,0.35)',
-                }}
-              >
-                <a
-                  href="https://buymeacoffee.com/poddesignchecker"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.boxShadow = '0 0 0 2px rgba(186,230,253,0.3), 0 0 16px rgba(56,189,248,0.35)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.boxShadow = '0 0 0 2px rgba(186,230,253,0.22), 0 0 12px rgba(56,189,248,0.25)';
-                  }}
-                  style={{
-                    display: 'inline-block',
-                    padding: '8px 12px',
-                    borderRadius: 10,
-                    background: '#0284c7',
-                    color: '#ffffff',
-                    fontSize: 13,
-                    fontWeight: 700,
-                    textDecoration: 'none',
-                    border: '1px solid rgba(255,255,255,0.2)',
-                    boxShadow: '0 0 0 2px rgba(186,230,253,0.22), 0 0 12px rgba(56,189,248,0.25)',
-                    transition: 'box-shadow 180ms ease',
-                  }}
-                >
-                  Support POD Checker
-                </a>
-                <div style={{ marginTop: 6, color: '#cbd5e1', fontSize: 12, lineHeight: 1.4 }}>
-                  Support POD Checker to help it grow and improve.
-                </div>
-              </div>
-              <details
-                style={{
-                  padding: 10,
-                  borderRadius: 12,
-                  background: 'rgba(15, 23, 42, 0.55)',
-                  border: '1px solid rgba(148, 163, 184, 0.22)',
-                }}
-              >
-                <summary
-                  style={{
-                    cursor: 'pointer',
-                    fontWeight: 800,
-                    fontSize: 13,
-                    color: '#e2e8f0',
-                    listStyle: 'none',
-                  }}
-                >
-                  {podCheckerV4Notes.title}
-                </summary>
-                <div
-                  style={{
-                    marginTop: 8,
-                    display: 'grid',
-                    gap: 8,
-                    color: '#cbd5e1',
-                    fontSize: 12,
-                    lineHeight: 1.45,
-                  }}
-                >
-                  {podCheckerV4Notes.paragraphs.map((paragraph) => (
-                    <p key={paragraph} style={{ margin: 0 }}>
-                      {paragraph}
-                    </p>
-                  ))}
-                  <a
-                    href={podCheckerV4Notes.supportUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                      display: 'inline-block',
-                      marginTop: 2,
-                      color: '#7dd3fc',
-                      fontWeight: 700,
-                      fontSize: 12,
-                      textDecoration: 'none',
-                    }}
-                  >
-                    {podCheckerV4Notes.supportLabel}
-                  </a>
-                </div>
-              </details>
+          <div style={{ display: 'grid', gap: 6, minWidth: 0, maxWidth: '100%' }}>
+            <div style={{ fontSize: 20, fontWeight: 800, lineHeight: 1.1 }}>
+              POD Design Checker™
             </div>
-
-            <div
-              style={{
-                padding: 10,
-                borderRadius: 12,
-                background: 'rgba(37, 99, 235, 0.08)',
-                border: '1px solid rgba(147, 197, 253, 0.22)',
-                display: 'grid',
-                gap: 4,
-              }}
-            >
-              <div style={{ fontWeight: 800, fontSize: 12, color: '#93c5fd' }}>Start Here</div>
-              <div style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.45 }}>
-                Upload your design, check the main issue, fix what matters, then export your PNG or ZIP.
-              </div>
+            <div style={{ color: '#cbd5e1', fontSize: 13, lineHeight: 1.35 }}>
+              Check, fix and prepare your design for POD.
             </div>
 
             <div
@@ -673,7 +648,7 @@ export default function ScanResultsPanel({
                 }}
               >
                 <div style={{ fontWeight: 800, fontSize: 12, color: '#93c5fd' }}>Tools</div>
-                <button type="button" onClick={() => onOpenTutorial?.()} style={tutorialTextButtonStyle}>
+                <button type="button" onClick={() => onOpenTutorial?.()} style={whatsNewLinkStyle}>
                   Tutorial
                 </button>
               </div>
@@ -693,11 +668,10 @@ export default function ScanResultsPanel({
                   Batch
                 </button>
               </div>
-
               <button
                 type="button"
-                onClick={() => setToolsTab('notes')}
-                style={whatsNewLinkStyle}
+                onClick={() => setWhatsNewOpen((open) => !open)}
+                style={{ ...whatsNewLinkStyle, justifySelf: 'start' }}
               >
                 What&apos;s New
               </button>
@@ -734,10 +708,9 @@ export default function ScanResultsPanel({
                   {batchExportOpen && onDownloadBatchExportZip ? (
                     <BatchExportQueue onDownloadBatchZip={onDownloadBatchExportZip} />
                   ) : null}
+                  {uploadNotesPanel}
                 </div>
               ) : null}
-
-              {toolsTab === 'notes' ? uploadNotesPanel : null}
             </div>
 
             <div
@@ -816,29 +789,73 @@ export default function ScanResultsPanel({
           style={{ display: 'none' }}
         />
 
+        <div style={secondaryLinkRowStyle}>
+          <button type="button" onClick={() => onOpenTutorial?.()} style={whatsNewLinkStyle}>
+            Tutorial
+          </button>
+          <span aria-hidden="true">•</span>
+          <button
+            type="button"
+            onClick={() => setWhatsNewOpen((open) => !open)}
+            style={whatsNewLinkStyle}
+          >
+            What&apos;s New
+          </button>
+          <span aria-hidden="true">•</span>
+          <a
+            href={podCheckerV4Notes.supportUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            data-tour="support"
+            style={{ ...whatsNewLinkStyle, textDecoration: 'underline' }}
+          >
+            Support
+          </a>
+        </div>
+
+        {whatsNewOpen ? (
+          <div
+            style={{
+              padding: '8px 10px',
+              borderRadius: 10,
+              background: 'rgba(15, 23, 42, 0.55)',
+              border: '1px solid rgba(148, 163, 184, 0.22)',
+              display: 'grid',
+              gap: 6,
+              color: '#cbd5e1',
+              fontSize: 11,
+              lineHeight: 1.45,
+            }}
+          >
+            {podCheckerV4Notes.paragraphs.map((paragraph) => (
+              <p key={paragraph} style={{ margin: 0 }}>
+                {paragraph.replace(/\bV4\b/g, '').replace(/  +/g, ' ').trim()}
+              </p>
+            ))}
+          </div>
+        ) : null}
+
         {!file ? (
           <div
             style={{
-              padding: '10px 12px',
-              borderRadius: 12,
-              background: 'rgba(15,23,42,0.62)',
-              border: '1px solid rgba(255,255,255,0.08)',
-              color: '#cbd5e1',
-              fontSize: 12,
-              lineHeight: 1.45,
+              padding: '9px 11px',
+              borderRadius: 10,
+              background: 'rgba(37, 99, 235, 0.12)',
+              border: '1px solid rgba(147, 197, 253, 0.25)',
               display: 'grid',
               gap: 4,
             }}
           >
-            <div>Upload a PNG design to begin.</div>
-            <div>Transparent PNG recommended for POD.</div>
-            <div style={{ color: '#94a3b8', fontSize: 11 }}>
-              JPG/WebP can be checked, but PNG is best for final upload.
+            <div style={{ color: '#e0f2fe', fontSize: 12, fontWeight: 700, lineHeight: 1.35 }}>
+              Upload a PNG design to begin.
+            </div>
+            <div style={{ color: '#94a3b8', fontSize: 11, lineHeight: 1.35 }}>
+              Transparent PNG recommended for best POD results.
             </div>
           </div>
         ) : null}
 
-        <div style={{ display: 'grid', gap: 8, minWidth: 0 }}>
+        <div style={{ display: 'grid', gap: 8, minWidth: 0, maxWidth: '100%' }}>
           {file ? (
             <div
               style={{
@@ -854,30 +871,11 @@ export default function ScanResultsPanel({
                 overflow: 'hidden',
                 whiteSpace: 'nowrap',
                 textOverflow: 'ellipsis',
+                minWidth: 0,
               }}
               title={file.name}
             >
               {file.name}
-            </div>
-          ) : null}
-
-          {downloadMessage ? (
-            <div
-              style={{
-                padding: '6px 10px',
-                borderRadius: 12,
-                background: 'rgba(8,47,73,0.72)',
-                border: '1px solid rgba(56,189,248,0.25)',
-                color: '#7dd3fc',
-                fontSize: 12,
-                fontWeight: 700,
-                width: '100%',
-                boxSizing: 'border-box',
-                wordBreak: 'break-word',
-                overflowWrap: 'anywhere',
-              }}
-            >
-              {downloadMessage}
             </div>
           ) : null}
 
@@ -894,6 +892,7 @@ export default function ScanResultsPanel({
                 fontWeight: 700,
                 border: '1px solid rgba(255,255,255,0.2)',
                 cursor: 'pointer',
+                maxWidth: '100%',
               }}
             >
               Check Another Design
@@ -903,130 +902,71 @@ export default function ScanResultsPanel({
       </div>
       </div>
 
-      <div style={{ display: 'grid', gap: 8 }} data-tour="scan-results">
-        <h2 style={{ margin: 0, fontSize: 20, fontWeight: 800 }}>Scan Report</h2>
-      <div
-        style={{
-          padding: 14,
-          borderRadius: 16,
-          background: 'rgba(2,6,23,0.92)',
-          border: '1px solid rgba(56,189,248,0.28)',
-        }}
-      >
+      {img ? (
+      <div style={{ display: 'grid', gap: 8, minWidth: 0, maxWidth: '100%' }} data-tour="scan-results">
+        <h2 style={{ margin: 0, fontSize: 16, fontWeight: 800, letterSpacing: '0.04em' }}>SCAN REPORT</h2>
         <div
           style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            gap: 10,
-            marginBottom: 10,
-            flexWrap: 'wrap',
+            padding: 12,
+            borderRadius: 14,
+            background: 'rgba(2,6,23,0.92)',
+            border: '1px solid rgba(56,189,248,0.28)',
+            display: 'grid',
+            gap: 8,
+            minWidth: 0,
+            maxWidth: '100%',
           }}
         >
-          <div style={{ fontSize: 13, color: '#ffffff', fontWeight: 800, letterSpacing: 0.4 }}>
-            PRINT READINESS
-          </div>
-
           <div
             style={{
-              padding: '6px 10px',
+              display: 'inline-flex',
+              alignSelf: 'start',
+              padding: '5px 10px',
               borderRadius: 999,
-              fontSize: 12,
+              fontSize: 11,
               fontWeight: 800,
               background: riskBg,
+              letterSpacing: '0.03em',
             }}
           >
             {riskLabel}
           </div>
-        </div>
 
-        <div
-          style={{
-            fontSize: 36,
-            fontWeight: 800,
-            color:
-              displayScore >= 80 ? '#22c55e' : displayScore >= 50 ? '#f59e0b' : '#ef4444',
-            lineHeight: 1,
-            marginBottom: 10,
-          }}
-        >
-          {displayScore}%
-        </div>
-
-        <div
-          style={{
-            width: '100%',
-            height: 14,
-            borderRadius: 999,
-            background: 'rgba(15,23,42,0.85)',
-            overflow: 'hidden',
-            border: '1px solid rgba(255,255,255,0.08)',
-            marginBottom: 12,
-          }}
-        >
-          <div
-            style={{
-              width: `${displayScore}%`,
-              height: '100%',
-              borderRadius: 999,
-              background:
-                displayScore >= 80 ? '#22c55e' : displayScore >= 50 ? '#f59e0b' : '#ef4444',
-              transition: 'width 0.5s ease',
-            }}
-          />
-        </div>
-
-        <div
-          style={{
-            padding: '10px 12px',
-            borderRadius: 12,
-            background: 'rgba(15,23,42,0.68)',
-            border: '1px solid rgba(255,255,255,0.10)',
-            fontSize: 14,
-            lineHeight: 1.45,
-            display: 'grid',
-            gap: 8,
-          }}
-        >
-          {autoFixApplied ? (
+          <div style={{ display: 'grid', gap: 2, fontSize: 12, color: '#cbd5e1', lineHeight: 1.4 }}>
             <div>
-              <span style={{ fontWeight: 800 }}>Status:</span> {getAutoFixAppliedText()}
+              <span style={{ color: '#94a3b8' }}>Print Confidence:</span>{' '}
+              <strong style={{ color: '#e2e8f0' }}>{displayScore}%</strong>
             </div>
-          ) : null}
-          <div>
-            <span style={{ fontWeight: 800 }}>Main Issue:</span> {mainIssue}
-          </div>
-        </div>
-
-        <div style={{ display: 'grid', gap: 8 }} data-tour="autofix">
-          <div
-            style={{
-              padding: '10px 12px',
-              borderRadius: 12,
-              background: 'rgba(15,23,42,0.68)',
-              border: '1px solid rgba(255,255,255,0.10)',
-              fontSize: 14,
-              lineHeight: 1.45,
-            }}
-          >
-            <span style={{ fontWeight: 800 }}>Current Action:</span> {currentAction}
-            {currentActionHelper ? (
-              <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 6, fontWeight: 500 }}>
-                {currentActionHelper}
+            {warningActive.length > 0 ? (
+              <div style={{ color: '#fde68a', fontWeight: 700 }}>
+                {warningActive.length === 1
+                  ? '1 item needs review'
+                  : `${warningActive.length} items need review`}
               </div>
             ) : null}
           </div>
 
-          {img &&
-          [
-            'Design Too Small',
-            'Print Safety Border',
-            'Off-Center Design',
-            'Empty Padding Risk',
-            'Uneven Padding Risk',
-            'Artwork Near Canvas Edge',
-            'Cut-Off Edge Risk',
-          ].includes(mainIssue) ? (
+          {autoFixApplied ? (
+            <div style={compactRowStyle}>
+              <span style={{ fontWeight: 800, color: '#93c5fd' }}>Status:</span>{' '}
+              {getAutoFixAppliedText()}
+            </div>
+          ) : null}
+
+          <div style={compactRowStyle}>
+            <div style={{ fontWeight: 800, color: '#93c5fd', marginBottom: 2 }}>Main Issue</div>
+            <div style={{ color: '#e5e7eb' }}>{mainIssue}</div>
+          </div>
+
+          <div style={compactRowStyle} data-tour="autofix">
+            <div style={{ fontWeight: 800, color: '#93c5fd', marginBottom: 2 }}>Next Action</div>
+            <div style={{ color: '#e5e7eb' }}>{currentAction}</div>
+            {currentActionHelper ? (
+              <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 4 }}>{currentActionHelper}</div>
+            ) : null}
+          </div>
+
+          {showAutoFixButton ? (
             <button
               type="button"
               onClick={() => {
@@ -1036,12 +976,13 @@ export default function ScanResultsPanel({
               style={{
                 width: '100%',
                 padding: '10px 14px',
-                borderRadius: 12,
+                borderRadius: 10,
                 background: '#2563eb',
                 color: '#ffffff',
-                fontSize: 14,
+                fontSize: 13,
                 fontWeight: 800,
                 cursor: 'pointer',
+                boxSizing: 'border-box',
               }}
             >
               Run Auto Fix
@@ -1049,394 +990,293 @@ export default function ScanResultsPanel({
           ) : null}
         </div>
 
-          {showManualFixCard ? (
-            <div
-              style={{
-                padding: '10px 12px',
-                borderRadius: 12,
-                background: 'rgba(120,53,15,0.45)',
-                border: '1px solid rgba(253,186,116,0.45)',
-                display: 'grid',
-                gap: 4,
-              }}
-            >
-              <div style={{ fontWeight: 800, color: '#fdba74', fontSize: 14 }}>Manual Fix Needed</div>
-              <div style={{ fontSize: 13, lineHeight: 1.45, color: '#fde68a' }}>{manualFixMessage}</div>
-            </div>
-          ) : null}
+        <details
+          style={{
+            padding: '8px 10px',
+            borderRadius: 10,
+            background: 'rgba(15,23,42,0.55)',
+            border: '1px solid rgba(148,163,184,0.22)',
+            minWidth: 0,
+            maxWidth: '100%',
+          }}
+        >
+          <summary style={{ cursor: 'pointer', fontWeight: 700, color: '#cbd5e1', fontSize: 12 }}>
+            View Details
+          </summary>
+          <div style={{ display: 'grid', gap: 10, marginTop: 10, minWidth: 0, maxWidth: '100%' }}>
+            {actionMessage ? (
+              <div style={{ ...compactRowStyle, fontSize: 12, color: '#bae6fd' }}>
+                <span style={{ fontWeight: 800 }}>Last Action:</span> {actionMessage}
+              </div>
+            ) : null}
 
-          {img && criticalActive.length === 0 && warningActive.length > 0 ? (
-            <div
-              style={{
-                padding: '10px 12px',
-                borderRadius: 12,
-                background: 'rgba(120,53,15,0.45)',
-                border: '1px solid rgba(253,186,116,0.45)',
-                fontSize: 13,
-                lineHeight: 1.45,
-                color: '#fde68a',
-                fontWeight: 700,
-              }}
-            >
-              You can download, but review the notes first.
-            </div>
-          ) : null}
+            {downloadMessage ? (
+              <div style={{ ...compactRowStyle, fontSize: 12, color: '#7dd3fc' }}>
+                <span style={{ fontWeight: 800 }}>Download:</span> {downloadMessage}
+              </div>
+            ) : null}
 
-          {img && autoFixApplied ? (
+            {showManualFixCard ? (
+              <div
+                style={{
+                  padding: '10px 12px',
+                  borderRadius: 10,
+                  background: 'rgba(120,53,15,0.45)',
+                  border: '1px solid rgba(253,186,116,0.45)',
+                  display: 'grid',
+                  gap: 4,
+                }}
+              >
+                <div style={{ fontWeight: 800, color: '#fdba74', fontSize: 13 }}>Manual Fix Needed</div>
+                <div style={{ fontSize: 12, lineHeight: 1.45, color: '#fde68a' }}>{manualFixMessage}</div>
+              </div>
+            ) : null}
+
+            {autoFixApplied ? (
+              <div
+                style={{
+                  padding: '10px 12px',
+                  borderRadius: 10,
+                  background: 'rgba(8,47,73,0.72)',
+                  border: '1px solid rgba(56,189,248,0.35)',
+                  display: 'grid',
+                  gap: 8,
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!img) return;
+                    handleDownloadFixedPng();
+                  }}
+                  style={{
+                    justifySelf: 'start',
+                    padding: '8px 14px',
+                    borderRadius: 10,
+                    background: '#0284c7',
+                    color: '#ffffff',
+                    fontSize: 13,
+                    fontWeight: 700,
+                    border: '1px solid rgba(255,255,255,0.2)',
+                    cursor: img ? 'pointer' : 'not-allowed',
+                  }}
+                >
+                  {getFixedDownloadButtonText()}
+                </button>
+                {uploadTarget === 'standard' ? (
+                  <div style={{ fontSize: 11, color: '#64748b', lineHeight: 1.4 }}>
+                    Exports as 4200 × 4800 transparent PNG.
+                  </div>
+                ) : null}
+                {autoFixHandledLabels.length > 0 ? (
+                  <div style={{ display: 'grid', gap: 4 }}>
+                    <div style={{ fontWeight: 800, color: '#7dd3fc', fontSize: 12 }}>Auto Fix handled:</div>
+                    {autoFixHandledLabels.map((label) => (
+                      <div key={`autofix-handled-${label}`} style={{ fontSize: 12, color: '#bae6fd' }}>
+                        ✓ {label}
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
+
             <div
               style={{
-                padding: '10px 12px',
+                padding: 12,
                 borderRadius: 12,
-                background: 'rgba(8,47,73,0.72)',
-                border: '1px solid rgba(56,189,248,0.35)',
+                background: 'rgba(2,6,23,0.92)',
+                border: '1px solid rgba(56,189,248,0.28)',
                 display: 'grid',
                 gap: 8,
               }}
             >
-              <button
-                type="button"
-                onClick={() => {
-                  if (!img) return;
-                  handleDownloadFixedPng();
-                }}
-                style={{
-                  justifySelf: 'start',
-                  padding: '8px 14px',
-                  borderRadius: 10,
-                  background: '#0284c7',
-                  color: '#ffffff',
-                  fontSize: 13,
-                  fontWeight: 700,
-                  border: '1px solid rgba(255,255,255,0.2)',
-                  cursor: img ? 'pointer' : 'not-allowed',
-                }}
-              >
-                {getFixedDownloadButtonText()}
-              </button>
-              {uploadTarget === 'standard' ? (
-                <div style={{ fontSize: 11, color: '#64748b', lineHeight: 1.4 }}>
-                  Exports as 4200 × 4800 transparent PNG.
-                </div>
-              ) : null}
-
-              {autoFixHandledLabels.length > 0 ? (
-                <div style={{ display: 'grid', gap: 4 }}>
-                  <div style={{ fontWeight: 800, color: '#7dd3fc', fontSize: 13 }}>Auto Fix handled:</div>
-                  {autoFixHandledLabels.map((label) => (
-                    <div key={`autofix-handled-${label}`} style={{ fontSize: 13, color: '#bae6fd' }}>
-                      ✓ {label}
-                    </div>
-                  ))}
-                </div>
-              ) : null}
-            </div>
-          ) : null}
-        </div>
-      </div>
-
-      {/* Final Upload Check: beginner-friendly readiness checklist using existing scan data. */}
-      {(() => {
-        const fixedDownloaded = downloadMessage.includes('Download ready');
-        const noFailRemain = criticalActive.length === 0;
-        const hasWarnings = warningActive.length > 0;
-        const scanCompleted = Boolean(img) && checks.length > 0;
-        const autoFixNeeded = checks.some(
-          (item) => isAutoFixableLabel(item.label) && (item.status === 'fail' || item.status === 'warn'),
-        );
-
-        let finalLabel: string;
-        let finalColor: string;
-        let finalBg: string;
-        let finalMsg: string;
-        if (!img || !noFailRemain) {
-          finalLabel = 'NOT READY';
-          finalColor = '#fca5a5';
-          finalBg = 'rgba(127,29,29,0.45)';
-          finalMsg = 'Fix the main issue before uploading.';
-        } else if (hasWarnings) {
-          finalLabel = 'READY WITH NOTES';
-          finalColor = '#fde68a';
-          finalBg = 'rgba(120,53,15,0.45)';
-          finalMsg = 'Your design may be usable, but review the notes before uploading.';
-        } else if (fixedDownloaded) {
-          finalLabel = 'READY TO UPLOAD';
-          finalColor = '#86efac';
-          finalBg = 'rgba(20,83,45,0.55)';
-          finalMsg = 'Your fixed PNG is ready for POD upload.';
-        } else {
-          finalLabel = 'READY TO DOWNLOAD';
-          finalColor = '#7dd3fc';
-          finalBg = 'rgba(7,89,133,0.50)';
-          finalMsg = 'No critical issues remain. Download the fixed PNG before uploading.';
-        }
-
-        const checklist = [
-          { label: img ? 'Design uploaded' : 'Upload a design', status: img ? 'pass' : 'fail' },
-          {
-            label: scanCompleted ? 'Scan completed' : 'Scan not completed',
-            status: scanCompleted ? 'pass' : 'fail',
-          },
-          {
-            label: noFailRemain ? 'Main issue reviewed' : 'Fix main issue first',
-            status: noFailRemain ? 'pass' : 'fail',
-          },
-          {
-            label: autoFixApplied
-              ? 'Auto Fix applied'
-              : autoFixNeeded
-              ? 'Run Auto Fix if needed'
-              : 'Auto Fix not needed',
-            status: autoFixApplied ? 'pass' : autoFixNeeded ? 'warn' : 'pass',
-          },
-          {
-            label: hasWarnings ? 'Review remaining warnings' : 'No warnings remaining',
-            status: hasWarnings ? 'warn' : 'pass',
-          },
-          {
-            label: fixedDownloaded
-              ? 'Fixed PNG downloaded'
-              : img && noFailRemain && !hasWarnings
-              ? 'Next: Download fixed PNG'
-              : 'Download fixed PNG before upload',
-            status: fixedDownloaded
-              ? 'pass'
-              : img && noFailRemain && !hasWarnings
-              ? 'next'
-              : img
-              ? 'warn'
-              : 'fail',
-          },
-        ];
-        const mark = (s: string) =>
-          s === 'pass' ? '✓' : s === 'next' ? '→' : s === 'warn' ? '⚠' : '✕';
-        const markColor = (s: string) =>
-          s === 'pass' ? '#86efac' : s === 'next' ? '#7dd3fc' : s === 'warn' ? '#fde68a' : '#fca5a5';
-
-        return (
-          <div
-            style={{
-              padding: 14,
-              borderRadius: 16,
-              background: 'rgba(2,6,23,0.92)',
-              border: '1px solid rgba(56,189,248,0.28)',
-              display: 'grid',
-              gap: 10,
-            }}
-          >
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                gap: 10,
-                flexWrap: 'wrap',
-              }}
-            >
-              <div style={{ fontSize: 13, color: '#ffffff', fontWeight: 800, letterSpacing: 0.4 }}>
-                FINAL UPLOAD CHECK
-              </div>
               <div
                 style={{
-                  padding: '6px 10px',
-                  borderRadius: 999,
-                  fontSize: 12,
-                  fontWeight: 800,
-                  color: finalColor,
-                  background: finalBg,
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  gap: 8,
+                  flexWrap: 'wrap',
                 }}
               >
-                {finalLabel}
-              </div>
-            </div>
-
-            <div style={{ fontSize: 13, lineHeight: 1.45, color: '#cbd5e1' }}>{finalMsg}</div>
-
-            <div style={{ display: 'grid', gap: 6 }}>
-              {checklist.map((c) => (
+                <div style={{ fontSize: 12, color: '#ffffff', fontWeight: 800 }}>FINAL UPLOAD CHECK</div>
                 <div
-                  key={`final-check-${c.label}`}
-                  style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13 }}
+                  style={{
+                    padding: '4px 8px',
+                    borderRadius: 999,
+                    fontSize: 11,
+                    fontWeight: 800,
+                    color: finalUploadColor,
+                    background: finalUploadBg,
+                  }}
                 >
-                  <span style={{ color: markColor(c.status), fontWeight: 800, width: 16 }}>
-                    {mark(c.status)}
-                  </span>
-                  <span style={{ color: '#e5e7eb' }}>{c.label}</span>
+                  {finalUploadLabel}
                 </div>
-              ))}
-            </div>
-          </div>
-        );
-      })()}
-
-      {criticalActive.length > 0 ? (
-        <div style={{ marginBottom: 18 }}>
-          <div style={{ color: '#94a3b8', fontSize: 12, marginBottom: 8 }}>Must fix before upload.</div>
-          <Section
-            title="Critical Issues"
-            items={criticalActive}
-            emptyText="No critical issues."
-            headingColor="#fca5a5"
-          />
-        </div>
-      ) : (
-        <div style={{ color: '#94a3b8', fontSize: 13 }}>No critical issues.</div>
-      )}
-
-      {warningActive.length > 0 ? (
-        <div style={{ marginBottom: 18 }}>
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              gap: 10,
-              marginBottom: 4,
-            }}
-          >
-            <div style={{ fontWeight: 800, color: '#fdba74' }}>Review Warnings</div>
-            <div style={{ color: '#cbd5e1', fontSize: 13, fontWeight: 700 }}>{warningActive.length}</div>
-          </div>
-          <div style={{ color: '#94a3b8', fontSize: 12, marginBottom: 8 }}>
-            Check these before upload, but they may not block the design.
-          </div>
-
-          <div style={{ display: 'grid', gap: 8 }}>
-            {warningActive.slice(0, 3).map((item, index) => (
-              <CheckCard key={`Warnings-${item.label}-${index}`} item={item} keyHint={`Warnings-${item.label}-${index}`} />
-            ))}
-          </div>
-
-          {warningActive.length > 3 ? (
-            <details
-              style={{
-                marginTop: 8,
-                padding: '8px 10px',
-                borderRadius: 10,
-                background: 'rgba(15,23,42,0.55)',
-                border: '1px solid rgba(253,186,116,0.25)',
-              }}
-            >
-              <summary style={{ cursor: 'pointer', fontWeight: 700, color: '#fdba74', fontSize: 13 }}>
-                Show More Warnings ({warningActive.length - 3})
-              </summary>
-              <div style={{ display: 'grid', gap: 8, marginTop: 10 }}>
-                {warningActive.slice(3).map((item, index) => (
-                  <CheckCard
-                    key={`Warnings-more-${item.label}-${index}`}
-                    item={item}
-                    keyHint={`Warnings-more-${item.label}-${index}`}
-                  />
+              </div>
+              <div style={{ fontSize: 12, lineHeight: 1.45, color: '#cbd5e1' }}>{finalUploadMsg}</div>
+              <div style={{ display: 'grid', gap: 5 }}>
+                {finalUploadChecklist.map((c) => (
+                  <div
+                    key={`final-check-${c.label}`}
+                    style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12 }}
+                  >
+                    <span style={{ color: checklistMarkColor(c.status), fontWeight: 800, width: 14 }}>
+                      {checklistMark(c.status)}
+                    </span>
+                    <span style={{ color: '#e5e7eb' }}>{c.label}</span>
+                  </div>
                 ))}
               </div>
-            </details>
-          ) : null}
-        </div>
-      ) : (
-        <div style={{ color: '#94a3b8', fontSize: 13 }}>No warnings.</div>
-      )}
+            </div>
 
-      {passedDisplay.length > 0 ? (
-        <details
-          data-tour="passed-checks"
-          style={{
-            marginBottom: 8,
-            padding: '8px 10px',
-            borderRadius: 10,
-            background: 'rgba(15,23,42,0.55)',
-            border: '1px solid rgba(134,239,172,0.2)',
-          }}
-        >
-          <summary style={{ cursor: 'pointer', fontWeight: 700, color: '#86efac', fontSize: 13 }}>
-            Show Passed Checks ({passedDisplay.length})
-          </summary>
-          <div style={{ marginTop: 10 }}>
-            <Section
-              title="Passed Checks"
-              items={passedDisplay}
-              emptyText="No passed checks yet."
-              headingColor="#86efac"
-            />
+            {criticalActive.length > 0 ? (
+              <div>
+                <div style={{ color: '#94a3b8', fontSize: 11, marginBottom: 6 }}>Must fix before upload.</div>
+                <Section
+                  title="Critical Issues"
+                  items={criticalActive}
+                  emptyText="No critical issues."
+                  headingColor="#fca5a5"
+                />
+              </div>
+            ) : null}
+
+            {warningActive.length > 0 ? (
+              <div>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    gap: 8,
+                    marginBottom: 4,
+                  }}
+                >
+                  <div style={{ fontWeight: 800, color: '#fdba74', fontSize: 13 }}>Review Warnings</div>
+                  <div style={{ color: '#cbd5e1', fontSize: 12, fontWeight: 700 }}>{warningActive.length}</div>
+                </div>
+                <div style={{ color: '#94a3b8', fontSize: 11, marginBottom: 6 }}>
+                  Check these before upload, but they may not block the design.
+                </div>
+                <div style={{ display: 'grid', gap: 8 }}>
+                  {warningActive.map((item, index) => (
+                    <CheckCard
+                      key={`Warnings-${item.label}-${index}`}
+                      item={item}
+                      keyHint={`Warnings-${item.label}-${index}`}
+                    />
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
+            {passedDisplay.length > 0 ? (
+              <details
+                data-tour="passed-checks"
+                style={{
+                  padding: '8px 10px',
+                  borderRadius: 10,
+                  background: 'rgba(15,23,42,0.55)',
+                  border: '1px solid rgba(134,239,172,0.2)',
+                }}
+              >
+                <summary style={{ cursor: 'pointer', fontWeight: 700, color: '#86efac', fontSize: 12 }}>
+                  Show Passed Checks ({passedDisplay.length})
+                </summary>
+                <div style={{ marginTop: 8 }}>
+                  <Section
+                    title="Passed Checks"
+                    items={passedDisplay}
+                    emptyText="No passed checks yet."
+                    headingColor="#86efac"
+                  />
+                </div>
+              </details>
+            ) : null}
+
+            {infoDisplay.length > 0 ? (
+              <details
+                data-tour="optional-notes"
+                style={{
+                  padding: '8px 10px',
+                  borderRadius: 10,
+                  background: 'rgba(15,23,42,0.55)',
+                  border: '1px solid rgba(125,211,252,0.2)',
+                }}
+              >
+                <summary style={{ cursor: 'pointer', fontWeight: 700, color: '#7dd3fc', fontSize: 12 }}>
+                  Show Optional Notes ({infoDisplay.length})
+                </summary>
+                <div style={{ marginTop: 8 }}>
+                  <Section
+                    title="Optional Notes"
+                    items={infoDisplay}
+                    emptyText="No optional notes."
+                    headingColor="#7dd3fc"
+                  />
+                </div>
+              </details>
+            ) : null}
+
+            {effectiveBounds ? (
+              <div
+                style={{
+                  padding: 10,
+                  borderRadius: 10,
+                  background: 'rgba(15,23,42,0.75)',
+                  border: '1px solid rgba(34,197,94,0.22)',
+                  display: 'grid',
+                  gap: 4,
+                  fontSize: 12,
+                  lineHeight: 1.4,
+                  color: '#e5e7eb',
+                }}
+              >
+                <div style={{ fontWeight: 800, color: '#86efac' }}>Artwork Info</div>
+                <div>
+                  Width fill: <strong>{((effectiveBounds.w / 4200) * 100).toFixed(1)}%</strong>
+                </div>
+                <div>
+                  Height fill: <strong>{((effectiveBounds.h / 4800) * 100).toFixed(1)}%</strong>
+                </div>
+                <div>
+                  Coverage: <strong>{coverage.toFixed(1)}%</strong>
+                </div>
+                <div>
+                  Scale: <strong>{(transform.scale * 100).toFixed(1)}%</strong>
+                </div>
+                <div>
+                  Preview: <strong>{Math.round(previewSize * 100)}%</strong>
+                </div>
+                <div>
+                  Inspect Zoom: <strong>{inspectZoom * 100}%</strong>
+                </div>
+                <div>
+                  Practical DPI: <strong>{practicalPrintDpi || '-'}</strong>
+                </div>
+              </div>
+            ) : null}
+
+            <div
+              style={{
+                padding: '8px 10px',
+                borderRadius: 10,
+                background: 'rgba(15,23,42,0.45)',
+                border: '1px solid rgba(255,255,255,0.06)',
+                color: '#94a3b8',
+                fontSize: 11,
+                lineHeight: 1.4,
+              }}
+            >
+              POD Checker includes DTG/DTF apparel export, Printful Readiness Check, Redbubble presets,
+              TeePublic all-products export, Shirt Colour Preview with custom colours, and export tools.
+              More POD tools coming soon.
+            </div>
           </div>
         </details>
-      ) : null}
-
-      {infoDisplay.length > 0 ? (
-        <details
-          data-tour="optional-notes"
-          style={{
-            marginBottom: 8,
-            padding: '8px 10px',
-            borderRadius: 10,
-            background: 'rgba(15,23,42,0.55)',
-            border: '1px solid rgba(125,211,252,0.2)',
-          }}
-        >
-          <summary style={{ cursor: 'pointer', fontWeight: 700, color: '#7dd3fc', fontSize: 13 }}>
-            Show Optional Notes ({infoDisplay.length})
-          </summary>
-          <div style={{ marginTop: 10 }}>
-            <Section
-              title="Optional Notes"
-              items={infoDisplay}
-              emptyText="No optional notes."
-              headingColor="#7dd3fc"
-            />
-          </div>
-        </details>
-      ) : null}
-
-      {img && effectiveBounds ? (
-        <div
-          style={{
-            padding: 12,
-            borderRadius: 14,
-            background: 'rgba(15,23,42,0.75)',
-            border: '1px solid rgba(34,197,94,0.22)',
-            display: 'grid',
-            gap: 6,
-            fontSize: 13,
-            lineHeight: 1.45,
-            color: '#e5e7eb',
-          }}
-        >
-          <div style={{ fontWeight: 800, color: '#86efac' }}>Artwork Info</div>
-          <div>
-            Width fill: <strong>{((effectiveBounds.w / 4200) * 100).toFixed(1)}%</strong>
-          </div>
-          <div>
-            Height fill: <strong>{((effectiveBounds.h / 4800) * 100).toFixed(1)}%</strong>
-          </div>
-          <div>
-            Coverage: <strong>{coverage.toFixed(1)}%</strong>
-          </div>
-          <div>
-            Scale: <strong>{(transform.scale * 100).toFixed(1)}%</strong>
-          </div>
-          <div>
-            Preview: <strong>{Math.round(previewSize * 100)}%</strong>
-          </div>
-          <div>
-            Inspect Zoom: <strong>{inspectZoom * 100}%</strong>
-          </div>
-          <div>
-            Practical DPI: <strong>{practicalPrintDpi || '-'}</strong>
-          </div>
-        </div>
-      ) : null}
-
-      <div
-        style={{
-          padding: '10px 12px',
-          borderRadius: 12,
-          background: 'rgba(15,23,42,0.45)',
-          border: '1px solid rgba(255,255,255,0.06)',
-          color: '#94a3b8',
-          fontSize: 12,
-          lineHeight: 1.45,
-        }}
-      >
-        POD Checker V5 includes DTG/DTF apparel export, Printful Readiness Check, Redbubble presets, TeePublic all-products export, Shirt Colour Preview with custom colours, and V5 export tools. More POD tools coming soon.
       </div>
+      ) : null}
     </div>
   );
 }
