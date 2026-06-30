@@ -212,30 +212,34 @@ export default function ScanResultsPanel({
   onDownloadBatchExportZip,
   uploadTarget = 'standard',
 }: ScanResultsPanelProps) {
-  const [v5ToolsTab, setV5ToolsTab] = useState<'export' | 'batch' | 'notes' | 'tutorial'>('export');
+  const [toolsTab, setToolsTab] = useState<'export' | 'batch' | 'notes'>('export');
 
-  const v5TabButtonStyle = (active: boolean): React.CSSProperties => ({
-    padding: '6px 10px',
+  const toolsTabButtonStyle = (active: boolean): React.CSSProperties => ({
+    flex: '1 1 0',
+    minWidth: 0,
+    padding: '7px 6px',
     borderRadius: 8,
     fontSize: 11,
     fontWeight: 800,
     textTransform: 'uppercase',
-    letterSpacing: '0.03em',
-    background: active ? 'rgba(37, 99, 235, 0.45)' : 'rgba(37, 99, 235, 0.14)',
+    letterSpacing: '0.02em',
+    background: active ? '#2563eb' : 'rgba(37, 99, 235, 0.14)',
     color: active ? '#ffffff' : '#bfdbfe',
-    border: '1px solid rgba(147, 197, 253, 0.35)',
+    border: active ? '1px solid rgba(96, 165, 250, 0.85)' : '1px solid rgba(147, 197, 253, 0.35)',
     cursor: 'pointer',
+    textAlign: 'center',
   });
 
-  const v5ToolButtonStyle: React.CSSProperties = {
-    padding: '7px 12px',
-    borderRadius: 999,
-    fontSize: 12,
-    fontWeight: 800,
-    background: 'rgba(37, 99, 235, 0.22)',
-    color: '#bfdbfe',
-    border: '1px solid rgba(147, 197, 253, 0.45)',
+  const tutorialTextButtonStyle: React.CSSProperties = {
+    padding: '4px 8px',
+    borderRadius: 8,
+    fontSize: 11,
+    fontWeight: 700,
+    background: 'transparent',
+    color: '#93c5fd',
+    border: '1px solid rgba(147, 197, 253, 0.35)',
     cursor: 'pointer',
+    flexShrink: 0,
   };
   // Auto Fix detection: once Auto Fix has run, the placement/size issues it resolves
   // should disappear from the active scan report AND from the Result Summary, instead
@@ -451,7 +455,7 @@ export default function ScanResultsPanel({
   const displayScore =
     img && criticalActive.length === 0 && warningActive.length === 0 ? 100 : printScore;
 
-  const uploadNotesPanel = v5ToolsTab === 'notes' ? (
+  const uploadNotesPanel = toolsTab === 'notes' ? (
     <PODUploadNotes
       file={file}
       img={img}
@@ -489,7 +493,7 @@ export default function ScanResultsPanel({
         overflowWrap: 'anywhere',
       }}
     >
-      <div style={{ display: 'grid', gap: 10 }}>
+      <div style={{ display: 'grid', gap: 10, minWidth: 0, maxWidth: '100%' }}>
         <div
           style={{
             padding: 12,
@@ -498,9 +502,12 @@ export default function ScanResultsPanel({
             border: '1px solid rgba(255,255,255,0.08)',
             display: 'grid',
             gap: 10,
+            minWidth: 0,
+            maxWidth: '100%',
+            overflow: 'hidden',
           }}
         >
-          <div style={{ display: 'grid', gap: 8 }}>
+          <div style={{ display: 'grid', gap: 8, minWidth: 0, maxWidth: '100%' }}>
             <div
               style={{
                 position: 'sticky',
@@ -638,54 +645,54 @@ export default function ScanResultsPanel({
                 border: '1px solid rgba(148, 163, 184, 0.22)',
                 display: 'grid',
                 gap: 8,
+                minWidth: 0,
+                maxWidth: '100%',
+                overflow: 'hidden',
               }}
             >
-              <div style={{ fontWeight: 800, fontSize: 12, color: '#93c5fd' }}>V5 Tools</div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  gap: 8,
+                  minWidth: 0,
+                }}
+              >
+                <div style={{ fontWeight: 800, fontSize: 12, color: '#93c5fd' }}>Tools</div>
+                <button type="button" onClick={() => onOpenTutorial?.()} style={tutorialTextButtonStyle}>
+                  Tutorial
+                </button>
+              </div>
+              <div style={{ display: 'flex', gap: 6, minWidth: 0, maxWidth: '100%' }}>
                 {(
                   [
                     ['export', 'Export'],
                     ['batch', 'Batch'],
                     ['notes', 'Notes'],
-                    ['tutorial', 'Tutorial'],
                   ] as const
                 ).map(([tab, label]) => (
                   <button
                     key={tab}
                     type="button"
-                    onClick={() => setV5ToolsTab(tab)}
-                    style={v5TabButtonStyle(v5ToolsTab === tab)}
+                    onClick={() => setToolsTab(tab)}
+                    style={toolsTabButtonStyle(toolsTab === tab)}
                   >
                     {label}
                   </button>
                 ))}
               </div>
 
-              {v5ToolsTab === 'export' ? (
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                  <button type="button" onClick={() => onOpenCustomSize?.()} style={v5ToolButtonStyle}>
-                    Custom Size
-                  </button>
-                  <button type="button" onClick={() => onOpenProductPresets?.()} style={v5ToolButtonStyle}>
-                    Product Presets
-                  </button>
-                  <button type="button" onClick={() => onOpenExportPackZip?.()} style={v5ToolButtonStyle}>
-                    Export Pack ZIP
-                  </button>
-                </div>
-              ) : null}
-
-              {v5ToolsTab === 'batch' ? (
-                <div style={{ display: 'grid', gap: 8 }}>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+              {toolsTab === 'batch' ? (
+                <div style={{ display: 'grid', gap: 8, minWidth: 0 }}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, minWidth: 0 }}>
                     <button
                       type="button"
                       onClick={() => onOpenBatchCheck?.()}
                       style={{
-                        ...v5ToolButtonStyle,
-                        background: batchCheckOpen
-                          ? 'rgba(37, 99, 235, 0.45)'
-                          : 'rgba(37, 99, 235, 0.22)',
+                        ...toolsTabButtonStyle(batchCheckOpen),
+                        flex: '1 1 auto',
+                        minWidth: 0,
                       }}
                     >
                       Batch Check
@@ -694,13 +701,12 @@ export default function ScanResultsPanel({
                       type="button"
                       onClick={() => onOpenBatchExport?.()}
                       style={{
-                        ...v5ToolButtonStyle,
-                        background: batchExportOpen
-                          ? 'rgba(37, 99, 235, 0.45)'
-                          : 'rgba(37, 99, 235, 0.22)',
+                        ...toolsTabButtonStyle(batchExportOpen),
+                        flex: '1 1 auto',
+                        minWidth: 0,
                       }}
                     >
-                      Batch Export Queue
+                      Batch Export
                     </button>
                   </div>
                   {batchCheckOpen && onLoadFileFromBatch ? (
@@ -712,60 +718,69 @@ export default function ScanResultsPanel({
                 </div>
               ) : null}
 
-              {v5ToolsTab === 'notes' ? uploadNotesPanel : null}
+              {toolsTab === 'notes' ? uploadNotesPanel : null}
 
-              {v5ToolsTab === 'tutorial' ? (
-                <div style={{ display: 'grid', gap: 8 }}>
-                  <button type="button" onClick={() => onOpenTutorial?.()} style={v5ToolButtonStyle}>
-                    Open Tutorial
-                  </button>
-                  <div style={{ fontSize: 12, color: '#94a3b8', lineHeight: 1.45 }}>
-                    Step-by-step guide for upload, scan, Auto Fix, export, and shirt colour preview.
-                  </div>
+              <details>
+                <summary
+                  style={{
+                    cursor: 'pointer',
+                    fontSize: 11,
+                    fontWeight: 800,
+                    color: '#94a3b8',
+                    padding: '2px 0',
+                    listStyle: 'none',
+                  }}
+                >
+                  More Tools
+                </summary>
+                <div style={{ marginTop: 6, fontSize: 11, color: '#64748b', lineHeight: 1.4 }}>
+                  Custom Size, Product Presets, and Export Pack ZIP are in Export &amp; Download on the right.
                 </div>
-              ) : null}
+              </details>
             </div>
 
             <div
             style={{
               display: 'grid',
-              gap: 8,
+              gap: 4,
+              minWidth: 0,
+              maxWidth: '100%',
             }}
             data-tour="detail-zoom"
           >
-            <div style={{ display: 'grid', gap: 4 }}>
-              <span style={{ fontWeight: 800, color: '#bae6fd', fontSize: 12 }}>
-                Detail Zoom
-              </span>
-              <div
-                style={{
-                  display: 'flex',
-                  flexWrap: 'wrap',
-                  gap: 6,
-                  alignItems: 'center',
-                }}
-              >
-                {[1, 2, 4, 8].map((z) => (
-                  <button
-                    key={z}
-                    onClick={() => {
-                      setInspectZoom(z);
-                      setActionMessage(`Inspect Zoom set to ${z * 100}%.`);
-                    }}
-                    style={{
-                      padding: '6px 8px',
-                      minWidth: 0,
-                      flex: '1 1 44px',
-                      fontSize: 12,
-                      fontWeight: inspectZoom === z ? 800 : 600,
-                      outline: inspectZoom === z ? '2px solid #38bdf8' : undefined,
-                    }}
-                    disabled={!img}
-                  >
-                    {z * 100}%
-                  </button>
-                ))}
-              </div>
+            <span style={{ fontWeight: 800, color: '#bae6fd', fontSize: 12 }}>
+              Detail Zoom
+            </span>
+            <div
+              style={{
+                display: 'flex',
+                flexWrap: 'nowrap',
+                gap: 4,
+                alignItems: 'center',
+                minWidth: 0,
+                maxWidth: '100%',
+              }}
+            >
+              {[1, 2, 4, 8].map((z) => (
+                <button
+                  key={z}
+                  onClick={() => {
+                    setInspectZoom(z);
+                    setActionMessage(`Inspect Zoom set to ${z * 100}%.`);
+                  }}
+                  style={{
+                    padding: '6px 4px',
+                    minWidth: 0,
+                    flex: '1 1 0',
+                    fontSize: 11,
+                    fontWeight: inspectZoom === z ? 800 : 600,
+                    outline: inspectZoom === z ? '2px solid #38bdf8' : undefined,
+                  }}
+                  disabled={!img}
+                >
+                  {z * 100}%
+                </button>
+              ))}
             </div>
           </div>
         </div>
