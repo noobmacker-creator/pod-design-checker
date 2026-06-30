@@ -418,6 +418,43 @@ export default function IssueBucketsPanel({
     letterSpacing: '0.04em',
   };
 
+  const selectStyle: React.CSSProperties = {
+    width: '100%',
+    padding: '11px 12px',
+    borderRadius: 10,
+    border: '1px solid rgba(255,255,255,0.12)',
+    background: 'rgba(255,255,255,0.06)',
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: 600,
+    outline: 'none',
+    boxSizing: 'border-box',
+  };
+
+  const printAreaSelectStyle: React.CSSProperties = {
+    width: '100%',
+    padding: '12px 14px',
+    borderRadius: 12,
+    border: '1px solid rgba(148, 163, 184, 0.25)',
+    background: 'rgba(15, 23, 42, 0.75)',
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: 700,
+    outline: 'none',
+    boxSizing: 'border-box',
+  };
+
+  const fixedSelectDisplayStyle: React.CSSProperties = {
+    ...printAreaSelectStyle,
+    color: '#e2e8f0',
+    cursor: 'default',
+  };
+
+  type ExportBoxOptions = {
+    hidePresetSelector?: boolean;
+    compact?: boolean;
+  };
+
   type UploadTarget = 'standard' | 'redbubble' | 'printful' | 'teepublic' | 'custom' | 'presets';
 
   const uploadTargetOptions: { id: UploadTarget; label: string }[] = [
@@ -437,6 +474,49 @@ export default function IssueBucketsPanel({
     custom: 'Enter a custom width and height for mugs, stickers, posters, and other POD products.',
     presets: 'Choose a quick generic POD export size for common product shapes.',
   };
+
+  const modeCards: { id: UploadTarget; title: string; description: string }[] = [
+    { id: 'standard', title: 'Standard POD', description: 'General apparel export' },
+    { id: 'redbubble', title: 'Redbubble', description: 'Platform apparel presets' },
+    { id: 'printful', title: 'Printful', description: 'DTG and DTF presets' },
+    { id: 'teepublic', title: 'TeePublic', description: 'All-products export' },
+    { id: 'custom', title: 'Custom Size', description: 'Enter exact dimensions' },
+    { id: 'presets', title: 'Product Presets', description: 'Ready-made product sizes' },
+  ];
+
+  const modeSectionStyle: React.CSSProperties = {
+    borderRadius: 18,
+    padding: 14,
+    background: 'rgba(15, 23, 42, 0.65)',
+    border: '1px solid rgba(148, 163, 184, 0.22)',
+    display: 'grid',
+    gap: 10,
+  };
+
+  const printAreaSectionStyle: React.CSSProperties = {
+    borderRadius: 18,
+    padding: 14,
+    background: 'rgba(15, 23, 42, 0.65)',
+    border: '1px solid rgba(148, 163, 184, 0.22)',
+    display: 'grid',
+    gap: 10,
+  };
+
+  const getModeCardStyle = (selected: boolean): React.CSSProperties => ({
+    borderRadius: 14,
+    padding: 12,
+    minHeight: 90,
+    textAlign: 'left',
+    width: '100%',
+    border: selected
+      ? '1px solid rgba(96, 165, 250, 0.85)'
+      : '1px solid rgba(148, 163, 184, 0.22)',
+    background: selected ? 'rgba(37, 99, 235, 0.18)' : 'rgba(15, 23, 42, 0.75)',
+    cursor: 'pointer',
+    display: 'grid',
+    gap: 4,
+    alignContent: 'start',
+  });
 
   const baseBoxStyle: React.CSSProperties = {
     border: '1px solid rgba(148, 163, 184, 0.22)',
@@ -467,41 +547,39 @@ export default function IssueBucketsPanel({
     color: '#bfdbfe',
   };
 
-  const renderStandardExportBox = () => (
+  const renderStandardExportBox = (opts?: ExportBoxOptions) => (
     <div key="standard" style={getBoxStyle('standard')}>
       <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 800 }}>
         Standard Apparel Export
       </div>
-      {uploadTarget === 'standard' && (
+      {uploadTarget === 'standard' && !opts?.compact && (
         <div style={recommendedLineStyle}>Recommended for your selected platform</div>
       )}
-      <div>
-        <span
-          style={{
-            display: 'inline-block',
-            fontSize: 11,
-            fontWeight: 900,
-            color: '#bbf7d0',
-            background: 'rgba(22, 163, 74, 0.18)',
-            border: '1px solid rgba(134, 239, 172, 0.30)',
-            borderRadius: 999,
-            padding: '4px 8px',
-          }}
-        >
-          Recommended first
-        </span>
-      </div>
-      <div style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.4 }}>
-        Best starting point for most POD shirt uploads.
-      </div>
-      <div style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.4 }}>
-        Best for: general POD shirt uploads.
-      </div>
+      {!opts?.compact && (
+        <>
+          <div>
+            <span
+              style={{
+                display: 'inline-block',
+                fontSize: 11,
+                fontWeight: 900,
+                color: '#bbf7d0',
+                background: 'rgba(22, 163, 74, 0.18)',
+                border: '1px solid rgba(134, 239, 172, 0.30)',
+                borderRadius: 999,
+                padding: '4px 8px',
+              }}
+            >
+              Recommended first
+            </span>
+          </div>
+          <div style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.4 }}>
+            Best for: general POD shirt uploads.
+          </div>
+        </>
+      )}
       <div style={{ fontSize: 12, color: '#bae6fd', fontWeight: 800 }}>
         {standardTargetLine}
-      </div>
-      <div style={{ fontSize: 12, color: '#cbd5e1' }}>
-        Generic 4200 × 4800 apparel PNG, not tied to one company.
       </div>
       <div style={stepLabelStyle}>Download PNG</div>
       <button
@@ -529,56 +607,44 @@ export default function IssueBucketsPanel({
     </div>
   );
 
-  const renderRedbubbleExportBox = () => (
+  const renderRedbubbleExportBox = (opts?: ExportBoxOptions) => (
     <div key="redbubble" style={getBoxStyle('redbubble')}>
       <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 800 }}>
         Redbubble Export
       </div>
-      {uploadTarget === 'redbubble' && (
+      {uploadTarget === 'redbubble' && !opts?.compact && (
         <div style={recommendedLineStyle}>Recommended for your selected platform</div>
       )}
-      <div style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.4 }}>
-        Best for: Redbubble apparel presets.
-      </div>
-      <div style={stepLabelStyle}>Step 1: Choose export size</div>
-      <div style={{ fontSize: 12, color: '#cbd5e1', fontWeight: 800 }}>
-        Export Size
-      </div>
-      <div style={{ fontSize: 11, color: '#94a3b8' }}>
-        Choose size, then press the blue download button.
-      </div>
-      <select
-        value={selectedRedbubblePreset}
-        onChange={(e) => {
-          setSelectedRedbubblePreset(e.target.value as RedbubblePresetId);
-          setActivePresetSystem('redbubble');
-        }}
-        style={{
-          width: '100%',
-          padding: '10px 12px',
-          borderRadius: 10,
-          border: '1px solid rgba(255,255,255,0.12)',
-          background: 'rgba(255,255,255,0.06)',
-          color: '#fff',
-          fontSize: 14,
-          fontWeight: 600,
-          outline: 'none',
-          boxSizing: 'border-box',
-        }}
-      >
-        {redbubblePresets.map((preset) => (
-          <option key={preset.id} value={preset.id}>
-            {preset.label} — {preset.width} × {preset.height}
-          </option>
-        ))}
-      </select>
+      {!opts?.compact && (
+        <div style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.4 }}>
+          Best for: Redbubble apparel presets.
+        </div>
+      )}
+      {!opts?.hidePresetSelector && (
+        <>
+          <div style={stepLabelStyle}>Step 1: Choose export size</div>
+          <select
+            value={selectedRedbubblePreset}
+            onChange={(e) => {
+              setSelectedRedbubblePreset(e.target.value as RedbubblePresetId);
+              setActivePresetSystem('redbubble');
+            }}
+            style={printAreaSelectStyle}
+          >
+            {redbubblePresets.map((preset) => (
+              <option key={preset.id} value={preset.id}>
+                {preset.label} — {preset.width} × {preset.height}
+              </option>
+            ))}
+          </select>
+        </>
+      )}
       <div style={{ fontSize: 12, color: '#bae6fd', fontWeight: 800 }}>
         {redbubbleTargetLine}
       </div>
-      <div style={{ fontSize: 12, color: '#cbd5e1' }}>
-        Resized for the selected Redbubble preset.
+      <div style={stepLabelStyle}>
+        {opts?.hidePresetSelector ? 'Download PNG' : 'Step 2: Download PNG'}
       </div>
-      <div style={stepLabelStyle}>Step 2: Download PNG</div>
       <button
         onClick={() => {
           if (!img) return;
@@ -668,57 +734,45 @@ export default function IssueBucketsPanel({
     );
   };
 
-  const renderPrintfulExportBox = () => (
+  const renderPrintfulExportBox = (opts?: ExportBoxOptions) => (
     <div key="printful" style={getBoxStyle('printful')}>
       <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 800 }}>
         Printful Export
       </div>
-      {uploadTarget === 'printful' && (
+      {uploadTarget === 'printful' && !opts?.compact && (
         <div style={recommendedLineStyle}>Recommended for your selected platform</div>
       )}
-      <div style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.4 }}>
-        Best for: Printful DTG/DTF apparel.
-      </div>
+      {!opts?.compact && (
+        <div style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.4 }}>
+          Best for: Printful DTG/DTF apparel.
+        </div>
+      )}
       {uploadTarget === 'printful' && renderPrintfulPreflightCard()}
-      <div style={stepLabelStyle}>Step 1: Choose export size</div>
-      <div style={{ fontSize: 12, color: '#cbd5e1', fontWeight: 800 }}>
-        Export Size
-      </div>
-      <div style={{ fontSize: 11, color: '#94a3b8' }}>
-        Choose size, then press the blue download button.
-      </div>
-      <select
-        value={selectedPrintfulPreset}
-        onChange={(e) => {
-          setSelectedPrintfulPreset(e.target.value as PrintfulPresetId);
-          setActivePresetSystem('printful');
-        }}
-        style={{
-          width: '100%',
-          padding: '10px 12px',
-          borderRadius: 10,
-          border: '1px solid rgba(255,255,255,0.12)',
-          background: 'rgba(255,255,255,0.06)',
-          color: '#fff',
-          fontSize: 14,
-          fontWeight: 600,
-          outline: 'none',
-          boxSizing: 'border-box',
-        }}
-      >
-        {printfulPresets.map((preset) => (
-          <option key={preset.id} value={preset.id}>
-            {preset.label} — {preset.width} × {preset.height}
-          </option>
-        ))}
-      </select>
+      {!opts?.hidePresetSelector && (
+        <>
+          <div style={stepLabelStyle}>Step 1: Choose export size</div>
+          <select
+            value={selectedPrintfulPreset}
+            onChange={(e) => {
+              setSelectedPrintfulPreset(e.target.value as PrintfulPresetId);
+              setActivePresetSystem('printful');
+            }}
+            style={selectStyle}
+          >
+            {printfulPresets.map((preset) => (
+              <option key={preset.id} value={preset.id}>
+                {preset.label} — {preset.width} × {preset.height}
+              </option>
+            ))}
+          </select>
+        </>
+      )}
       <div style={{ fontSize: 12, color: '#bae6fd', fontWeight: 800 }}>
         {printfulTargetLine}
       </div>
-      <div style={{ fontSize: 12, color: '#cbd5e1' }}>
-        Resized for the selected Printful preset.
+      <div style={stepLabelStyle}>
+        {opts?.hidePresetSelector ? 'Download PNG' : 'Step 2: Download PNG'}
       </div>
-      <div style={stepLabelStyle}>Step 2: Download PNG</div>
       <button
         onClick={() => {
           if (!img) return;
@@ -743,22 +797,21 @@ export default function IssueBucketsPanel({
     </div>
   );
 
-  const renderTeePublicExportBox = () => (
+  const renderTeePublicExportBox = (opts?: ExportBoxOptions) => (
     <div key="teepublic" style={getBoxStyle('teepublic')}>
       <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 800 }}>
         TeePublic Export
       </div>
-      {uploadTarget === 'teepublic' && (
+      {uploadTarget === 'teepublic' && !opts?.compact && (
         <div style={recommendedLineStyle}>Recommended for your selected platform</div>
       )}
-      <div style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.4 }}>
-        Best for: TeePublic all-products upload.
-      </div>
+      {!opts?.compact && (
+        <div style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.4 }}>
+          Best for: TeePublic all-products upload.
+        </div>
+      )}
       <div style={{ fontSize: 12, color: '#bae6fd', fontWeight: 800 }}>
         {teePublicTargetLine}
-      </div>
-      <div style={{ fontSize: 12, color: '#cbd5e1' }}>
-        Resized for TeePublic all-products export.
       </div>
       <div style={stepLabelStyle}>Download PNG</div>
       <button
@@ -954,7 +1007,7 @@ export default function IssueBucketsPanel({
     V5_PRODUCT_PRESETS[0];
   const selectedProductPresetFileName = `pod-checker-${toSafeSlug(selectedProductPreset.name)}-${selectedProductPreset.width}x${selectedProductPreset.height}.png`;
 
-  const renderProductPresetsPanel = () => (
+  const renderProductPresetsPanel = (opts?: ExportBoxOptions) => (
     <div
       id="product-presets-export"
       ref={productPresetsRef}
@@ -963,38 +1016,27 @@ export default function IssueBucketsPanel({
       <div style={{ fontSize: 14, color: '#e2e8f0', fontWeight: 800 }}>
         V5 Product Export Presets
       </div>
-      {uploadTarget === 'presets' && (
+      {uploadTarget === 'presets' && !opts?.compact && (
         <div style={recommendedLineStyle}>Recommended for your selected platform</div>
       )}
-      <div style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.4 }}>
-        Choose a quick generic POD export size for common product shapes. These are generic POD
-        presets — not official platform sizes.
-      </div>
-      <div style={{ fontSize: 12, color: '#cbd5e1', fontWeight: 800 }}>
-        Choose a generic POD preset:
-      </div>
-      <select
-        value={selectedProductPresetId}
-        onChange={(e) => setSelectedProductPresetId(e.target.value)}
-        style={{
-          width: '100%',
-          padding: '10px 12px',
-          borderRadius: 10,
-          border: '1px solid rgba(255,255,255,0.12)',
-          background: 'rgba(255,255,255,0.06)',
-          color: '#fff',
-          fontSize: 14,
-          fontWeight: 600,
-          outline: 'none',
-          boxSizing: 'border-box',
-        }}
-      >
-        {V5_PRODUCT_PRESETS.map((preset) => (
-          <option key={preset.id} value={preset.id}>
-            {preset.name} — {preset.width} × {preset.height}
-          </option>
-        ))}
-      </select>
+      {!opts?.compact && (
+        <>
+          <div style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.4 }}>
+            Generic POD presets — not official platform sizes.
+          </div>
+          <select
+            value={selectedProductPresetId}
+            onChange={(e) => setSelectedProductPresetId(e.target.value)}
+            style={selectStyle}
+          >
+            {V5_PRODUCT_PRESETS.map((preset) => (
+              <option key={preset.id} value={preset.id}>
+                {preset.name} — {preset.width} × {preset.height}
+              </option>
+            ))}
+          </select>
+        </>
+      )}
       <div style={{ fontSize: 11, color: '#94a3b8', lineHeight: 1.4 }}>{selectedProductPreset.note}</div>
       <div style={{ fontSize: 12, color: '#bae6fd', fontWeight: 800 }}>
         Target: {selectedProductPreset.width} × {selectedProductPreset.height} px
@@ -1018,73 +1060,74 @@ export default function IssueBucketsPanel({
     </div>
   );
 
-  const renderCustomSizeExportBox = () => (
+  const renderCustomSizeInputs = () => (
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+      <label style={{ display: 'grid', gap: 4 }}>
+        <span style={{ fontSize: 11, fontWeight: 800, color: '#93c5fd' }}>Width</span>
+        <input
+          ref={customWidthInputRef}
+          id="custom-size-width"
+          type="number"
+          min={CUSTOM_EXPORT_MIN}
+          max={CUSTOM_EXPORT_MAX}
+          value={customWidth}
+          onChange={(e) => {
+            setCustomWidth(e.target.value);
+            setCustomSizeError('');
+          }}
+          style={{
+            width: '100%',
+            padding: '8px 10px',
+            borderRadius: 10,
+            border: '1px solid rgba(255,255,255,0.12)',
+            background: 'rgba(255,255,255,0.06)',
+            color: '#fff',
+            fontSize: 14,
+            fontWeight: 600,
+            outline: 'none',
+            boxSizing: 'border-box',
+          }}
+        />
+      </label>
+      <label style={{ display: 'grid', gap: 4 }}>
+        <span style={{ fontSize: 11, fontWeight: 800, color: '#93c5fd' }}>Height</span>
+        <input
+          type="number"
+          min={CUSTOM_EXPORT_MIN}
+          max={CUSTOM_EXPORT_MAX}
+          value={customHeight}
+          onChange={(e) => {
+            setCustomHeight(e.target.value);
+            setCustomSizeError('');
+          }}
+          style={{
+            width: '100%',
+            padding: '8px 10px',
+            borderRadius: 10,
+            border: '1px solid rgba(255,255,255,0.12)',
+            background: 'rgba(255,255,255,0.06)',
+            color: '#fff',
+            fontSize: 14,
+            fontWeight: 600,
+            outline: 'none',
+            boxSizing: 'border-box',
+          }}
+        />
+      </label>
+    </div>
+  );
+
+  const renderCustomSizeExportBox = (opts?: ExportBoxOptions) => (
     <div
       id="custom-size-export"
       ref={customSizeRef}
       style={getExtraPanelStyle('custom')}
     >
       <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 800 }}>Custom Size Export</div>
-      {uploadTarget === 'custom' && (
+      {uploadTarget === 'custom' && !opts?.compact && (
         <div style={recommendedLineStyle}>Recommended for your selected platform</div>
       )}
-      <div style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.4 }}>
-        Choose a custom PNG size for mugs, stickers, posters, square designs, and other POD products.
-      </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-        <label style={{ display: 'grid', gap: 4 }}>
-          <span style={{ fontSize: 11, fontWeight: 800, color: '#93c5fd' }}>Width</span>
-          <input
-            ref={customWidthInputRef}
-            id="custom-size-width"
-            type="number"
-            min={CUSTOM_EXPORT_MIN}
-            max={CUSTOM_EXPORT_MAX}
-            value={customWidth}
-            onChange={(e) => {
-              setCustomWidth(e.target.value);
-              setCustomSizeError('');
-            }}
-            style={{
-              width: '100%',
-              padding: '8px 10px',
-              borderRadius: 10,
-              border: '1px solid rgba(255,255,255,0.12)',
-              background: 'rgba(255,255,255,0.06)',
-              color: '#fff',
-              fontSize: 14,
-              fontWeight: 600,
-              outline: 'none',
-              boxSizing: 'border-box',
-            }}
-          />
-        </label>
-        <label style={{ display: 'grid', gap: 4 }}>
-          <span style={{ fontSize: 11, fontWeight: 800, color: '#93c5fd' }}>Height</span>
-          <input
-            type="number"
-            min={CUSTOM_EXPORT_MIN}
-            max={CUSTOM_EXPORT_MAX}
-            value={customHeight}
-            onChange={(e) => {
-              setCustomHeight(e.target.value);
-              setCustomSizeError('');
-            }}
-            style={{
-              width: '100%',
-              padding: '8px 10px',
-              borderRadius: 10,
-              border: '1px solid rgba(255,255,255,0.12)',
-              background: 'rgba(255,255,255,0.06)',
-              color: '#fff',
-              fontSize: 14,
-              fontWeight: 600,
-              outline: 'none',
-              boxSizing: 'border-box',
-            }}
-          />
-        </label>
-      </div>
+      {!opts?.compact && renderCustomSizeInputs()}
       {customSizeParsed.valid && (
         <div style={{ fontSize: 12, color: '#bae6fd', fontWeight: 800 }}>
           Target: {customSizeParsed.width} × {customSizeParsed.height} px
@@ -1116,12 +1159,86 @@ export default function IssueBucketsPanel({
 
   const exportBoxRenderers: Record<
     Exclude<UploadTarget, 'custom' | 'presets'>,
-    () => React.JSX.Element
+    (opts?: ExportBoxOptions) => React.JSX.Element
   > = {
     standard: renderStandardExportBox,
     redbubble: renderRedbubbleExportBox,
     printful: renderPrintfulExportBox,
     teepublic: renderTeePublicExportBox,
+  };
+
+  const renderProductExportSizeSelector = () => {
+    switch (uploadTarget) {
+      case 'standard':
+        return (
+          <div style={fixedSelectDisplayStyle}>
+            Standard Apparel — {STANDARD_EXPORT_W} × {STANDARD_EXPORT_H}
+          </div>
+        );
+      case 'redbubble':
+        return (
+          <select
+            value={selectedRedbubblePreset}
+            onChange={(e) => {
+              setSelectedRedbubblePreset(e.target.value as RedbubblePresetId);
+              setActivePresetSystem('redbubble');
+            }}
+            style={printAreaSelectStyle}
+          >
+            {redbubblePresets.map((preset) => (
+              <option key={preset.id} value={preset.id}>
+                {preset.label} — {preset.width} × {preset.height}
+              </option>
+            ))}
+          </select>
+        );
+      case 'printful':
+        return (
+          <select
+            value={selectedPrintfulPreset}
+            onChange={(e) => {
+              setSelectedPrintfulPreset(e.target.value as PrintfulPresetId);
+              setActivePresetSystem('printful');
+            }}
+            style={printAreaSelectStyle}
+          >
+            {printfulPresets.map((preset) => (
+              <option key={preset.id} value={preset.id}>
+                {preset.label} — {preset.width} × {preset.height}
+              </option>
+            ))}
+          </select>
+        );
+      case 'teepublic':
+        return (
+          <div style={fixedSelectDisplayStyle}>
+            TeePublic All Products — {TEEPUBLIC_EXPORT_W} × {TEEPUBLIC_EXPORT_H}
+          </div>
+        );
+      case 'custom':
+        return renderCustomSizeInputs();
+      case 'presets':
+        return (
+          <select
+            value={selectedProductPresetId}
+            onChange={(e) => setSelectedProductPresetId(e.target.value)}
+            style={printAreaSelectStyle}
+          >
+            {V5_PRODUCT_PRESETS.map((preset) => (
+              <option key={preset.id} value={preset.id}>
+                {preset.name} — {preset.width} × {preset.height}
+              </option>
+            ))}
+          </select>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const selectedExportBoxOptions: ExportBoxOptions = {
+    hidePresetSelector: uploadTarget === 'redbubble' || uploadTarget === 'printful',
+    compact: true,
   };
 
   const platformExportTargets: Exclude<UploadTarget, 'custom' | 'presets'>[] = [
@@ -1131,13 +1248,17 @@ export default function IssueBucketsPanel({
     'teepublic',
   ];
 
-  const orderedPlatformTargets: Exclude<UploadTarget, 'custom' | 'presets'>[] =
-    uploadTarget === 'custom' || uploadTarget === 'presets'
-      ? platformExportTargets
-      : [
-          uploadTarget,
-          ...platformExportTargets.filter((id) => id !== uploadTarget),
-        ];
+  const isPlatformTarget = (
+    target: UploadTarget
+  ): target is Exclude<UploadTarget, 'custom' | 'presets'> =>
+    target === 'standard' ||
+    target === 'redbubble' ||
+    target === 'printful' ||
+    target === 'teepublic';
+
+  const moreDownloadTargets = platformExportTargets.filter(
+    (id) => !isPlatformTarget(uploadTarget) || id !== uploadTarget
+  );
 
   return (
     <div
@@ -1177,60 +1298,86 @@ export default function IssueBucketsPanel({
           ? 'Ready to export. Choose a size, then press the blue download button.'
           : 'Upload a design to enable downloads.'}
       </div>
-      <div
-        style={{
-          marginBottom: 12,
-          padding: 10,
-          borderRadius: 12,
-          background: 'rgba(37, 99, 235, 0.10)',
-          border: '1px solid rgba(147, 197, 253, 0.25)',
-        }}
-      >
-        <div style={{ fontWeight: 800, color: '#bfdbfe', fontSize: 12, marginBottom: 6 }}>
-          Where are you uploading?
+      <div style={{ marginBottom: 10, display: 'grid', gap: 10 }}>
+        <div style={modeSectionStyle}>
+          <div style={{ fontSize: 14, fontWeight: 800, color: '#e2e8f0' }}>Mode</div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+            {modeCards.map((mode) => {
+              const selected = uploadTarget === mode.id;
+              return (
+                <button
+                  key={mode.id}
+                  type="button"
+                  onClick={() => setUploadTarget(mode.id)}
+                  style={getModeCardStyle(selected)}
+                >
+                  <div
+                    style={{
+                      fontSize: 13,
+                      fontWeight: 800,
+                      color: selected ? '#93c5fd' : '#f1f5f9',
+                    }}
+                  >
+                    {mode.title}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 11,
+                      color: selected ? '#bfdbfe' : '#94a3b8',
+                      lineHeight: 1.35,
+                    }}
+                  >
+                    {mode.description}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
         </div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-          {uploadTargetOptions.map((option) => {
-            const isSelected = uploadTarget === option.id;
-            return (
-              <button
-                key={option.id}
-                onClick={() => setUploadTarget(option.id)}
-                style={{
-                  fontSize: 12,
-                  fontWeight: 800,
-                  borderRadius: 999,
-                  padding: '6px 12px',
-                  cursor: 'pointer',
-                  color: isSelected ? '#ffffff' : '#cbd5e1',
-                  background: isSelected ? '#2563eb' : 'rgba(255,255,255,0.06)',
-                  border: isSelected
-                    ? '1px solid rgba(96, 165, 250, 0.75)'
-                    : '1px solid rgba(148, 163, 184, 0.25)',
-                }}
-              >
-                {option.label}
-              </button>
-            );
-          })}
+
+        <div style={printAreaSectionStyle}>
+          <div style={{ fontSize: 14, fontWeight: 800, color: '#e2e8f0' }}>Print Area</div>
+          {renderProductExportSizeSelector()}
+          {uploadTarget === 'custom' && customSizeError && (
+            <div style={{ fontSize: 12, color: '#fbbf24', lineHeight: 1.4 }}>{customSizeError}</div>
+          )}
+          {uploadTarget === 'presets' && (
+            <div style={{ fontSize: 11, color: '#94a3b8', lineHeight: 1.4 }}>
+              {selectedProductPreset.note}
+            </div>
+          )}
         </div>
-        <div
-          style={{
-            marginTop: 8,
-            fontSize: 12,
-            color: '#cbd5e1',
-            lineHeight: 1.45,
-          }}
-        >
+
+        <div style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.4 }}>
           {uploadTargetHelper[uploadTarget]}
         </div>
       </div>
 
-      <div style={{ marginBottom: 14, display: 'grid', gap: 12 }} data-tour="download">
-        {uploadTarget === 'presets' && renderProductPresetsPanel()}
-        {uploadTarget === 'custom' && renderCustomSizeExportBox()}
+      <div style={{ marginBottom: 14, display: 'grid', gap: 10 }} data-tour="download">
+        {uploadTarget === 'presets' && renderProductPresetsPanel(selectedExportBoxOptions)}
+        {uploadTarget === 'custom' && renderCustomSizeExportBox(selectedExportBoxOptions)}
+        {isPlatformTarget(uploadTarget) &&
+          exportBoxRenderers[uploadTarget](selectedExportBoxOptions)}
+        {moreDownloadTargets.length > 0 && (
+          <details>
+            <summary
+              style={{
+                cursor: 'pointer',
+                fontSize: 12,
+                fontWeight: 800,
+                color: '#cbd5e1',
+                padding: '6px 0',
+                listStyle: 'none',
+              }}
+            >
+              More Download Options
+            </summary>
+            <div style={{ display: 'grid', gap: 10, marginTop: 8 }}>
+              {moreDownloadTargets.map((target) => exportBoxRenderers[target]())}
+            </div>
+          </details>
+        )}
         {renderExportPackZipPanel()}
-        {orderedPlatformTargets.map((target) => exportBoxRenderers[target]())}
       </div>
 
     </div>
