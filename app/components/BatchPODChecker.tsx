@@ -204,6 +204,10 @@ export default function BatchPODChecker({ onOpenInChecker, aboveFileControls }: 
         border: '1px solid rgba(147, 197, 253, 0.25)',
         display: 'grid',
         gap: 8,
+        minWidth: 0,
+        maxWidth: '100%',
+        boxSizing: 'border-box',
+        overflowX: 'hidden',
       }}
     >
       <div style={{ fontSize: 14, color: '#e2e8f0', fontWeight: 800 }}>Batch POD Checker</div>
@@ -234,7 +238,8 @@ export default function BatchPODChecker({ onOpenInChecker, aboveFileControls }: 
           color: '#bfdbfe',
           border: '1px solid rgba(147, 197, 253, 0.45)',
           cursor: busy ? 'not-allowed' : 'pointer',
-          width: 'fit-content',
+          width: '100%',
+          boxSizing: 'border-box',
           opacity: busy ? 0.65 : 1,
         }}
       >
@@ -338,7 +343,7 @@ export default function BatchPODChecker({ onOpenInChecker, aboveFileControls }: 
                     ? 'yes'
                     : 'no'}
               </div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center', minWidth: 0 }}>
                 <button
                   type="button"
                   onClick={() => onOpenInChecker(item.file)}
@@ -351,7 +356,10 @@ export default function BatchPODChecker({ onOpenInChecker, aboveFileControls }: 
                     color: '#ffffff',
                     border: 'none',
                     cursor: 'pointer',
-                    width: 'fit-content',
+                    flex: '1 1 auto',
+                    minWidth: 0,
+                    maxWidth: '100%',
+                    boxSizing: 'border-box',
                   }}
                 >
                   Open in Checker

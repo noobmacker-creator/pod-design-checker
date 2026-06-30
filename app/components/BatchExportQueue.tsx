@@ -334,7 +334,8 @@ export default function BatchExportQueue({ onDownloadBatchZip, aboveFileControls
           color: '#bfdbfe',
           border: '1px solid rgba(147, 197, 253, 0.45)',
           cursor: busy ? 'not-allowed' : 'pointer',
-          width: 'fit-content',
+          width: '100%',
+          boxSizing: 'border-box',
           opacity: busy ? 0.65 : 1,
         }}
       >

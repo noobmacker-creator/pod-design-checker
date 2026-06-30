@@ -153,6 +153,10 @@ export default function PODUploadNotes(props: PODUploadNotesProps) {
         border: '1px solid rgba(147, 197, 253, 0.25)',
         display: 'grid',
         gap: 6,
+        minWidth: 0,
+        maxWidth: '100%',
+        boxSizing: 'border-box',
+        overflowX: 'hidden',
       }}
     >
       <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 800 }}>Upload Notes</div>
