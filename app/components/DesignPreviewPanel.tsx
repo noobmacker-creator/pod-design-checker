@@ -89,7 +89,11 @@ export default function DesignPreviewPanel({
         background: 'rgba(255,255,255,0.04)',
         boxShadow: '0 25px 70px rgba(0,0,0,0.35)',
         minWidth: 0,
-        height: 'fit-content',
+        height: '100%',
+        minHeight: 0,
+        display: 'flex',
+        flexDirection: 'column',
+        boxSizing: 'border-box',
       }}
     >
       {autoFixApplied && setAutoFixPreviewMode ? (
@@ -100,6 +104,7 @@ export default function DesignPreviewPanel({
             alignItems: 'center',
             gap: 6,
             marginBottom: 8,
+            flexShrink: 0,
           }}
         >
           <span style={{ fontWeight: 700, color: '#bae6fd', fontSize: 13 }}>View:</span>
@@ -135,6 +140,7 @@ export default function DesignPreviewPanel({
           display: 'grid',
           gap: 4,
           marginBottom: 8,
+          flexShrink: 0,
         }}
         data-tour="shirt-colour-preview"
       >
@@ -226,7 +232,9 @@ export default function DesignPreviewPanel({
         style={{
           position: 'relative',
           width: '100%',
-          height: '100vh',
+          flex: 1,
+          minHeight: 0,
+          height: 'auto',
           overflow: 'auto',
           borderRadius: 18,
           border: '2px solid #38bdf8',
