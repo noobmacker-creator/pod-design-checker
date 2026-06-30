@@ -1,6 +1,10 @@
 'use client';
 
 import React, { useRef, useState } from 'react';
+import {
+  BATCH_MULTI_EXPORT_SIZE_OPTIONS,
+  type BatchExportSizeSelection,
+} from '../lib/batchExportSizeOptions';
 
 type BatchExportItem = {
   id: string;
@@ -58,22 +62,10 @@ export type BatchExportSizeOption = {
   height: number;
 };
 
-export const BATCH_EXPORT_SIZE_OPTIONS: BatchExportSizeOption[] = [
-  { id: 'standard', label: 'Standard 4200 × 4800', width: 4200, height: 4800 },
-  { id: 'square', label: 'Square 4500 × 4500', width: 4500, height: 4500 },
-  { id: 'sticker', label: 'Sticker 3000 × 3000', width: 3000, height: 3000 },
-  { id: 'poster', label: 'Poster 5400 × 7200', width: 5400, height: 7200 },
-  { id: 'mug', label: 'Mug 2700 × 1200', width: 2700, height: 1200 },
-  { id: 'tote-bag', label: 'Tote Bag 4500 × 5400', width: 4500, height: 5400 },
-  { id: 'phone-case', label: 'Phone Case 2400 × 3600', width: 2400, height: 3600 },
-];
-
 type BatchExportQueueProps = {
   onDownloadBatchZip: (
     files: File[],
-    exportLabel: string,
-    width: number,
-    height: number,
+    sizes: BatchExportSizeSelection[],
     onProgress: (message: string) => void,
   ) => Promise<void>;
   aboveFileControls?: React.ReactNode;
@@ -149,14 +141,36 @@ export default function BatchExportQueue({ onDownloadBatchZip, aboveFileControls
   const inputRef = useRef<HTMLInputElement>(null);
   const [items, setItems] = useState<BatchExportItem[]>([]);
   const [busy, setBusy] = useState(false);
-  const [selectedSizeId, setSelectedSizeId] = useState(BATCH_EXPORT_SIZE_OPTIONS[0].id);
+  const [selectedSizeIds, setSelectedSizeIds] = useState<Record<string, boolean>>({
+    standard: true,
+    redbubble: false,
+    printful: false,
+    teepublic: false,
+    square: false,
+    sticker: false,
+    poster: false,
+    mug: false,
+    'tote-bag': false,
+    'phone-case': false,
+  });
   const [message, setMessage] = useState('');
   const [progressMessage, setProgressMessage] = useState('');
   const [filter, setFilter] = useState<BatchFilter>('all');
 
-  const selectedSize =
-    BATCH_EXPORT_SIZE_OPTIONS.find((option) => option.id === selectedSizeId) ??
-    BATCH_EXPORT_SIZE_OPTIONS[0];
+  const selectedSizes = BATCH_MULTI_EXPORT_SIZE_OPTIONS.filter(
+    (option) => selectedSizeIds[option.id],
+  );
+  const selectedDesignCount = items.filter((item) => item.selected && !item.loadError).length;
+  const totalOutputCount = selectedDesignCount * selectedSizes.length;
+
+  const toggleSizeOption = (id: string) => {
+    setSelectedSizeIds((prev) => {
+      const currentlySelected = Object.entries(prev).filter(([, on]) => on).length;
+      if (prev[id] && currentlySelected <= 1) return prev;
+      return { ...prev, [id]: !prev[id] };
+    });
+    setMessage('');
+  };
 
   const filteredItems = items.filter((item) => matchesBatchFilter(item, filter));
 
@@ -241,15 +255,23 @@ export default function BatchExportQueue({ onDownloadBatchZip, aboveFileControls
       return;
     }
 
+    if (selectedSizes.length === 0) {
+      setMessage('Choose at least one export size.');
+      return;
+    }
+
     setMessage('');
     setProgressMessage('');
     setBusy(true);
     try {
       await onDownloadBatchZip(
         selectedFiles,
-        selectedSize.label,
-        selectedSize.width,
-        selectedSize.height,
+        selectedSizes.map(({ label, width, height, folderSlug }) => ({
+          label,
+          width,
+          height,
+          folderSlug,
+        })),
         setProgressMessage,
       );
     } finally {
@@ -272,7 +294,7 @@ export default function BatchExportQueue({ onDownloadBatchZip, aboveFileControls
     >
       <div style={{ fontSize: 14, color: '#e2e8f0', fontWeight: 800 }}>Batch Export Queue</div>
       <div style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.45 }}>
-        Add multiple designs, choose an export size, then download one ZIP with ready PNG files.
+        Add multiple designs, choose export sizes, then download one ZIP with ready PNG files.
       </div>
       {aboveFileControls}
       <input
@@ -304,30 +326,50 @@ export default function BatchExportQueue({ onDownloadBatchZip, aboveFileControls
       >
         {busy && items.length === 0 ? 'Loading files...' : 'Add PNG / JPG designs'}
       </button>
-      <div style={{ fontSize: 12, color: '#cbd5e1', fontWeight: 800 }}>Export size:</div>
-      <select
-        value={selectedSizeId}
-        onChange={(e) => setSelectedSizeId(e.target.value)}
-        disabled={busy}
+      <div style={{ fontSize: 12, color: '#cbd5e1', fontWeight: 800 }}>Choose Export Sizes</div>
+      <div
         style={{
-          width: '100%',
-          padding: '8px 10px',
+          maxHeight: 160,
+          overflowY: 'auto',
+          padding: 8,
           borderRadius: 10,
-          border: '1px solid rgba(255,255,255,0.12)',
-          background: 'rgba(255,255,255,0.06)',
-          color: '#fff',
-          fontSize: 12,
-          fontWeight: 600,
-          outline: 'none',
-          boxSizing: 'border-box',
+          background: 'rgba(15, 23, 42, 0.55)',
+          border: '1px solid rgba(148, 163, 184, 0.22)',
+          display: 'grid',
+          gap: 6,
         }}
       >
-        {BATCH_EXPORT_SIZE_OPTIONS.map((option) => (
-          <option key={option.id} value={option.id}>
-            {option.label}
-          </option>
+        {BATCH_MULTI_EXPORT_SIZE_OPTIONS.map((option) => (
+          <label
+            key={option.id}
+            style={{
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: 8,
+              fontSize: 11,
+              color: '#e2e8f0',
+              cursor: busy ? 'not-allowed' : 'pointer',
+              lineHeight: 1.4,
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={Boolean(selectedSizeIds[option.id])}
+              disabled={busy}
+              onChange={() => toggleSizeOption(option.id)}
+              style={{ width: 14, height: 14, flexShrink: 0, marginTop: 2 }}
+            />
+            <span>{option.checkboxLabel}</span>
+          </label>
         ))}
-      </select>
+      </div>
+      {selectedDesignCount > 0 && selectedSizes.length > 0 ? (
+        <div style={{ fontSize: 11, color: '#93c5fd', lineHeight: 1.4, fontWeight: 700 }}>
+          {selectedDesignCount} design{selectedDesignCount === 1 ? '' : 's'} × {selectedSizes.length}{' '}
+          size{selectedSizes.length === 1 ? '' : 's'} = {totalOutputCount} PNG file
+          {totalOutputCount === 1 ? '' : 's'}
+        </div>
+      ) : null}
       {items.length === 0 ? (
         <div style={{ fontSize: 12, color: '#94a3b8', lineHeight: 1.45 }}>
           No batch files added yet.
@@ -472,7 +514,7 @@ export default function BatchExportQueue({ onDownloadBatchZip, aboveFileControls
           opacity: busy ? 0.65 : 1,
         }}
       >
-        {busy && items.length > 0 ? 'Building batch export...' : 'Download Batch ZIP'}
+        {busy && items.length > 0 ? 'Building batch export...' : 'Download Batch Export ZIP'}
       </button>
       <div style={{ fontSize: 11, color: '#94a3b8', lineHeight: 1.4 }}>
         ZIP file name: pod-checker-batch-export.zip

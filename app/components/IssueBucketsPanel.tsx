@@ -623,7 +623,9 @@ export default function IssueBucketsPanel({
       )}
       {!opts?.hidePresetSelector && (
         <>
-          <div style={stepLabelStyle}>Step 1: Choose export size</div>
+          <div style={stepLabelStyle}>
+            {opts?.embedded ? 'Export size' : 'Step 1: Choose export size'}
+          </div>
           <select
             value={selectedRedbubblePreset}
             onChange={(e) => {
@@ -751,7 +753,9 @@ export default function IssueBucketsPanel({
       {uploadTarget === 'printful' && renderPrintfulPreflightCard()}
       {!opts?.hidePresetSelector && (
         <>
-          <div style={stepLabelStyle}>Step 1: Choose export size</div>
+          <div style={stepLabelStyle}>
+            {opts?.embedded ? 'Export size' : 'Step 1: Choose export size'}
+          </div>
           <select
             value={selectedPrintfulPreset}
             onChange={(e) => {
@@ -1015,7 +1019,7 @@ export default function IssueBucketsPanel({
       style={opts?.embedded ? embeddedBoxStyle : getExtraPanelStyle('presets')}
     >
       <div style={{ fontSize: 14, color: '#e2e8f0', fontWeight: 800 }}>
-        V5 Product Export Presets
+        Product Export Presets
       </div>
       {uploadTarget === 'presets' && !opts?.compact && !opts?.embedded && (
         <div style={recommendedLineStyle}>Recommended for your selected platform</div>
