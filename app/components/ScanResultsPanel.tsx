@@ -461,8 +461,25 @@ export default function ScanResultsPanel({
   const showManualFixCard = Boolean(img) && Boolean(mainPick.item) && !autoFixableIssues.includes(mainIssue);
   const manualFixMessage = manualFixMessages[mainIssue] ?? 'This issue needs a source-file fix before upload.';
 
-  const displayScore =
-    img && criticalActive.length === 0 && warningActive.length === 0 ? 100 : printScore;
+  // Display-only confidence: caps match visible risk without changing printScore.
+  let displayScore: number | null = null;
+  if (img) {
+    let score = printScore;
+    if (criticalActive.length > 0) {
+      score = Math.min(score, 59);
+    } else if (warningActive.length > 0) {
+      score = Math.min(score, 89);
+    }
+    const mainIssueLabel = mainPick.key ?? mainPick.item?.label ?? '';
+    if (
+      !autoFixApplied &&
+      mainPick.item &&
+      isAutoFixableLabel(mainIssueLabel)
+    ) {
+      score = Math.min(score, 85);
+    }
+    displayScore = score;
+  }
 
   const uploadNotesPanel = (
     <PODUploadNotes
@@ -477,7 +494,7 @@ export default function ScanResultsPanel({
       practicalPrintDpi={practicalPrintDpi}
       autoFixApplied={autoFixApplied}
       downloadMessage={downloadMessage}
-      displayScore={displayScore}
+      displayScore={displayScore ?? 0}
       scanStatus={riskLabel}
     />
   );
@@ -591,7 +608,6 @@ export default function ScanResultsPanel({
         padding: 12,
         background: 'rgba(255,255,255,0.04)',
         boxShadow: '0 8px 24px rgba(0,0,0,0.18)',
-        alignSelf: 'start',
         display: 'grid',
         gap: 14,
         width: '100%',
@@ -728,7 +744,7 @@ export default function ScanResultsPanel({
             <div
               style={{
                 display: 'flex',
-                flexWrap: 'nowrap',
+                flexWrap: 'wrap',
                 gap: 4,
                 alignItems: 'center',
                 minWidth: 0,
@@ -933,16 +949,20 @@ export default function ScanResultsPanel({
           </div>
 
           <div style={{ display: 'grid', gap: 2, fontSize: 12, color: '#cbd5e1', lineHeight: 1.4 }}>
-            <div>
-              <span style={{ color: '#94a3b8' }}>Print Confidence:</span>{' '}
-              <strong style={{ color: '#e2e8f0' }}>{displayScore}%</strong>
-            </div>
+            {displayScore !== null ? (
+              <div>
+                <span style={{ color: '#94a3b8' }}>Print Confidence:</span>{' '}
+                <strong style={{ color: '#e2e8f0' }}>{displayScore}%</strong>
+              </div>
+            ) : null}
             {warningActive.length > 0 ? (
               <div style={{ color: '#fde68a', fontWeight: 700 }}>
                 {warningActive.length === 1
                   ? '1 item needs review'
                   : `${warningActive.length} items need review`}
               </div>
+            ) : criticalActive.length === 0 && warningActive.length === 0 ? (
+              <div style={{ color: '#86efac', fontWeight: 700 }}>No issues need review</div>
             ) : null}
           </div>
 
