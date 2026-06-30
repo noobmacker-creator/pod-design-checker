@@ -112,7 +112,7 @@ function CheckCard({ item, keyHint }: { item: CheckItem; keyHint: string }) {
         <span>{item.label}</span>
       </div>
 
-      <div style={{ color: '#e5e7eb', fontSize: 13, lineHeight: 1.55, whiteSpace: 'pre-line' }}>{item.message}</div>
+      <div style={{ color: '#e5e7eb', fontSize: 13, lineHeight: 1.55, whiteSpace: 'pre-line', wordBreak: 'break-word', overflowWrap: 'anywhere' }}>{item.message}</div>
     </div>
   );
 }
@@ -162,7 +162,7 @@ function Section({ title, items, emptyText, headingColor }: SectionProps) {
                 <span>{item.label}</span>
               </div>
 
-              <div style={{ color: '#e5e7eb', fontSize: 13, lineHeight: 1.55, whiteSpace: 'pre-line' }}>{item.message}</div>
+              <div style={{ color: '#e5e7eb', fontSize: 13, lineHeight: 1.55, whiteSpace: 'pre-line', wordBreak: 'break-word', overflowWrap: 'anywhere' }}>{item.message}</div>
             </div>
           ))}
 
@@ -485,6 +485,8 @@ export default function ScanResultsPanel({
         minWidth: 0,
         boxSizing: 'border-box',
         overflowX: 'hidden',
+        wordBreak: 'break-word',
+        overflowWrap: 'anywhere',
       }}
     >
       <div style={{ display: 'grid', gap: 10 }}>
@@ -510,6 +512,8 @@ export default function ScanResultsPanel({
                 marginBottom: 2,
                 background: 'rgba(15, 23, 42, 0.97)',
                 borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
+                minWidth: 0,
+                maxWidth: '100%',
               }}
             >
               <div style={{ fontSize: 20, fontWeight: 800, lineHeight: 1.1 }}>
@@ -853,6 +857,8 @@ export default function ScanResultsPanel({
                 fontWeight: 700,
                 width: '100%',
                 boxSizing: 'border-box',
+                wordBreak: 'break-word',
+                overflowWrap: 'anywhere',
               }}
             >
               {downloadMessage}
