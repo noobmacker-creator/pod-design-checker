@@ -1270,6 +1270,9 @@ export default function IssueBucketsPanel({
         background: 'rgba(255,255,255,0.04)',
         boxShadow: '0 25px 70px rgba(0,0,0,0.35)',
         minWidth: 0,
+        maxWidth: '100%',
+        boxSizing: 'border-box',
+        overflowX: 'hidden',
         alignSelf: 'start',
       }}
     >
@@ -1300,7 +1303,12 @@ export default function IssueBucketsPanel({
       </div>
       <div style={{ marginBottom: 10, display: 'grid', gap: 10 }}>
         <div style={modeSectionStyle}>
-          <div style={{ fontSize: 14, fontWeight: 800, color: '#e2e8f0' }}>Mode</div>
+          <div style={{ display: 'grid', gap: 4 }}>
+            <div style={{ fontSize: 14, fontWeight: 800, color: '#e2e8f0' }}>1. PREPARE FOR PRINT</div>
+            <div style={{ fontSize: 11, color: '#94a3b8', lineHeight: 1.35 }}>
+              Choose your POD platform or custom setup.
+            </div>
+          </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
             {modeCards.map((mode) => {
               const selected = uploadTarget === mode.id;
@@ -1336,7 +1344,12 @@ export default function IssueBucketsPanel({
         </div>
 
         <div style={printAreaSectionStyle}>
-          <div style={{ fontSize: 14, fontWeight: 800, color: '#e2e8f0' }}>Print Area</div>
+          <div style={{ display: 'grid', gap: 4 }}>
+            <div style={{ fontSize: 14, fontWeight: 800, color: '#e2e8f0' }}>2. CHOOSE EXPORT SIZE</div>
+            <div style={{ fontSize: 11, color: '#94a3b8', lineHeight: 1.35 }}>
+              Select the size needed for your final PNG.
+            </div>
+          </div>
           {renderProductExportSizeSelector()}
           {uploadTarget === 'custom' && customSizeError && (
             <div style={{ fontSize: 12, color: '#fbbf24', lineHeight: 1.4 }}>{customSizeError}</div>
