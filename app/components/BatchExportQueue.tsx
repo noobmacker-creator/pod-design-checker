@@ -137,21 +137,25 @@ async function loadBatchExportItem(file: File): Promise<Omit<BatchExportItem, 'i
   });
 }
 
+const DEFAULT_SIZE_SELECTIONS: Record<string, boolean> = {
+  standard: true,
+  redbubble: false,
+  printful: false,
+  teepublic: false,
+  square: false,
+  sticker: false,
+  poster: false,
+  mug: false,
+  'tote-bag': false,
+  'phone-case': false,
+};
+
 export default function BatchExportQueue({ onDownloadBatchZip, aboveFileControls }: BatchExportQueueProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [items, setItems] = useState<BatchExportItem[]>([]);
   const [busy, setBusy] = useState(false);
   const [selectedSizeIds, setSelectedSizeIds] = useState<Record<string, boolean>>({
-    standard: true,
-    redbubble: false,
-    printful: false,
-    teepublic: false,
-    square: false,
-    sticker: false,
-    poster: false,
-    mug: false,
-    'tote-bag': false,
-    'phone-case': false,
+    ...DEFAULT_SIZE_SELECTIONS,
   });
   const [message, setMessage] = useState('');
   const [progressMessage, setProgressMessage] = useState('');
@@ -162,13 +166,10 @@ export default function BatchExportQueue({ onDownloadBatchZip, aboveFileControls
   );
   const selectedDesignCount = items.filter((item) => item.selected && !item.loadError).length;
   const totalOutputCount = selectedDesignCount * selectedSizes.length;
+  const canDownload = selectedDesignCount > 0 && selectedSizes.length > 0 && !busy;
 
   const toggleSizeOption = (id: string) => {
-    setSelectedSizeIds((prev) => {
-      const currentlySelected = Object.entries(prev).filter(([, on]) => on).length;
-      if (prev[id] && currentlySelected <= 1) return prev;
-      return { ...prev, [id]: !prev[id] };
-    });
+    setSelectedSizeIds((prev) => ({ ...prev, [id]: !prev[id] }));
     setMessage('');
   };
 
@@ -237,6 +238,15 @@ export default function BatchExportQueue({ onDownloadBatchZip, aboveFileControls
     setProgressMessage('');
   }
 
+  function resetBatch() {
+    setItems([]);
+    setMessage('');
+    setProgressMessage('');
+    setFilter('all');
+    setSelectedSizeIds({ ...DEFAULT_SIZE_SELECTIONS });
+    if (inputRef.current) inputRef.current.value = '';
+  }
+
   function toggleItem(id: string) {
     setItems((prev) =>
       prev.map((item) => (item.id === id ? { ...item, selected: !item.selected } : item)),
@@ -290,6 +300,10 @@ export default function BatchExportQueue({ onDownloadBatchZip, aboveFileControls
         border: '1px solid rgba(147, 197, 253, 0.25)',
         display: 'grid',
         gap: 8,
+        minWidth: 0,
+        maxWidth: '100%',
+        boxSizing: 'border-box',
+        overflowX: 'hidden',
       }}
     >
       <div style={{ fontSize: 14, color: '#e2e8f0', fontWeight: 800 }}>Batch Export Queue</div>
@@ -363,6 +377,11 @@ export default function BatchExportQueue({ onDownloadBatchZip, aboveFileControls
           </label>
         ))}
       </div>
+      {selectedSizes.length === 0 ? (
+        <div style={{ fontSize: 12, color: '#fbbf24', lineHeight: 1.4 }}>
+          Choose at least one export size.
+        </div>
+      ) : null}
       {selectedDesignCount > 0 && selectedSizes.length > 0 ? (
         <div style={{ fontSize: 11, color: '#93c5fd', lineHeight: 1.4, fontWeight: 700 }}>
           {selectedDesignCount} design{selectedDesignCount === 1 ? '' : 's'} × {selectedSizes.length}{' '}
@@ -406,6 +425,14 @@ export default function BatchExportQueue({ onDownloadBatchZip, aboveFileControls
             </button>
             <button type="button" onClick={clearAll} disabled={busy} style={removeButtonStyle}>
               Clear All
+            </button>
+            <button
+              type="button"
+              onClick={resetBatch}
+              disabled={busy}
+              style={removeButtonStyle}
+            >
+              Reset Batch
             </button>
           </div>
           {filteredItems.length === 0 ? (
@@ -500,7 +527,7 @@ export default function BatchExportQueue({ onDownloadBatchZip, aboveFileControls
         onClick={() => {
           void handleDownloadClick();
         }}
-        disabled={busy}
+        disabled={!canDownload}
         style={{
           padding: '10px 14px',
           borderRadius: 12,
@@ -509,9 +536,10 @@ export default function BatchExportQueue({ onDownloadBatchZip, aboveFileControls
           background: '#2563eb',
           color: '#ffffff',
           border: 'none',
-          cursor: busy ? 'not-allowed' : 'pointer',
+          cursor: canDownload ? 'pointer' : 'not-allowed',
           width: '100%',
-          opacity: busy ? 0.65 : 1,
+          opacity: canDownload ? 1 : 0.55,
+          boxShadow: canDownload ? '0 10px 20px rgba(37, 99, 235, 0.30)' : 'none',
         }}
       >
         {busy && items.length > 0 ? 'Building batch export...' : 'Download Batch Export ZIP'}
