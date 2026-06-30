@@ -238,10 +238,11 @@ export default function DesignPreviewPanel({
           overflow: 'auto',
           borderRadius: 18,
           border: '2px solid #38bdf8',
-          boxShadow: '0 0 0 1px rgba(56,189,248,0.25), inset 0 0 30px rgba(8,47,73,0.25)',
-          background: '#020617',
+          boxShadow: '0 0 0 1px rgba(56,189,248,0.25)',
+          ...getPreviewBackgroundStyle(previewBackground, customPreviewColor),
           padding: 12,
           minWidth: 0,
+          boxSizing: 'border-box',
         }}
       >
         {isScanning && (
@@ -280,34 +281,39 @@ export default function DesignPreviewPanel({
           </div>
         )}
         <div
-  style={{
-    width: 'fit-content',
-    minWidth: '100%',
-    minHeight: '100%',
-    paddingBottom: 12,
-  }}
->
-  <div
-    style={{
-      ...getPreviewBackgroundStyle(previewBackground, customPreviewColor),
-      position: 'relative',
-      width: `${previewCanvasW * totalScale}px`,
-      height: `${previewCanvasH * totalScale}px`,
-      borderRadius: 12,
-      overflow: 'hidden',
-      boxShadow: '0 12px 50px rgba(0,0,0,0.55)',
-    }}
-  >
-    <canvas
-      ref={previewCanvasRef}
-      style={{
-        display: 'block',
-        width: '100%',
-        height: '100%',
-      }}
-    />
-  </div>
-</div>
+          style={{
+            width: '100%',
+            minWidth: '100%',
+            minHeight: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxSizing: 'border-box',
+          }}
+        >
+          <div
+            style={{
+              position: 'relative',
+              width: `${previewCanvasW * totalScale}px`,
+              height: `${previewCanvasH * totalScale}px`,
+              flexShrink: 0,
+              borderRadius: 12,
+              overflow: 'hidden',
+              background: 'transparent',
+              border: 'none',
+              outline: 'none',
+            }}
+          >
+            <canvas
+              ref={previewCanvasRef}
+              style={{
+                display: 'block',
+                width: '100%',
+                height: '100%',
+              }}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );
