@@ -484,6 +484,7 @@ export default function ScanResultsPanel({
         maxWidth: '100%',
         minWidth: 0,
         boxSizing: 'border-box',
+        overflowX: 'hidden',
       }}
     >
       <div style={{ display: 'grid', gap: 10 }}>
@@ -735,7 +736,7 @@ export default function ScanResultsPanel({
               <div
                 style={{
                   display: 'flex',
-                  flexWrap: 'nowrap',
+                  flexWrap: 'wrap',
                   gap: 6,
                   alignItems: 'center',
                 }}
@@ -748,8 +749,10 @@ export default function ScanResultsPanel({
                       setActionMessage(`Inspect Zoom set to ${z * 100}%.`);
                     }}
                     style={{
-                      padding: '7px 10px',
-                      minWidth: 52,
+                      padding: '6px 8px',
+                      minWidth: 0,
+                      flex: '1 1 44px',
+                      fontSize: 12,
                       fontWeight: inspectZoom === z ? 800 : 600,
                       outline: inspectZoom === z ? '2px solid #38bdf8' : undefined,
                     }}
