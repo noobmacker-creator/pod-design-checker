@@ -356,6 +356,7 @@ export default function BatchExportQueue({ onDownloadBatchZip, aboveFileControls
               color: '#e2e8f0',
               cursor: busy ? 'not-allowed' : 'pointer',
               lineHeight: 1.4,
+              minWidth: 0,
             }}
           >
             <input
@@ -365,7 +366,7 @@ export default function BatchExportQueue({ onDownloadBatchZip, aboveFileControls
               onChange={() => toggleSizeOption(option.id)}
               style={{ width: 14, height: 14, flexShrink: 0, marginTop: 2 }}
             />
-            <span>{option.checkboxLabel}</span>
+            <span style={{ minWidth: 0, flex: 1, wordBreak: 'break-word' }}>{option.checkboxLabel}</span>
           </label>
         ))}
       </div>

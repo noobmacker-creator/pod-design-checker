@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
+import type { CheckItem } from '../lib/podCheckerTypes';
 export type PreviewBackground = 'checker' | 'white' | 'black' | 'navy' | 'dark-grey' | 'red' | 'pink' | 'custom';
 
 export const PREVIEW_BACKGROUND_COLORS: Record<Exclude<PreviewBackground, 'checker' | 'custom'>, string> = {
@@ -63,7 +64,106 @@ type DesignPreviewPanelProps = {
   autoFixPreviewMode?: 'fixed' | 'original';
   setAutoFixPreviewMode?: React.Dispatch<React.SetStateAction<'fixed' | 'original'>>;
   isScanning?: boolean;
+  img?: HTMLImageElement | null;
+  checks?: CheckItem[];
 };
+
+function shirtNameFromLabel(label: string) {
+  return label.replace(/^Shirt Fit:\s*/, '');
+}
+
+function groupShirtFitChecks(checks: CheckItem[]) {
+  const shirtItems = checks.filter((item) => item.label.startsWith('Shirt Fit:'));
+  if (shirtItems.length === 0) return null;
+
+  const strongest = shirtItems.filter((i) => i.status === 'pass').map((i) => shirtNameFromLabel(i.label));
+  const checkFirst = shirtItems
+    .filter((i) => i.status === 'warn' || i.status === 'info')
+    .map((i) => shirtNameFromLabel(i.label));
+  const mayBlend = shirtItems.filter((i) => i.status === 'fail').map((i) => shirtNameFromLabel(i.label));
+
+  return { strongest, checkFirst, mayBlend };
+}
+
+function ShirtColourGuidancePanel({ checks }: { checks: CheckItem[] }) {
+  const groups = useMemo(() => groupShirtFitChecks(checks), [checks]);
+  const [pinnedOpen, setPinnedOpen] = useState(false);
+  const [hovered, setHovered] = useState(false);
+  const [focused, setFocused] = useState(false);
+
+  if (!groups) return null;
+
+  const expanded = pinnedOpen || hovered || focused;
+  const compactBest =
+    groups.strongest.length > 0 ? groups.strongest.join(', ') : 'No strong matches yet';
+
+  return (
+    <div
+      role="region"
+      aria-label="Shirt Colour Guidance"
+      aria-expanded={expanded}
+      tabIndex={0}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      onFocus={() => setFocused(true)}
+      onBlur={() => setFocused(false)}
+      onClick={() => setPinnedOpen((open) => !open)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          setPinnedOpen((open) => !open);
+        }
+      }}
+      style={{
+        position: 'absolute',
+        bottom: 14,
+        left: 14,
+        maxWidth: 300,
+        zIndex: 8,
+        padding: '10px 12px',
+        borderRadius: 12,
+        background: expanded ? 'rgba(2, 6, 23, 0.97)' : 'rgba(2, 6, 23, 0.62)',
+        border: '1px solid rgba(56, 189, 248, 0.35)',
+        backdropFilter: 'blur(8px)',
+        opacity: expanded ? 0.98 : 0.64,
+        transition: 'opacity 0.2s ease, background 0.2s ease',
+        cursor: 'pointer',
+        boxSizing: 'border-box',
+      }}
+    >
+      <div style={{ fontWeight: 800, fontSize: 12, color: '#f8fafc', marginBottom: expanded ? 8 : 4 }}>
+        Shirt Colour Guidance
+      </div>
+
+      {!expanded ? (
+        <div style={{ fontSize: 11, color: '#cbd5e1', lineHeight: 1.4 }}>
+          Best on: {compactBest}
+        </div>
+      ) : (
+        <div style={{ display: 'grid', gap: 8, fontSize: 11, lineHeight: 1.45, color: '#e2e8f0' }}>
+          {groups.strongest.length > 0 ? (
+            <div>
+              <div style={{ fontWeight: 800, color: '#86efac', marginBottom: 2 }}>Looks strongest on</div>
+              <div>{groups.strongest.join(', ')}</div>
+            </div>
+          ) : null}
+          {groups.checkFirst.length > 0 ? (
+            <div>
+              <div style={{ fontWeight: 800, color: '#fde68a', marginBottom: 2 }}>Check first</div>
+              <div>{groups.checkFirst.join(', ')}</div>
+            </div>
+          ) : null}
+          {groups.mayBlend.length > 0 ? (
+            <div>
+              <div style={{ fontWeight: 800, color: '#fca5a5', marginBottom: 2 }}>May blend</div>
+              <div>{groups.mayBlend.join(', ')}</div>
+            </div>
+          ) : null}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function DesignPreviewPanel({
   previewCanvasRef,
@@ -77,6 +177,8 @@ export default function DesignPreviewPanel({
   autoFixPreviewMode = 'fixed',
   setAutoFixPreviewMode,
   isScanning = false,
+  img = null,
+  checks = [],
 }: DesignPreviewPanelProps) {
   const [customPreviewColor, setCustomPreviewColor] = useState('#808080');
 
@@ -245,6 +347,8 @@ export default function DesignPreviewPanel({
           boxSizing: 'border-box',
         }}
       >
+        {img && checks.length > 0 ? <ShirtColourGuidancePanel checks={checks} /> : null}
+
         {isScanning && (
           <div
             style={{

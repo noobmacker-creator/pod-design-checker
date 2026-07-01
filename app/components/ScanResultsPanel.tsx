@@ -117,7 +117,7 @@ function CheckCard({ item, keyHint }: { item: CheckItem; keyHint: string }) {
 
 function Section({ title, items, emptyText, headingColor }: SectionProps) {
   return (
-    <div style={{ marginBottom: 18 }}>
+    <div style={{ marginBottom: 18, minWidth: 0, maxWidth: '100%' }}>
       <div
         style={{
           display: 'flex',
@@ -143,6 +143,9 @@ function Section({ title, items, emptyText, headingColor }: SectionProps) {
                 borderRadius: 10,
                 background: 'rgba(15,23,42,0.78)',
                 border: `1px solid ${statusColor(item.status)}44`,
+                minWidth: 0,
+                maxWidth: '100%',
+                boxSizing: 'border-box',
               }}
             >
               <div
@@ -624,9 +627,11 @@ export default function ScanResultsPanel({
         maxWidth: '100%',
         minWidth: 0,
         height: '100%',
-        minHeight: '100%',
+        maxHeight: '100%',
+        minHeight: 0,
         boxSizing: 'border-box',
         overflowX: 'hidden',
+        overflowY: 'auto',
         wordBreak: 'break-word',
         overflowWrap: 'anywhere',
       }}
