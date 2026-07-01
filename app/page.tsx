@@ -10,6 +10,8 @@ import {
   estimateThinLines,
   getEffectiveArtBounds,
   getDesignCanvasSize,
+  getShirtColourFitChecks,
+  runShirtColourFitDevTests,
 } from './lib/podCheckerUtils';
 import type { CheckStatus, ViewMode, PreviewSize, CheckItem } from './lib/podCheckerTypes';
 import { redbubblePresets } from './lib/redbubblePresets';
@@ -1030,7 +1032,7 @@ export default function Page() {
   const [thinLinePercent, setThinLinePercent] = useState(0);
 
   const [fakeTransparencyDetected, setFakeTransparencyDetected] = useState(false);
-  const [shirtFitTone, setShirtFitTone] = useState<'dark' | 'light' | 'colourful' | 'mid' | null>(null);
+  const [shirtFitChecks, setShirtFitChecks] = useState<CheckItem[]>([]);
   const [viewMode, setViewMode] = useState<ViewMode>('pod');
   const [previewSize, setPreviewSize] = useState<PreviewSize>(DEFAULT_PREVIEW_SIZE);
   const [inspectZoom, setInspectZoom] = useState(1);
@@ -1050,6 +1052,9 @@ export default function Page() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    if (process.env.NODE_ENV === 'development') {
+      runShirtColourFitDevTests();
+    }
     if (shouldAutoOpenStartupTutorial()) {
       const timer = window.setTimeout(() => setTutorialOpen(true), 400);
       return () => window.clearTimeout(timer);
@@ -1245,13 +1250,10 @@ export default function Page() {
     setSolidBackgroundBoxCheck(getSolidBackgroundBoxRiskCheck(imageData));
     if (devTiming) timingStages['Solid-background-box detection'] = performance.now() - stageStart;
 
-    // Shirt Colour Fit: estimate if the artwork is mostly dark, mostly light, or colourful.
-    // Only opaque pixels are counted so transparent areas are ignored.
+    // Shirt Colour Fit + White Background Risk: count opaque/near-white pixels.
     stageStart = devTiming ? performance.now() : 0;
     const data = imageData.data;
     let opaqueCount = 0;
-    let lumaSum = 0;
-    let colourfulnessSum = 0;
     let nearWhiteCount = 0;
     for (let i = 0; i < data.length; i += 4) {
       const alpha = data[i + 3];
@@ -1259,8 +1261,6 @@ export default function Page() {
       const r = data[i];
       const g = data[i + 1];
       const b = data[i + 2];
-      lumaSum += 0.299 * r + 0.587 * g + 0.114 * b;
-      colourfulnessSum += Math.max(r, g, b) - Math.min(r, g, b);
       // Count solid or near-white pixels for the White Background Risk check.
       if (r >= 240 && g >= 240 && b >= 240) {
         nearWhiteCount++;
@@ -1268,24 +1268,12 @@ export default function Page() {
       opaqueCount++;
     }
 
-    // White Background Risk: ratio of visible pixels that are solid/near-white.
+    // Shirt Colour Fit: compare composited artwork contrast per shirt colour.
     setWhitePixelRatio(opaqueCount === 0 ? 0 : nearWhiteCount / opaqueCount);
 
-    if (opaqueCount === 0) {
-      setShirtFitTone(null);
-    } else {
-      const avgLuma = lumaSum / opaqueCount;
-      const avgColourfulness = colourfulnessSum / opaqueCount;
-      if (avgColourfulness > 60) {
-        setShirtFitTone('colourful');
-      } else if (avgLuma < 90) {
-        setShirtFitTone('dark');
-      } else if (avgLuma > 170) {
-        setShirtFitTone('light');
-      } else {
-        setShirtFitTone('mid');
-      }
-    }
+    stageStart = devTiming ? performance.now() : 0;
+    const shirtChecks = getShirtColourFitChecks(imageData);
+    setShirtFitChecks(shirtChecks);
     if (devTiming) timingStages['Shirt-colour analysis'] = performance.now() - stageStart;
 
     if (devTiming && timingSnapshot) {
@@ -1568,68 +1556,6 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
     const aspectClose = Math.abs(aspect - targetCanvasAspect) < 0.01;
     const largerThanTarget = imgW >= targetCanvasW && imgH >= targetCanvasH;
 
-    // Shirt Colour Fit: compare the artwork tone against common shirt colours.
-    // Shirt tone groups: 'light' shirts, 'dark' shirts, and red (medium colourful).
-    const shirtColours: { name: string; tone: 'light' | 'dark' | 'red' }[] = [
-      { name: 'White', tone: 'light' },
-      { name: 'Black', tone: 'dark' },
-      { name: 'Dark Grey', tone: 'dark' },
-      { name: 'Navy', tone: 'dark' },
-      { name: 'Red', tone: 'red' },
-      { name: 'Pink', tone: 'light' },
-      { name: 'Light Blue', tone: 'light' },
-    ];
-
-    const shirtFitChecks: CheckItem[] = shirtColours.map((shirt) => {
-      let status: CheckStatus = 'warn';
-      let message = `Check first on ${shirt.name}. Some parts may blend into the shirt colour.`;
-
-      if (shirtFitTone === null) {
-        status = 'info';
-        message = `Could not measure artwork colours clearly for ${shirt.name}.`;
-      } else if (shirtFitTone === 'dark') {
-        if (shirt.tone === 'light') {
-          status = 'pass';
-          message = `Good fit on ${shirt.name}. Artwork should show clearly.`;
-        } else if (shirt.tone === 'dark') {
-          status = 'fail';
-          message = `Not recommended on ${shirt.name}. Dark artwork may disappear on dark shirts.`;
-        } else {
-          status = 'warn';
-          message = `Check first on ${shirt.name}. Some parts may blend into the shirt colour.`;
-        }
-      } else if (shirtFitTone === 'light') {
-        if (shirt.tone === 'dark') {
-          status = 'pass';
-          message = `Good fit on ${shirt.name}. Artwork should show clearly.`;
-        } else if (shirt.tone === 'light') {
-          status = 'fail';
-          message = `Not recommended on ${shirt.name}. Light artwork may disappear on light shirts.`;
-        } else {
-          status = 'warn';
-          message = `Check first on ${shirt.name}. Some parts may blend into the shirt colour.`;
-        }
-      } else if (shirtFitTone === 'colourful') {
-        if (shirt.tone === 'light') {
-          status = 'pass';
-          message = `Good fit on ${shirt.name}. Artwork should show clearly.`;
-        } else {
-          status = 'warn';
-          message = `Check first on ${shirt.name}. Some parts may blend into the shirt colour.`;
-        }
-      } else {
-        // 'mid' tone: not clearly dark or light, so always worth checking.
-        status = 'warn';
-        message = `Check first on ${shirt.name}. Some parts may blend into the shirt colour.`;
-      }
-
-      return {
-        label: `Shirt Fit: ${shirt.name}`,
-        status,
-        message,
-      };
-    });
-
     return [
       {
         label: 'Export Size Note',
@@ -1790,7 +1716,7 @@ message: "Safe but close to edge. For best results, use quick fix Auto Fix top l
     thinLinePercent,
     dpiMetadata,
     fakeTransparencyDetected,
-    shirtFitTone,
+    shirtFitChecks,
     whiteBackgroundCheck,
     whiteEdgeCheck,
     semiTransparencyCheck,
@@ -2083,7 +2009,7 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
     setSpecks(0);
     setThinLinePercent(0);
     setFakeTransparencyDetected(false);
-    setShirtFitTone(null);
+    setShirtFitChecks([]);
 
     setWhiteBackgroundCheck(null);
     setWhiteEdgeCheck(null);

@@ -1,3 +1,13 @@
+import type { CheckItem, CheckStatus } from './podCheckerTypes';
+import {
+  analyzeShirtVisibility,
+  SHIRT_COLOUR_PRESETS,
+  visibilityLevelMessage,
+  runShirtVisibilityDevTests,
+} from './shirtVisibility';
+
+export { SHIRT_COLOUR_PRESETS };
+
 export function statusColor(status: 'pass' | 'warn' | 'fail' | 'info') {
     switch (status) {
       case 'pass':
@@ -632,3 +642,38 @@ export function estimateThinLines(imageData: ImageData) {
   
     return { width: 900, height: 900 };
   }
+
+export function getShirtColourFitChecks(imageData: ImageData): CheckItem[] {
+  const devTiming = process.env.NODE_ENV === 'development';
+  if (devTiming) console.time('[Shirt Visibility]');
+  const results = analyzeShirtVisibility(imageData);
+  if (devTiming) {
+    console.timeEnd('[Shirt Visibility]');
+    console.info('[POD Checker] Shirt visibility scores (dev only):');
+    console.table(
+      results.map((r) => ({
+        colour: r.shirtName,
+        level: r.level,
+        score: Number(r.visibilityScore.toFixed(3)),
+        boundaryP8: Number(r.boundaryLowPercentileContrast.toFixed(2)),
+        visibleP8: Number(r.visiblePixelLowPercentileContrast.toFixed(2)),
+        edgeRet: Number(r.internalEdgeRetention.toFixed(2)),
+        semiRisk: r.semiTransparencyRisk,
+      })),
+    );
+  }
+
+  return results.map((m) => ({
+    label: `Shirt Fit: ${m.shirtName}`,
+    status: 'info' as const,
+    message: visibilityLevelMessage(m.level),
+    score: m.visibilityScore,
+    visibilityLevel: m.level,
+    semiTransparencyRisk: m.semiTransparencyRisk,
+  }));
+}
+
+/** Development-only synthetic tests — delegates to shirt visibility fixtures. */
+export function runShirtColourFitDevTests(): void {
+  runShirtVisibilityDevTests();
+}

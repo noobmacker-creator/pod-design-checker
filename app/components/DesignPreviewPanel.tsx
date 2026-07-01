@@ -2,6 +2,7 @@
 
 import React, { useMemo, useState } from 'react';
 import type { CheckItem } from '../lib/podCheckerTypes';
+import { groupShirtVisibilityFromChecks } from '../lib/shirtVisibility';
 export type PreviewBackground = 'checker' | 'white' | 'black' | 'navy' | 'dark-grey' | 'red' | 'pink' | 'custom';
 
 export const PREVIEW_BACKGROUND_COLORS: Record<Exclude<PreviewBackground, 'checker' | 'custom'>, string> = {
@@ -68,24 +69,11 @@ type DesignPreviewPanelProps = {
   checks?: CheckItem[];
 };
 
-function shirtNameFromLabel(label: string) {
-  return label.replace(/^Shirt Fit:\s*/, '');
-}
-
 function groupShirtFitChecks(checks: CheckItem[]) {
-  const shirtItems = checks.filter((item) => item.label.startsWith('Shirt Fit:'));
-  if (shirtItems.length === 0) return null;
-
-  const strongest = shirtItems.filter((i) => i.status === 'pass').map((i) => shirtNameFromLabel(i.label));
-  const checkFirst = shirtItems
-    .filter((i) => i.status === 'warn' || i.status === 'info')
-    .map((i) => shirtNameFromLabel(i.label));
-  const mayBlend = shirtItems.filter((i) => i.status === 'fail').map((i) => shirtNameFromLabel(i.label));
-
-  return { strongest, checkFirst, mayBlend };
+  return groupShirtVisibilityFromChecks(checks);
 }
 
-function ShirtColourGuidancePanel({ checks }: { checks: CheckItem[] }) {
+function ShirtColourVisibilityPanel({ checks }: { checks: CheckItem[] }) {
   const groups = useMemo(() => groupShirtFitChecks(checks), [checks]);
   const [pinnedOpen, setPinnedOpen] = useState(false);
   const [hovered, setHovered] = useState(false);
@@ -94,13 +82,13 @@ function ShirtColourGuidancePanel({ checks }: { checks: CheckItem[] }) {
   if (!groups) return null;
 
   const expanded = pinnedOpen || hovered || focused;
-  const compactBest =
-    groups.strongest.length > 0 ? groups.strongest.join(', ') : 'No strong matches yet';
+  const compactStrong =
+    groups.strong.length > 0 ? groups.strong.join(', ') : 'Preview recommended';
 
   return (
     <div
       role="region"
-      aria-label="Shirt Colour Guidance"
+      aria-label="Shirt Colour Visibility"
       aria-expanded={expanded}
       tabIndex={0}
       onMouseEnter={() => setHovered(true)}
@@ -132,31 +120,39 @@ function ShirtColourGuidancePanel({ checks }: { checks: CheckItem[] }) {
       }}
     >
       <div style={{ fontWeight: 800, fontSize: 12, color: '#f8fafc', marginBottom: expanded ? 8 : 4 }}>
-        Shirt Colour Guidance
+        Shirt Colour Visibility
       </div>
 
       {!expanded ? (
         <div style={{ fontSize: 11, color: '#cbd5e1', lineHeight: 1.4 }}>
-          Best on: {compactBest}
+          Strong visibility: {compactStrong}
         </div>
       ) : (
         <div style={{ display: 'grid', gap: 8, fontSize: 11, lineHeight: 1.45, color: '#e2e8f0' }}>
-          {groups.strongest.length > 0 ? (
+          {groups.strong.length > 0 ? (
             <div>
-              <div style={{ fontWeight: 800, color: '#86efac', marginBottom: 2 }}>Looks strongest on</div>
-              <div>{groups.strongest.join(', ')}</div>
+              <div style={{ fontWeight: 800, color: '#86efac', marginBottom: 2 }}>Strong visibility</div>
+              <div>{groups.strong.join(', ')}</div>
             </div>
           ) : null}
-          {groups.checkFirst.length > 0 ? (
+          {groups.preview.length > 0 ? (
             <div>
-              <div style={{ fontWeight: 800, color: '#fde68a', marginBottom: 2 }}>Check first</div>
-              <div>{groups.checkFirst.join(', ')}</div>
+              <div style={{ fontWeight: 800, color: '#fde68a', marginBottom: 2 }}>Preview recommended</div>
+              <div>{groups.preview.join(', ')}</div>
             </div>
           ) : null}
-          {groups.mayBlend.length > 0 ? (
+          {groups.low.length > 0 ? (
             <div>
-              <div style={{ fontWeight: 800, color: '#fca5a5', marginBottom: 2 }}>May blend</div>
-              <div>{groups.mayBlend.join(', ')}</div>
+              <div style={{ fontWeight: 800, color: '#fca5a5', marginBottom: 2 }}>Details may blend</div>
+              <div>{groups.low.join(', ')}</div>
+            </div>
+          ) : null}
+          {groups.semiTransparencyRisk ? (
+            <div>
+              <div style={{ fontWeight: 800, color: '#fcd34d', marginBottom: 2 }}>Print note</div>
+              <div>
+                Semi-transparent areas may print differently, especially on coloured or dark DTG garments.
+              </div>
             </div>
           ) : null}
         </div>
@@ -347,7 +343,7 @@ export default function DesignPreviewPanel({
           boxSizing: 'border-box',
         }}
       >
-        {img && checks.length > 0 ? <ShirtColourGuidancePanel checks={checks} /> : null}
+        {img && checks.length > 0 ? <ShirtColourVisibilityPanel checks={checks} /> : null}
 
         {isScanning && (
           <div

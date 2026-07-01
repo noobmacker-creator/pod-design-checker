@@ -303,9 +303,10 @@ export default function ScanResultsPanel({
 
   let shirtFitCard: CheckItem | null = null;
   if (shirtFitItems.length > 0) {
-    const goodFit = shirtFitItems.filter((i) => i.status === 'pass').map(shirtName);
-    const checkFirst = shirtFitItems.filter((i) => i.status === 'warn').map(shirtName);
-    const notRecommended = shirtFitItems.filter((i) => i.status === 'fail').map(shirtName);
+    const strongVis = shirtFitItems.filter((i) => i.visibilityLevel === 'strong').map(shirtName);
+    const previewVis = shirtFitItems.filter((i) => i.visibilityLevel === 'preview').map(shirtName);
+    const lowVis = shirtFitItems.filter((i) => i.visibilityLevel === 'low').map(shirtName);
+    const hasSemiRisk = shirtFitItems.some((i) => i.semiTransparencyRisk);
 
     shirtFitCard = {
       label: 'Shirt Colour Preview',
@@ -313,9 +314,12 @@ export default function ScanResultsPanel({
       message: [
         'Some shirt colours may suit this artwork better than others. Use the preview background to choose the best colours.',
         '',
-        `Good fit: ${goodFit.length ? goodFit.join(', ') : 'none'}`,
-        `Check first: ${checkFirst.length ? checkFirst.join(', ') : 'none'}`,
-        `Not recommended: ${notRecommended.length ? notRecommended.join(', ') : 'none'}`,
+        `Strong visibility: ${strongVis.length ? strongVis.join(', ') : 'none'}`,
+        `Preview recommended: ${previewVis.length ? previewVis.join(', ') : 'none'}`,
+        `May blend: ${lowVis.length ? lowVis.join(', ') : 'none'}`,
+        ...(hasSemiRisk
+          ? ['', 'Print note: Semi-transparent areas may print differently on coloured or dark DTG garments.']
+          : []),
       ].join('\n'),
     };
   }
@@ -613,6 +617,7 @@ export default function ScanResultsPanel({
 
   return (
     <div
+      className="scan-results-panel"
       style={{
         border: '1px solid rgba(255,255,255,0.08)',
         borderRadius: 20,
@@ -634,8 +639,15 @@ export default function ScanResultsPanel({
         overflowY: 'auto',
         wordBreak: 'break-word',
         overflowWrap: 'anywhere',
+        contain: 'inline-size',
       }}
     >
+      <style>{`
+        .scan-results-panel button {
+          max-width: 100%;
+          box-sizing: border-box;
+        }
+      `}</style>
       <div style={{ ...directChildStyle, display: 'grid', gap: 10, overflow: 'hidden' }}>
         <div
           style={{
