@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   BATCH_MULTI_EXPORT_SIZE_OPTIONS,
   type BatchExportSizeSelection,
 } from '../lib/batchExportSizeOptions';
-
+import type { BatchQueueItem } from '../lib/batchQueueUtils';
 type BatchExportItem = {
   id: string;
   file: File;
@@ -63,18 +63,19 @@ export type BatchExportSizeOption = {
 };
 
 type BatchExportQueueProps = {
+  queueItems: BatchQueueItem[];
   onDownloadBatchZip: (
     files: File[],
     sizes: BatchExportSizeSelection[],
     onProgress: (message: string) => void,
   ) => Promise<void>;
-  aboveFileControls?: React.ReactNode;
 };
 
 function getFileTypeLabel(file: File): string {
   const ext = file.name.split('.').pop()?.toLowerCase() || '';
   if (ext === 'png' || file.type === 'image/png') return 'PNG';
   if (ext === 'jpg' || ext === 'jpeg' || file.type === 'image/jpeg') return 'JPEG';
+  if (ext === 'webp' || file.type === 'image/webp') return 'WEBP';
   return ext ? ext.toUpperCase() : 'Unknown';
 }
 
@@ -141,10 +142,10 @@ const DEFAULT_SIZE_SELECTIONS: Record<string, boolean> = Object.fromEntries(
   BATCH_MULTI_EXPORT_SIZE_OPTIONS.map((option) => [option.id, false]),
 );
 
-export default function BatchExportQueue({ onDownloadBatchZip, aboveFileControls }: BatchExportQueueProps) {
-  const inputRef = useRef<HTMLInputElement>(null);
+export default function BatchExportQueue({ queueItems, onDownloadBatchZip }: BatchExportQueueProps) {
   const [items, setItems] = useState<BatchExportItem[]>([]);
   const [busy, setBusy] = useState(false);
+  const [loadingQueue, setLoadingQueue] = useState(false);
   const [selectedSizeIds, setSelectedSizeIds] = useState<Record<string, boolean>>({
     ...DEFAULT_SIZE_SELECTIONS,
   });
@@ -152,12 +153,54 @@ export default function BatchExportQueue({ onDownloadBatchZip, aboveFileControls
   const [progressMessage, setProgressMessage] = useState('');
   const [filter, setFilter] = useState<BatchFilter>('all');
 
+  useEffect(() => {
+    let cancelled = false;
+
+    async function syncQueue() {
+      if (queueItems.length === 0) {
+        setItems([]);
+        return;
+      }
+
+      setLoadingQueue(true);
+      const previousSelection = new Map(items.map((item) => [item.id, item.selected]));
+      const analyzed = await Promise.all(
+        queueItems.map(async (queueItem) => {
+          const result = await loadBatchExportItem(queueItem.file);
+          return {
+            id: queueItem.id,
+            file: queueItem.file,
+            selected: previousSelection.has(queueItem.id)
+              ? Boolean(previousSelection.get(queueItem.id))
+              : true,
+            ...result,
+            fileName: queueItem.filename,
+            fileType: queueItem.type,
+          };
+        }),
+      );
+
+      if (!cancelled) {
+        setItems(analyzed);
+        setLoadingQueue(false);
+      }
+    }
+
+    void syncQueue();
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [queueItems]);
+
   const selectedSizes = BATCH_MULTI_EXPORT_SIZE_OPTIONS.filter(
     (option) => selectedSizeIds[option.id],
   );
   const selectedDesignCount = items.filter((item) => item.selected && !item.loadError).length;
   const totalOutputCount = selectedDesignCount * selectedSizes.length;
-  const canDownload = selectedDesignCount > 0 && selectedSizes.length > 0 && !busy;
+  const canDownload =
+    selectedDesignCount > 0 && selectedSizes.length > 0 && !busy && !loadingQueue;
 
   const toggleSizeOption = (id: string) => {
     setSelectedSizeIds((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -191,51 +234,16 @@ export default function BatchExportQueue({ onDownloadBatchZip, aboveFileControls
     flexShrink: 0,
   };
 
-  async function handleFilesSelected(e: React.ChangeEvent<HTMLInputElement>) {
-    const fileList = e.target.files;
-    if (!fileList || fileList.length === 0) return;
-
-    setBusy(true);
-    setMessage('');
-    const selectedFiles = Array.from(fileList);
-    const analyzed = await Promise.all(
-      selectedFiles.map(async (file) => {
-        const result = await loadBatchExportItem(file);
-        return {
-          id: `${file.name}-${file.size}-${file.lastModified}`,
-          file,
-          selected: true,
-          ...result,
-        };
-      }),
-    );
-
-    setItems(analyzed);
-    setBusy(false);
-    e.target.value = '';
-  }
-
-  function removeItem(id: string) {
-    setItems((prev) => prev.filter((item) => item.id !== id));
-  }
-
-  function removeSelected() {
-    setItems((prev) => prev.filter((item) => !item.selected));
-  }
-
-  function clearAll() {
-    setItems([]);
-    setMessage('');
-    setProgressMessage('');
+  function deselectAll() {
+    setItems((prev) => prev.map((item) => ({ ...item, selected: false })));
   }
 
   function resetBatch() {
-    setItems([]);
     setMessage('');
     setProgressMessage('');
     setFilter('all');
     setSelectedSizeIds({ ...DEFAULT_SIZE_SELECTIONS });
-    if (inputRef.current) inputRef.current.value = '';
+    setItems((prev) => prev.map((item) => ({ ...item, selected: false })));
   }
 
   function toggleItem(id: string) {
@@ -245,8 +253,8 @@ export default function BatchExportQueue({ onDownloadBatchZip, aboveFileControls
   }
 
   async function handleDownloadClick() {
-    if (items.length === 0) {
-      setMessage('Add designs before building a batch export.');
+    if (queueItems.length === 0) {
+      setMessage('Add designs to the queue before building a batch export.');
       return;
     }
 
@@ -297,41 +305,13 @@ export default function BatchExportQueue({ onDownloadBatchZip, aboveFileControls
         overflowX: 'hidden',
       }}
     >
-      <div style={{ fontSize: 14, color: '#e2e8f0', fontWeight: 800 }}>Batch Export Queue</div>
+      <div style={{ fontSize: 14, color: '#e2e8f0', fontWeight: 800 }}>Batch Export</div>
       <div style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.45 }}>
-        Add multiple designs, choose export sizes, then download one ZIP with ready PNG files.
+        Choose export sizes, select queued designs, then download one ZIP with ready PNG files.
       </div>
-      {aboveFileControls}
-      <input
-        ref={inputRef}
-        type="file"
-        accept=".png,.jpg,.jpeg,image/png,image/jpeg"
-        multiple
-        onChange={(e) => {
-          void handleFilesSelected(e);
-        }}
-        style={{ display: 'none' }}
-      />
-      <button
-        type="button"
-        onClick={() => inputRef.current?.click()}
-        disabled={busy}
-        style={{
-          padding: '8px 12px',
-          borderRadius: 10,
-          fontSize: 12,
-          fontWeight: 800,
-          background: 'rgba(37, 99, 235, 0.22)',
-          color: '#bfdbfe',
-          border: '1px solid rgba(147, 197, 253, 0.45)',
-          cursor: busy ? 'not-allowed' : 'pointer',
-          width: '100%',
-          boxSizing: 'border-box',
-          opacity: busy ? 0.65 : 1,
-        }}
-      >
-        {busy && items.length === 0 ? 'Loading files...' : 'Add PNG / JPG designs'}
-      </button>
+      {loadingQueue ? (
+        <div style={{ fontSize: 12, color: '#94a3b8', lineHeight: 1.45 }}>Loading queued files...</div>
+      ) : null}
       <div style={{ fontSize: 12, color: '#cbd5e1', fontWeight: 800 }}>Choose Export Sizes</div>
       <div
         style={{
@@ -382,9 +362,9 @@ export default function BatchExportQueue({ onDownloadBatchZip, aboveFileControls
           {totalOutputCount === 1 ? '' : 's'}
         </div>
       ) : null}
-      {items.length === 0 ? (
+      {queueItems.length === 0 ? (
         <div style={{ fontSize: 12, color: '#94a3b8', lineHeight: 1.45 }}>
-          No batch files added yet.
+          Add files to the queue above to begin.
         </div>
       ) : (
         <div style={{ display: 'grid', gap: 6 }}>
@@ -406,23 +386,23 @@ export default function BatchExportQueue({ onDownloadBatchZip, aboveFileControls
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
             <button
               type="button"
-              onClick={removeSelected}
-              disabled={busy || !items.some((item) => item.selected)}
+              onClick={deselectAll}
+              disabled={busy || loadingQueue || !items.some((item) => item.selected)}
               style={{
                 ...removeButtonStyle,
-                opacity: busy || !items.some((item) => item.selected) ? 0.55 : 1,
-                cursor: busy || !items.some((item) => item.selected) ? 'not-allowed' : 'pointer',
+                opacity: busy || loadingQueue || !items.some((item) => item.selected) ? 0.55 : 1,
+                cursor:
+                  busy || loadingQueue || !items.some((item) => item.selected)
+                    ? 'not-allowed'
+                    : 'pointer',
               }}
             >
-              Remove selected
-            </button>
-            <button type="button" onClick={clearAll} disabled={busy} style={removeButtonStyle}>
-              Clear All
+              Deselect all
             </button>
             <button
               type="button"
               onClick={resetBatch}
-              disabled={busy}
+              disabled={busy || loadingQueue}
               style={removeButtonStyle}
             >
               Reset Batch
@@ -466,7 +446,7 @@ export default function BatchExportQueue({ onDownloadBatchZip, aboveFileControls
                   <input
                     type="checkbox"
                     checked={item.selected}
-                    disabled={item.loadError || busy}
+                    disabled={item.loadError || busy || loadingQueue}
                     onChange={() => toggleItem(item.id)}
                     style={{ width: 14, height: 14, flexShrink: 0 }}
                   />
@@ -481,14 +461,6 @@ export default function BatchExportQueue({ onDownloadBatchZip, aboveFileControls
                     {item.fileName}
                   </span>
                 </label>
-                <button
-                  type="button"
-                  onClick={() => removeItem(item.id)}
-                  disabled={busy}
-                  style={removeButtonStyle}
-                >
-                  Remove
-                </button>
               </div>
               <div style={{ fontSize: 11, color: '#94a3b8', lineHeight: 1.45, paddingLeft: 22 }}>
                 {item.loadError

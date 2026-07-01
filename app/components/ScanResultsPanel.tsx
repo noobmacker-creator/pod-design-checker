@@ -6,7 +6,9 @@ import { statusColor, statusIcon } from '../lib/podCheckerUtils';
 import { podCheckerV4Notes } from '../content/podCheckerV4Notes';
 import BatchPODChecker from './BatchPODChecker';
 import BatchExportQueue from './BatchExportQueue';
+import BatchFileQueue from './BatchFileQueue';
 import PODUploadNotes from './PODUploadNotes';
+import type { BatchQueueItem } from '../lib/batchQueueUtils';
 
 type Bounds = {
   x: number;
@@ -216,6 +218,7 @@ export default function ScanResultsPanel({
   const [toolsTab, setToolsTab] = useState<'export' | 'batch'>('export');
   const [batchSubTab, setBatchSubTab] = useState<'check' | 'export'>('check');
   const [whatsNewOpen, setWhatsNewOpen] = useState(false);
+  const [batchQueue, setBatchQueue] = useState<BatchQueueItem[]>([]);
 
   const toolsTabButtonStyle = (active: boolean): React.CSSProperties => ({
     flex: '1 1 0',
@@ -693,6 +696,7 @@ export default function ScanResultsPanel({
 
               {toolsTab === 'batch' ? (
                 <div style={{ display: 'grid', gap: 8, minWidth: 0 }}>
+                  <BatchFileQueue items={batchQueue} onItemsChange={setBatchQueue} />
                   <div style={{ display: 'flex', flexWrap: 'nowrap', gap: 6, minWidth: 0, maxWidth: '100%' }}>
                     <button
                       type="button"
@@ -718,10 +722,16 @@ export default function ScanResultsPanel({
                     </button>
                   </div>
                   {batchSubTab === 'check' && onLoadFileFromBatch ? (
-                    <BatchPODChecker onOpenInChecker={onLoadFileFromBatch} />
+                    <BatchPODChecker
+                      queueItems={batchQueue}
+                      onOpenInChecker={onLoadFileFromBatch}
+                    />
                   ) : null}
                   {batchSubTab === 'export' && onDownloadBatchExportZip ? (
-                    <BatchExportQueue onDownloadBatchZip={onDownloadBatchExportZip} />
+                    <BatchExportQueue
+                      queueItems={batchQueue}
+                      onDownloadBatchZip={onDownloadBatchExportZip}
+                    />
                   ) : null}
                   {uploadNotesPanel}
                 </div>
