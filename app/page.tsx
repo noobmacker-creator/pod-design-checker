@@ -30,6 +30,32 @@ type Bounds = {
   h: number;
 };
 
+type ScanTimingSnapshot = {
+  scanStart: number;
+  fileReadMs: number;
+  dpiProfileMs: number;
+  decodeMs: number;
+};
+
+const isDevScannerTimingEnabled = () => process.env.NODE_ENV === 'development';
+
+function formatTimingMs(ms: number): string {
+  return `${Math.round(ms)} ms`;
+}
+
+function logScannerTiming(stages: Record<string, number>, totalMs: number) {
+  if (!isDevScannerTimingEnabled()) return;
+
+  console.group('POD Checker Scanner Timing');
+  const tableRows = Object.entries(stages).map(([stage, ms]) => ({
+    Stage: stage,
+    Duration: formatTimingMs(ms),
+  }));
+  console.table(tableRows);
+  console.log(`Total scan: ${formatTimingMs(totalMs)}`);
+  console.groupEnd();
+}
+
 const CANVAS_W = 4200;
 const CANVAS_H = 4800;
 const CANVAS_ASPECT = CANVAS_W / CANVAS_H;
@@ -151,89 +177,256 @@ function getSemiTransparencyRiskCheck(imageData: ImageData): CheckItem {
   };
 }
 
-// Stray Speck Check: only counts small blobs outside an expanded artwork safe area.
+// Stray Speck Check: only counts small blobs outside an expanded structural-artwork safe area.
+// Safe area is built from the union of all connected components larger than maxSpeckPixels.
 function detectStraySpecks(imageData: ImageData, thresholdAlpha = 40, maxSpeckPixels = 12): number {
   const { width, height, data } = imageData;
+  const pixelCount = width * height;
+  const visited = new Uint8Array(pixelCount);
+  const stack = new Int32Array(pixelCount);
 
-  let minX = width;
-  let minY = height;
-  let maxX = -1;
-  let maxY = -1;
+  const dx8 = [-1, 1, 0, 0, -1, 1, -1, 1];
+  const dy8 = [0, 0, -1, 1, -1, -1, 1, 1];
 
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      const i = (y * width + x) * 4;
-      if (data[i + 3] > thresholdAlpha) {
-        if (x < minX) minX = x;
-        if (y < minY) minY = y;
-        if (x > maxX) maxX = x;
-        if (y > maxY) maxY = y;
+  const isSolidAt = (idx: number) => data[(idx << 2) + 3] > thresholdAlpha;
+
+  type BlobStats = {
+    size: number;
+    minX: number;
+    minY: number;
+    maxX: number;
+    maxY: number;
+    touchesSafeArea: boolean;
+  };
+
+  const floodFill = (
+    startIdx: number,
+    markVisited: Uint8Array,
+    trackSafeTouch: boolean,
+    safeMinX: number,
+    safeMinY: number,
+    safeMaxX: number,
+    safeMaxY: number,
+  ): BlobStats => {
+    let stackLen = 0;
+    stack[stackLen++] = startIdx;
+    let size = 0;
+    let minX = width;
+    let minY = height;
+    let maxX = -1;
+    let maxY = -1;
+    let touchesSafeArea = false;
+
+    while (stackLen > 0) {
+      const idx = stack[--stackLen];
+      size++;
+      const x = idx % width;
+      const y = (idx / width) | 0;
+
+      if (x < minX) minX = x;
+      if (x > maxX) maxX = x;
+      if (y < minY) minY = y;
+      if (y > maxY) maxY = y;
+
+      if (
+        trackSafeTouch &&
+        x >= safeMinX &&
+        x <= safeMaxX &&
+        y >= safeMinY &&
+        y <= safeMaxY
+      ) {
+        touchesSafeArea = true;
       }
+
+      for (let d = 0; d < 8; d++) {
+        const nx = x + dx8[d];
+        const ny = y + dy8[d];
+        if (nx < 0 || ny < 0 || nx >= width || ny >= height) continue;
+        const ni = ny * width + nx;
+        if (markVisited[ni]) continue;
+        markVisited[ni] = 1;
+        if (isSolidAt(ni)) stack[stackLen++] = ni;
+      }
+    }
+
+    return { size, minX, minY, maxX, maxY, touchesSafeArea };
+  };
+
+  // Pass 1: union bounds of every structural component (larger than maxSpeckPixels).
+  let hasStructural = false;
+  let mainMinX = width;
+  let mainMinY = height;
+  let mainMaxX = -1;
+  let mainMaxY = -1;
+
+  for (let idx = 0; idx < pixelCount; idx++) {
+    if (visited[idx]) continue;
+    visited[idx] = 1;
+    if (!isSolidAt(idx)) continue;
+
+    const blob = floodFill(idx, visited, false, 0, 0, 0, 0);
+    if (blob.size > maxSpeckPixels) {
+      hasStructural = true;
+      if (blob.minX < mainMinX) mainMinX = blob.minX;
+      if (blob.minY < mainMinY) mainMinY = blob.minY;
+      if (blob.maxX > mainMaxX) mainMaxX = blob.maxX;
+      if (blob.maxY > mainMaxY) mainMaxY = blob.maxY;
     }
   }
 
-  if (maxX === -1) return 0;
+  if (!hasStructural) return 0;
 
   const padding = Math.max(40, Math.round(width * 0.02), Math.round(height * 0.02));
-  const safeMinX = Math.max(0, minX - padding);
-  const safeMinY = Math.max(0, minY - padding);
-  const safeMaxX = Math.min(width - 1, maxX + padding);
-  const safeMaxY = Math.min(height - 1, maxY + padding);
+  const safeMinX = Math.max(0, mainMinX - padding);
+  const safeMinY = Math.max(0, mainMinY - padding);
+  const safeMaxX = Math.min(width - 1, mainMaxX + padding);
+  const safeMaxY = Math.min(height - 1, mainMaxY + padding);
 
-  const isInsideSafeArea = (x: number, y: number) =>
-    x >= safeMinX && x <= safeMaxX && y >= safeMinY && y <= safeMaxY;
-
-  const visited = new Uint8Array(width * height);
+  // Pass 2: count small blobs outside the expanded structural-artwork safe area only.
+  visited.fill(0);
   let specks = 0;
-
-  function isSolid(x: number, y: number) {
-    const i = (y * width + x) * 4;
-    return data[i + 3] > thresholdAlpha;
-  }
 
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
-      const pixelIndex = y * width + x;
-      if (visited[pixelIndex]) continue;
-      visited[pixelIndex] = 1;
-      if (!isSolid(x, y)) continue;
+      if (x >= safeMinX && x <= safeMaxX && y >= safeMinY && y <= safeMaxY) continue;
 
-      const stack: [number, number][] = [[x, y]];
-      let blobSize = 0;
-      let touchesSafeArea = false;
+      const idx = y * width + x;
+      if (visited[idx]) continue;
+      visited[idx] = 1;
+      if (!isSolidAt(idx)) continue;
 
-      while (stack.length > 0) {
-        const [cx, cy] = stack.pop()!;
-        blobSize++;
-        if (isInsideSafeArea(cx, cy)) touchesSafeArea = true;
-
-        const neighbors = [
-          [cx - 1, cy],
-          [cx + 1, cy],
-          [cx, cy - 1],
-          [cx, cy + 1],
-          [cx - 1, cy - 1],
-          [cx + 1, cy - 1],
-          [cx - 1, cy + 1],
-          [cx + 1, cy + 1],
-        ];
-
-        for (const [nx, ny] of neighbors) {
-          if (nx < 0 || ny < 0 || nx >= width || ny >= height) continue;
-          const ni = ny * width + nx;
-          if (visited[ni]) continue;
-          visited[ni] = 1;
-          if (isSolid(nx, ny)) stack.push([nx, ny]);
-        }
-      }
-
-      if (blobSize <= maxSpeckPixels && !touchesSafeArea) {
+      const blob = floodFill(idx, visited, true, safeMinX, safeMinY, safeMaxX, safeMaxY);
+      if (blob.size <= maxSpeckPixels && !blob.touchesSafeArea) {
         specks++;
       }
     }
   }
 
   return specks;
+}
+
+type StraySpeckTestResult = {
+  name: string;
+  specks: number;
+  expected: string;
+};
+
+function createStraySpeckTestImage(
+  width: number,
+  height: number,
+  paint: (data: Uint8ClampedArray, x: number, y: number, i: number) => void,
+): ImageData {
+  const data = new Uint8ClampedArray(width * height * 4);
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      paint(data, x, y, (y * width + x) * 4);
+    }
+  }
+  return new ImageData(data, width, height);
+}
+
+function runStraySpeckDetectorTests(): StraySpeckTestResult[] {
+  const solid = (data: Uint8ClampedArray, i: number) => {
+    data[i] = 20;
+    data[i + 1] = 20;
+    data[i + 2] = 20;
+    data[i + 3] = 255;
+  };
+
+  const tests: StraySpeckTestResult[] = [];
+
+  const cleanArt = createStraySpeckTestImage(220, 220, (data, x, y, i) => {
+    if (x >= 60 && x <= 160 && y >= 60 && y <= 160) solid(data, i);
+  });
+  tests.push({
+    name: 'Clean artwork, no stray specks',
+    specks: detectStraySpecks(cleanArt),
+    expected: '0',
+  });
+
+  const oneSpeck = createStraySpeckTestImage(220, 220, (data, x, y, i) => {
+    if (x >= 60 && x <= 160 && y >= 60 && y <= 160) solid(data, i);
+    if (x === 8 && y === 8) solid(data, i);
+  });
+  tests.push({
+    name: 'One isolated 1-pixel speck outside artwork',
+    specks: detectStraySpecks(oneSpeck),
+    expected: '1',
+  });
+
+  const manySpecks = createStraySpeckTestImage(220, 220, (data, x, y, i) => {
+    if (x >= 60 && x <= 160 && y >= 60 && y <= 160) solid(data, i);
+    if (x === 8 && y === 8) solid(data, i);
+    if (x === 12 && y === 8) solid(data, i);
+    if (x === 205 && y === 205) solid(data, i);
+    if (x === 206 && y === 205) solid(data, i);
+  });
+  tests.push({
+    name: 'Several isolated tiny specks outside artwork',
+    specks: detectStraySpecks(manySpecks),
+    expected: '3',
+  });
+
+  const connectedDetail = createStraySpeckTestImage(220, 220, (data, x, y, i) => {
+    if (x >= 60 && x <= 160 && y >= 60 && y <= 160) solid(data, i);
+    if (x === 161 && y >= 100 && y <= 104) solid(data, i);
+  });
+  tests.push({
+    name: 'Tiny detail connected to main artwork',
+    specks: detectStraySpecks(connectedDetail),
+    expected: '0',
+  });
+
+  const distressedInside = createStraySpeckTestImage(220, 220, (data, x, y, i) => {
+    if (x >= 60 && x <= 160 && y >= 60 && y <= 160) {
+      if ((x + y) % 9 !== 0) solid(data, i);
+    }
+  });
+  tests.push({
+    name: 'Intentional distressed texture inside artwork',
+    specks: detectStraySpecks(distressedInside),
+    expected: '0',
+  });
+
+  const disconnectedLetters = createStraySpeckTestImage(300, 200, (data, x, y, i) => {
+    if (x >= 40 && x <= 55 && y >= 80 && y <= 120) solid(data, i);
+    if (x >= 200 && x <= 215 && y >= 80 && y <= 120) solid(data, i);
+  });
+  tests.push({
+    name: 'Multiple disconnected letters',
+    specks: detectStraySpecks(disconnectedLetters),
+    expected: '0',
+  });
+
+  const starsNearDesign = createStraySpeckTestImage(220, 220, (data, x, y, i) => {
+    if (x >= 60 && x <= 160 && y >= 60 && y <= 160) solid(data, i);
+    if (x >= 162 && x <= 168 && y >= 100 && y <= 112) solid(data, i);
+  });
+  tests.push({
+    name: 'Small stars near the main design',
+    specks: detectStraySpecks(starsNearDesign),
+    expected: '0',
+  });
+
+  const distressedWithStray = createStraySpeckTestImage(220, 220, (data, x, y, i) => {
+    if (x >= 60 && x <= 160 && y >= 60 && y <= 160) {
+      if ((x + y) % 9 !== 0) solid(data, i);
+    }
+    if (x === 5 && y === 5) solid(data, i);
+  });
+  tests.push({
+    name: 'One real stray mark outside a distressed design',
+    specks: detectStraySpecks(distressedWithStray),
+    expected: '1',
+  });
+
+  return tests;
+}
+
+if (typeof window !== 'undefined' && isDevScannerTimingEnabled()) {
+  (
+    window as Window & { __runStraySpeckTests?: () => StraySpeckTestResult[] }
+  ).__runStraySpeckTests = runStraySpeckDetectorTests;
 }
 
 // Cut-Off Edge Risk: looks for visible artwork sitting in a small band around the
@@ -876,6 +1069,7 @@ export default function Page() {
 
   const previewCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const analysisCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const scanTimingRef = useRef<ScanTimingSnapshot | null>(null);
 
   useEffect(() => {
     const shirt = new Image();
@@ -897,26 +1091,59 @@ export default function Page() {
     if (!img) return;
 
     const canvas = analysisCanvasRef.current;
-    if (!canvas) return;
+    if (!canvas) {
+      setIsScanning(false);
+      return;
+    }
 
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
-    if (!ctx) return;
+    if (!ctx) {
+      setIsScanning(false);
+      return;
+    }
+
+    const devTiming = isDevScannerTimingEnabled();
+    const timingStages: Record<string, number> = {};
+    const timingSnapshot = scanTimingRef.current;
+
+    if (timingSnapshot) {
+      timingStages['File read'] = timingSnapshot.fileReadMs;
+      timingStages['DPI and colour profile'] = timingSnapshot.dpiProfileMs;
+      timingStages['Image decode'] = timingSnapshot.decodeMs;
+    }
+
+    let stageStart = devTiming ? performance.now() : 0;
 
     canvas.width = img.naturalWidth;
-canvas.height = img.naturalHeight;
+    canvas.height = img.naturalHeight;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(img, 0, 0);
 
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    if (devTiming) timingStages['Canvas drawing'] = performance.now() - stageStart;
 
+    stageStart = devTiming ? performance.now() : 0;
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    if (devTiming) timingStages['ImageData extraction'] = performance.now() - stageStart;
+
+    stageStart = devTiming ? performance.now() : 0;
     const res = detectBoundsAndCoverage(imageData, 10);
     setOriginalBounds(res.bounds);
     setCoverage(res.coverage);
+    if (devTiming) timingStages['Bounds and coverage'] = performance.now() - stageStart;
+
+    stageStart = devTiming ? performance.now() : 0;
     setSpecks(detectStraySpecks(imageData));
+    if (devTiming) timingStages['Speck detection'] = performance.now() - stageStart;
+
+    stageStart = devTiming ? performance.now() : 0;
     setThinLinePercent(estimateThinLines(imageData));
+    if (devTiming) timingStages['Thin-line detection'] = performance.now() - stageStart;
+
+    stageStart = devTiming ? performance.now() : 0;
     const fakeTransparency = detectFakeTransparencyBackground(imageData);
     setFakeTransparencyDetected(fakeTransparency.detected);
-    
+    if (devTiming) timingStages['Fake-transparency detection'] = performance.now() - stageStart;
+
     let transparentFound = false;
     for (let i = 3; i < imageData.data.length; i += 4) {
       if (imageData.data[i] < 255) {
@@ -928,6 +1155,7 @@ canvas.height = img.naturalHeight;
 
     // White Background Risk: calculated directly from imageData so it never depends on
     // stale transparency state. Counts visible, near-white, and transparent pixels.
+    stageStart = devTiming ? performance.now() : 0;
     {
       const wbData = imageData.data;
       const totalPixels = wbData.length / 4;
@@ -971,21 +1199,55 @@ canvas.height = img.naturalHeight;
         message: wbMessage,
       });
     }
+    if (devTiming) timingStages['White-background calculation'] = performance.now() - stageStart;
 
+    stageStart = devTiming ? performance.now() : 0;
     setWhiteEdgeCheck(getWhiteEdgeHaloCheck(imageData));
+    if (devTiming) timingStages['White-edge detection'] = performance.now() - stageStart;
+
+    stageStart = devTiming ? performance.now() : 0;
     setSemiTransparencyCheck(getSemiTransparencyRiskCheck(imageData));
+    if (devTiming) timingStages['Semi-transparency detection'] = performance.now() - stageStart;
+
+    stageStart = devTiming ? performance.now() : 0;
     setCutOffEdgeCheck(getCutOffEdgeRiskCheck(imageData));
+    if (devTiming) timingStages['Cut-off edge detection'] = performance.now() - stageStart;
+
+    stageStart = devTiming ? performance.now() : 0;
     setLowContrastCheck(getLowContrastRiskCheck(imageData));
+    if (devTiming) timingStages['Low-contrast detection'] = performance.now() - stageStart;
+
+    stageStart = devTiming ? performance.now() : 0;
     setTinyTextCheck(getTinyTextRiskCheck(imageData));
+    if (devTiming) timingStages['Tiny-text detection'] = performance.now() - stageStart;
+
+    stageStart = devTiming ? performance.now() : 0;
     setCompressionArtifactCheck(getCompressionArtifactRiskCheck(imageData));
+    if (devTiming) timingStages['Compression-artifact detection'] = performance.now() - stageStart;
+
+    stageStart = devTiming ? performance.now() : 0;
     setEmptyPaddingCheck(getEmptyPaddingRiskCheck(imageData));
+    if (devTiming) timingStages['Empty-padding detection'] = performance.now() - stageStart;
+
+    stageStart = devTiming ? performance.now() : 0;
     setPixelationCheck(getPixelationRiskCheck(imageData));
+    if (devTiming) timingStages['Pixelation detection'] = performance.now() - stageStart;
+
+    stageStart = devTiming ? performance.now() : 0;
     setUnevenPaddingCheck(getUnevenPaddingRiskCheck(imageData));
+    if (devTiming) timingStages['Uneven-padding detection'] = performance.now() - stageStart;
+
+    stageStart = devTiming ? performance.now() : 0;
     setOversizedArtworkCheck(getOversizedArtworkRiskCheck(imageData));
+    if (devTiming) timingStages['Oversized-artwork detection'] = performance.now() - stageStart;
+
+    stageStart = devTiming ? performance.now() : 0;
     setSolidBackgroundBoxCheck(getSolidBackgroundBoxRiskCheck(imageData));
+    if (devTiming) timingStages['Solid-background-box detection'] = performance.now() - stageStart;
 
     // Shirt Colour Fit: estimate if the artwork is mostly dark, mostly light, or colourful.
     // Only opaque pixels are counted so transparent areas are ignored.
+    stageStart = devTiming ? performance.now() : 0;
     const data = imageData.data;
     let opaqueCount = 0;
     let lumaSum = 0;
@@ -1024,6 +1286,14 @@ canvas.height = img.naturalHeight;
         setShirtFitTone('mid');
       }
     }
+    if (devTiming) timingStages['Shirt-colour analysis'] = performance.now() - stageStart;
+
+    if (devTiming && timingSnapshot) {
+      logScannerTiming(timingStages, performance.now() - timingSnapshot.scanStart);
+    }
+
+    scanTimingRef.current = null;
+    setIsScanning(false);
   }, [img]);
 
   const effectiveBounds = useMemo(() => {
@@ -1648,6 +1918,9 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
   }, [img, shirtImg, transform, previewEffectiveBounds, viewMode, previewDesignCanvasSize, mockupOffsetX, mockupOffsetY, mockupScale]);
 
   async function loadDesignFile(selected: File) {
+    const devTiming = isDevScannerTimingEnabled();
+    const scanStart = devTiming ? performance.now() : 0;
+
     setIsScanning(true);
     setHasAutoFixApplied(false);
     setPreviewBackground('checker');
@@ -1657,9 +1930,14 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
     setFile(selected);
     setFileSize(selected.size);
 
+    const fileReadStart = devTiming ? performance.now() : 0;
     const arrayBuffer = await selected.arrayBuffer();
+    const fileReadMs = devTiming ? performance.now() - fileReadStart : 0;
+
+    const dpiProfileStart = devTiming ? performance.now() : 0;
     setDpiMetadata(getImageDpi(selected, arrayBuffer));
     setColourProfileStatus(getColourProfile(selected, arrayBuffer));
+    const dpiProfileMs = devTiming ? performance.now() - dpiProfileStart : 0;
 
     const url = URL.createObjectURL(selected);
     setFileUrl(url);
@@ -1667,8 +1945,20 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
     setActionMessage('Scanning design...');
 
     const image = new Image();
+    const decodeStart = devTiming ? performance.now() : 0;
 
     image.onload = () => {
+      const decodeMs = devTiming ? performance.now() - decodeStart : 0;
+
+      if (devTiming) {
+        scanTimingRef.current = {
+          scanStart,
+          fileReadMs,
+          dpiProfileMs,
+          decodeMs,
+        };
+      }
+
       setImg(image);
       setImgW(image.naturalWidth);
       setImgH(image.naturalHeight);
@@ -1696,12 +1986,12 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
       setViewMode('design');
       setPreviewSize(0.15);
       setUploadInputKey((key) => key + 1);
-      setTimeout(() => setIsScanning(false), 600);
     };
 
     image.onerror = () => {
+      scanTimingRef.current = null;
       setActionMessage('Could not load that image.');
-      setTimeout(() => setIsScanning(false), 600);
+      setIsScanning(false);
     };
 
     image.src = url;
