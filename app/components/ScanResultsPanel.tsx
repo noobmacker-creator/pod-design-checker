@@ -268,7 +268,6 @@ export default function ScanResultsPanel({
   ];
   const autoFixApplied = Boolean(img) && autoFixAppliedProp;
   const isAutoFixableLabel = (label: string) => autoFixableIssues.includes(label);
-  const isShirtFit = (item: CheckItem) => item.label.startsWith('Shirt Fit:');
   const isSoftTransparency = (item: CheckItem) => item.label === 'Soft Transparency';
   const isExportSizeNote = (item: CheckItem) => item.label === 'Export Size Note';
 
@@ -279,9 +278,9 @@ export default function ScanResultsPanel({
     ? checks.filter((item) => !isAutoFixableLabel(item.label))
     : checks;
 
-  // Shirt colour and soft transparency are optional preview notes — never score-blocking.
+  // Soft transparency and export size notes are optional preview notes — never score-blocking.
   const scoringChecks = visibleChecks.filter(
-    (item) => !isShirtFit(item) && !isSoftTransparency(item) && !isExportSizeNote(item),
+    (item) => !isSoftTransparency(item) && !isExportSizeNote(item),
   );
 
   // The auto-fixable labels that were actually present in the original scan, so the
@@ -296,48 +295,16 @@ export default function ScanResultsPanel({
 
   const infoItems = visibleChecks.filter((item) => item.status === 'info');
 
-  // Display grouping only: compact the many "Shirt Fit: <colour>" rows into one
-  // optional "Shirt Colour Preview" note. This does NOT change the checks array.
-  const shirtName = (item: CheckItem) => item.label.replace(/^Shirt Fit:\s*/, '');
-  const shirtFitItems = checks.filter(isShirtFit);
-
-  let shirtFitCard: CheckItem | null = null;
-  if (shirtFitItems.length > 0) {
-    const strongVis = shirtFitItems.filter((i) => i.visibilityLevel === 'strong').map(shirtName);
-    const previewVis = shirtFitItems.filter((i) => i.visibilityLevel === 'preview').map(shirtName);
-    const lowVis = shirtFitItems.filter((i) => i.visibilityLevel === 'low').map(shirtName);
-    const hasSemiRisk = shirtFitItems.some((i) => i.semiTransparencyRisk);
-
-    shirtFitCard = {
-      label: 'Shirt Colour Preview',
-      status: 'info',
-      message: [
-        'Some shirt colours may suit this artwork better than others. Use the preview background to choose the best colours.',
-        '',
-        `Strong visibility: ${strongVis.length ? strongVis.join(', ') : 'none'}`,
-        `Preview recommended: ${previewVis.length ? previewVis.join(', ') : 'none'}`,
-        `May blend: ${lowVis.length ? lowVis.join(', ') : 'none'}`,
-        ...(hasSemiRisk
-          ? ['', 'Print note: Semi-transparent areas may print differently on coloured or dark DTG garments.']
-          : []),
-      ].join('\n'),
-    };
-  }
-
   const criticalDisplay = criticalItems.filter(
-    (item) => !isShirtFit(item) && !isSoftTransparency(item) && !isExportSizeNote(item),
+    (item) => !isSoftTransparency(item) && !isExportSizeNote(item),
   );
   const warningDisplay = warningItems.filter(
-    (item) => !isShirtFit(item) && !isSoftTransparency(item) && !isExportSizeNote(item),
+    (item) => !isSoftTransparency(item) && !isExportSizeNote(item),
   );
   const criticalActive = criticalDisplay;
   const warningActive = warningDisplay;
-  const passedDisplay = passedItems.filter((item) => !isShirtFit(item) && !isSoftTransparency(item));
-  const infoDisplay = infoItems.filter((item) => !isShirtFit(item) && !isSoftTransparency(item));
-
-  if (shirtFitCard) {
-    infoDisplay.push(shirtFitCard);
-  }
+  const passedDisplay = passedItems.filter((item) => !isSoftTransparency(item));
+  const infoDisplay = infoItems.filter((item) => !isSoftTransparency(item));
 
   // Soft Transparency is optional preview guidance — always shown as an info note.
   const softTransparencyItem = checks.find(isSoftTransparency);
