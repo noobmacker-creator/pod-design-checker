@@ -3,10 +3,12 @@
 import React, { useRef, useState } from 'react';
 import {
   type BatchQueueItem,
+  type BatchScanStatus,
   buildBatchIntakeMessage,
   formatBatchFileSize,
   intakeBatchFiles,
 } from '../lib/batchQueueUtils';
+import { getBatchStatusColors, getBatchStatusLabel, scanBatchFile } from '../lib/batchScanner';
 
 type BatchFileQueueProps = {
   items: BatchQueueItem[];
@@ -38,12 +40,44 @@ const secondaryButtonStyle: React.CSSProperties = {
   cursor: 'pointer',
 };
 
+function countByStatus(items: BatchQueueItem[], status: BatchScanStatus) {
+  return items.filter((item) => item.status === status).length;
+}
+
+function StatusBadge({ status }: { status: BatchScanStatus }) {
+  const colors = getBatchStatusColors(status);
+  return (
+    <span
+      style={{
+        fontSize: 10,
+        fontWeight: 800,
+        color: colors.color,
+        background: colors.background,
+        border: `1px solid ${colors.border}`,
+        borderRadius: 999,
+        padding: '3px 7px',
+        width: 'fit-content',
+        whiteSpace: 'nowrap',
+      }}
+    >
+      {getBatchStatusLabel(status)}
+    </span>
+  );
+}
+
 export default function BatchFileQueue({ items, onItemsChange }: BatchFileQueueProps) {
   const filesInputRef = useRef<HTMLInputElement>(null);
   const folderInputRef = useRef<HTMLInputElement>(null);
+  const cancelScanRef = useRef(false);
   const [message, setMessage] = useState('');
+  const [isScanning, setIsScanning] = useState(false);
+  const [scanProgress, setScanProgress] = useState({ current: 0, total: 0 });
 
   const totalSize = items.reduce((sum, item) => sum + item.size, 0);
+  const scannedCount = items.filter(
+    (item) => item.status !== 'waiting' && item.status !== 'scanning',
+  ).length;
+  const hasScanResults = scannedCount > 0;
 
   function applyIntake(files: File[]) {
     const previousCount = items.length;
@@ -66,10 +100,78 @@ export default function BatchFileQueue({ items, onItemsChange }: BatchFileQueueP
   }
 
   function clearQueue() {
+    cancelScanRef.current = true;
     onItemsChange([]);
     setMessage('');
+    setIsScanning(false);
+    setScanProgress({ current: 0, total: 0 });
     if (filesInputRef.current) filesInputRef.current.value = '';
     if (folderInputRef.current) folderInputRef.current.value = '';
+  }
+
+  async function handleScanBatch() {
+    if (items.length === 0 || isScanning) return;
+
+    cancelScanRef.current = false;
+    setIsScanning(true);
+    setMessage('');
+    setScanProgress({ current: 0, total: items.length });
+
+    let workingItems: BatchQueueItem[] = items.map((item) => ({
+      ...item,
+      status: 'waiting' as BatchScanStatus,
+      scanResult: null,
+    }));
+    onItemsChange(workingItems);
+
+    for (let index = 0; index < workingItems.length; index++) {
+      if (cancelScanRef.current) break;
+
+      const item = workingItems[index];
+      workingItems = workingItems.map((row, rowIndex) =>
+        rowIndex === index ? { ...row, status: 'scanning' as BatchScanStatus } : row,
+      );
+      onItemsChange([...workingItems]);
+      setScanProgress({ current: index + 1, total: workingItems.length });
+
+      try {
+        const result = await scanBatchFile(item.file);
+        workingItems = workingItems.map((row, rowIndex) =>
+          rowIndex === index
+            ? { ...row, status: result.status, scanResult: result.scanResult }
+            : row,
+        );
+      } catch {
+        workingItems = workingItems.map((row, rowIndex) =>
+          rowIndex === index
+            ? {
+                ...row,
+                status: 'failed' as BatchScanStatus,
+                scanResult: {
+                  printConfidence: null,
+                  mainIssue: 'Scan failed',
+                  nextAction: 'Fix or replace this file before upload.',
+                  warnings: [],
+                  failures: ['Scan failed'],
+                  scanTimeMs: null,
+                  errorMessage: 'Scan failed',
+                },
+              }
+            : row,
+        );
+      }
+
+      onItemsChange([...workingItems]);
+    }
+
+    setIsScanning(false);
+    if (cancelScanRef.current) {
+      setMessage('Scan cancelled. Completed results were kept.');
+    }
+  }
+
+  function handleCancelScan() {
+    cancelScanRef.current = true;
   }
 
   return (
@@ -88,7 +190,7 @@ export default function BatchFileQueue({ items, onItemsChange }: BatchFileQueueP
     >
       <div style={{ fontSize: 14, color: '#e2e8f0', fontWeight: 800 }}>Batch File Queue</div>
       <div style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.45 }}>
-        Add multiple images or a folder. Files stay in the queue until you scan or export them.
+        Add multiple images or a folder, then scan them for quick traffic-light results.
       </div>
 
       <input
@@ -131,11 +233,11 @@ export default function BatchFileQueue({ items, onItemsChange }: BatchFileQueueP
         <button
           type="button"
           onClick={clearQueue}
-          disabled={items.length === 0}
+          disabled={items.length === 0 || isScanning}
           style={{
             ...secondaryButtonStyle,
-            opacity: items.length === 0 ? 0.55 : 1,
-            cursor: items.length === 0 ? 'not-allowed' : 'pointer',
+            opacity: items.length === 0 || isScanning ? 0.55 : 1,
+            cursor: items.length === 0 || isScanning ? 'not-allowed' : 'pointer',
           }}
           aria-label="Clear the batch file queue"
         >
@@ -143,10 +245,67 @@ export default function BatchFileQueue({ items, onItemsChange }: BatchFileQueueP
         </button>
       </div>
 
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+        <button
+          type="button"
+          onClick={handleScanBatch}
+          disabled={items.length === 0 || isScanning}
+          style={{
+            ...controlButtonStyle,
+            background: '#2563eb',
+            color: '#ffffff',
+            opacity: items.length === 0 || isScanning ? 0.55 : 1,
+            cursor: items.length === 0 || isScanning ? 'not-allowed' : 'pointer',
+          }}
+          aria-label="Scan all queued batch files"
+        >
+          Scan Batch
+        </button>
+        {isScanning ? (
+          <button
+            type="button"
+            onClick={handleCancelScan}
+            style={secondaryButtonStyle}
+            aria-label="Cancel batch scan after the current file"
+          >
+            Cancel Scan
+          </button>
+        ) : null}
+      </div>
+
+      {isScanning ? (
+        <div style={{ fontSize: 12, color: '#bfdbfe', fontWeight: 700 }} role="status">
+          Scanning {scanProgress.current} of {scanProgress.total}
+        </div>
+      ) : null}
+
       <div style={{ fontSize: 11, color: '#94a3b8', lineHeight: 1.45 }}>
         {items.length} file{items.length === 1 ? '' : 's'} · {formatBatchFileSize(totalSize)} total · PNG,
         JPG, JPEG, WEBP accepted · max 100 files · 50 MB per file · 500 MB combined
       </div>
+
+      {hasScanResults ? (
+        <div
+          style={{
+            fontSize: 12,
+            color: '#cbd5e1',
+            lineHeight: 1.5,
+            padding: '8px 10px',
+            borderRadius: 10,
+            background: 'rgba(15, 23, 42, 0.55)',
+            border: '1px solid rgba(148, 163, 184, 0.18)',
+          }}
+          role="status"
+        >
+          <div style={{ fontWeight: 800, marginBottom: 4 }}>
+            Scanned {scannedCount} of {items.length} files
+          </div>
+          <div>🟢 Ready: {countByStatus(items, 'ready')}</div>
+          <div>🟡 Safe Auto Fix: {countByStatus(items, 'safe-auto-fix')}</div>
+          <div>🟠 Needs Review: {countByStatus(items, 'needs-review')}</div>
+          <div>🔴 Failed: {countByStatus(items, 'failed')}</div>
+        </div>
+      ) : null}
 
       {message ? (
         <div style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.45 }} role="status">
@@ -161,7 +320,7 @@ export default function BatchFileQueue({ items, onItemsChange }: BatchFileQueueP
           style={{
             display: 'grid',
             gap: 0,
-            maxHeight: 280,
+            maxHeight: 320,
             overflowY: 'auto',
             borderRadius: 10,
             border: '1px solid rgba(148, 163, 184, 0.22)',
@@ -171,7 +330,7 @@ export default function BatchFileQueue({ items, onItemsChange }: BatchFileQueueP
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'minmax(0, 1fr) 72px 72px 64px',
+              gridTemplateColumns: 'minmax(0, 1fr) 64px 88px 64px',
               gap: 8,
               padding: '8px 10px',
               fontSize: 10,
@@ -196,10 +355,10 @@ export default function BatchFileQueue({ items, onItemsChange }: BatchFileQueueP
               key={item.id}
               style={{
                 display: 'grid',
-                gridTemplateColumns: 'minmax(0, 1fr) 72px 72px 64px',
+                gridTemplateColumns: 'minmax(0, 1fr) 64px 88px 64px',
                 gap: 8,
                 padding: '8px 10px',
-                alignItems: 'center',
+                alignItems: 'start',
                 borderBottom: '1px solid rgba(148, 163, 184, 0.12)',
                 minWidth: 0,
               }}
@@ -222,29 +381,28 @@ export default function BatchFileQueue({ items, onItemsChange }: BatchFileQueueP
                     ? ` · ${item.relativePath}`
                     : ''}
                 </div>
+                {item.scanResult ? (
+                  <div style={{ fontSize: 10, color: '#cbd5e1', lineHeight: 1.4, marginTop: 4 }}>
+                    {item.scanResult.printConfidence !== null
+                      ? `Print Confidence: ${item.scanResult.printConfidence}%`
+                      : null}
+                    {item.scanResult.printConfidence !== null ? ' · ' : ''}
+                    Main Issue: {item.scanResult.mainIssue}
+                  </div>
+                ) : null}
               </div>
               <div style={{ fontSize: 11, color: '#cbd5e1' }}>{formatBatchFileSize(item.size)}</div>
-              <span
-                style={{
-                  fontSize: 10,
-                  fontWeight: 800,
-                  color: '#94a3b8',
-                  background: 'rgba(148, 163, 184, 0.14)',
-                  border: '1px solid rgba(148, 163, 184, 0.22)',
-                  borderRadius: 999,
-                  padding: '3px 7px',
-                  width: 'fit-content',
-                }}
-              >
-                Waiting
-              </span>
+              <StatusBadge status={item.status} />
               <button
                 type="button"
                 onClick={() => removeItem(item.id)}
+                disabled={isScanning && item.status === 'scanning'}
                 style={{
                   ...secondaryButtonStyle,
                   padding: '5px 8px',
                   fontSize: 10,
+                  opacity: isScanning && item.status === 'scanning' ? 0.55 : 1,
+                  cursor: isScanning && item.status === 'scanning' ? 'not-allowed' : 'pointer',
                 }}
                 aria-label={`Remove ${item.filename} from batch queue`}
               >

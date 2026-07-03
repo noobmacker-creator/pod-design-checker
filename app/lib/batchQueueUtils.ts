@@ -1,3 +1,21 @@
+export type BatchScanStatus =
+  | 'waiting'
+  | 'scanning'
+  | 'ready'
+  | 'safe-auto-fix'
+  | 'needs-review'
+  | 'failed';
+
+export type BatchScanResult = {
+  printConfidence: number | null;
+  mainIssue: string;
+  nextAction: string;
+  warnings: string[];
+  failures: string[];
+  scanTimeMs: number | null;
+  errorMessage?: string;
+};
+
 export type BatchQueueItem = {
   id: string;
   file: File;
@@ -5,7 +23,8 @@ export type BatchQueueItem = {
   relativePath: string;
   size: number;
   type: string;
-  status: 'waiting';
+  status: BatchScanStatus;
+  scanResult?: BatchScanResult | null;
 };
 
 export const BATCH_QUEUE_MAX_FILES = 100;
