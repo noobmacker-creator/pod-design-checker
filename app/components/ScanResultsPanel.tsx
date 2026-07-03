@@ -607,6 +607,7 @@ export default function ScanResultsPanel({
         boxSizing: 'border-box',
         overflowX: 'hidden',
         overflowY: 'auto',
+        scrollbarGutter: 'stable',
         wordBreak: 'break-word',
         overflowWrap: 'anywhere',
         contain: 'inline-size',

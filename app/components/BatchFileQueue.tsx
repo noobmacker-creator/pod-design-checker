@@ -388,7 +388,9 @@ function StatusBadge({ status }: { status: BatchScanStatus }) {
         borderRadius: 999,
         padding: '3px 7px',
         width: 'fit-content',
-        whiteSpace: 'nowrap',
+        maxWidth: '100%',
+        lineHeight: 1.25,
+        overflowWrap: 'anywhere',
       }}
     >
       {getBatchStatusLabel(status)}
@@ -890,7 +892,7 @@ export default function BatchFileQueue({ items, onItemsChange }: BatchFileQueueP
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'minmax(0, 1fr) 64px 88px 72px 64px',
+              gridTemplateColumns: 'minmax(0, 1fr) 54px 72px 58px 60px',
               gap: 8,
               padding: '8px 10px',
               fontSize: 10,
@@ -916,7 +918,7 @@ export default function BatchFileQueue({ items, onItemsChange }: BatchFileQueueP
               key={item.id}
               style={{
                 display: 'grid',
-                gridTemplateColumns: 'minmax(0, 1fr) 64px 88px 72px 64px',
+                gridTemplateColumns: 'minmax(0, 1fr) 54px 72px 58px 60px',
                 gap: 8,
                 padding: '8px 10px',
                 alignItems: 'start',
