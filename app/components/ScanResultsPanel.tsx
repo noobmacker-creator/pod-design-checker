@@ -613,7 +613,19 @@ export default function ScanResultsPanel({
       }}
     >
       <style>{`
+        .scan-results-panel {
+          overflow-x: hidden;
+        }
         .scan-results-panel button {
+          max-width: 100%;
+          box-sizing: border-box;
+        }
+        .scan-results-panel button:not([style*="padding: 0"]) {
+          padding: 8px 10px;
+        }
+        .scan-results-panel input,
+        .scan-results-panel select,
+        .scan-results-panel textarea {
           max-width: 100%;
           box-sizing: border-box;
         }

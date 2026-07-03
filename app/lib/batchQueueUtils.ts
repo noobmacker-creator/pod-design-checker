@@ -25,6 +25,11 @@ export type BatchQueueItem = {
   type: string;
   status: BatchScanStatus;
   scanResult?: BatchScanResult | null;
+  fixedBlob?: Blob;
+  wasAutoFixed?: boolean;
+  fixesApplied?: string[];
+  preFixResult?: BatchScanResult | null;
+  postFixResult?: BatchScanResult | null;
 };
 
 export const BATCH_QUEUE_MAX_FILES = 100;

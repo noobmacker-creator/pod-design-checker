@@ -275,6 +275,64 @@ function pickMainIssue(items: CheckItem[]): CheckItem | null {
   return bestItem;
 }
 
+function pickMainIssueLabel(labels: string[]): string | null {
+  if (labels.length === 0) return null;
+  let bestLabel = labels[0];
+  let bestRank = Infinity;
+  for (const label of labels) {
+    const key = matchPriorityKey(label);
+    const rank = key ? ISSUE_PRIORITY.indexOf(key) : Infinity;
+    if (rank < bestRank) {
+      bestRank = rank;
+      bestLabel = label;
+    }
+  }
+  return matchPriorityKey(bestLabel) ?? bestLabel;
+}
+
+const REVIEW_ACTION: Record<string, string> = {
+  ...SHORT_ACTION,
+  'Line Thickness': 'Inspect thin details',
+  'Fake Transparency Background': 'Fix the source transparency',
+};
+
+/** After Auto Fix, current display must reflect post-fix review issues, not stale Run Auto Fix. */
+export function resolvePostAutoFixScanResult(
+  scanResult: BatchScanResult,
+  finalStatus: BatchScanStatus,
+): BatchScanResult {
+  if (finalStatus === 'safe-auto-fix') {
+    return scanResult;
+  }
+
+  const remainingLabels = [...scanResult.failures, ...scanResult.warnings].filter(
+    (label) => !AUTO_FIXABLE_LABELS.has(label),
+  );
+
+  if (remainingLabels.length > 0) {
+    const mainIssue = pickMainIssueLabel(remainingLabels) ?? scanResult.mainIssue;
+    const nextAction =
+      AUTO_FIXABLE_LABELS.has(mainIssue)
+        ? REVIEW_ACTION[mainIssue] ?? 'Review scan results'
+        : REVIEW_ACTION[mainIssue] ?? SHORT_ACTION[mainIssue] ?? 'Review scan results';
+
+    return {
+      ...scanResult,
+      mainIssue,
+      nextAction,
+    };
+  }
+
+  if (scanResult.nextAction === 'Run Auto Fix') {
+    return {
+      ...scanResult,
+      nextAction: REVIEW_ACTION[scanResult.mainIssue] ?? 'Review scan results',
+    };
+  }
+
+  return scanResult;
+}
+
 function getDisplayConfidence(
   printScore: number,
   status: BatchScanStatus,
