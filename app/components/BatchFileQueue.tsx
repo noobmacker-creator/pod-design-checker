@@ -51,21 +51,10 @@ function countByStatus(items: BatchQueueItem[], status: BatchScanStatus) {
   return items.filter((item) => item.status === status).length;
 }
 
-/** After Auto Fix, map recheck status to the item's current final status. */
-function resolvePostAutoFixStatus(
-  recheckStatus: BatchScanStatus,
-  postFixScanResult: BatchScanResult,
-  preFixResult: BatchScanResult | null,
-): BatchScanStatus {
+/** After Auto Fix, an attempted item must leave the yellow state. */
+function resolvePostAutoFixStatus(recheckStatus: BatchScanStatus): BatchScanStatus {
   if (recheckStatus === 'ready' || recheckStatus === 'failed') {
     return recheckStatus;
-  }
-  if (recheckStatus === 'needs-review') {
-    return 'needs-review';
-  }
-  // Still safe-auto-fix after a fix: only keep that status if progress was made.
-  if (preFixResult && postFixScanResult.mainIssue !== preFixResult.mainIssue) {
-    return 'safe-auto-fix';
   }
   return 'needs-review';
 }
@@ -422,6 +411,10 @@ export default function BatchFileQueue({ items, onItemsChange }: BatchFileQueueP
     [items],
   );
   const needsReviewCount = needsReviewItems.length;
+  const eligibleAutoFixItems = useMemo(
+    () => items.filter((item) => item.status === 'safe-auto-fix' && item.wasAutoFixed !== true),
+    [items],
+  );
 
   function openReviewAt(itemId: string) {
     const startIndex = needsReviewItems.findIndex((item) => item.id === itemId);
@@ -439,7 +432,30 @@ export default function BatchFileQueue({ items, onItemsChange }: BatchFileQueueP
     (item) => item.status !== 'waiting' && item.status !== 'scanning',
   ).length;
   const hasScanResults = scannedCount > 0;
-  const safeAutoFixCount = items.filter((item) => item.status === 'safe-auto-fix').length;
+  const safeAutoFixCount = eligibleAutoFixItems.length;
+
+  useEffect(() => {
+    if (process.env.NODE_ENV !== 'development') return;
+
+    const completedStatusTotal =
+      countByStatus(items, 'ready') +
+      countByStatus(items, 'safe-auto-fix') +
+      countByStatus(items, 'needs-review') +
+      countByStatus(items, 'failed');
+    const staleAutoFixedItems = items.filter(
+      (item) => item.wasAutoFixed === true && item.status === 'safe-auto-fix',
+    );
+
+    if (completedStatusTotal !== scannedCount) {
+      console.warn('[Batch Status] Completed status totals do not match scanned count.');
+    }
+    if (needsReviewCount !== countByStatus(items, 'needs-review')) {
+      console.warn('[Batch Status] Review count does not match Needs Review count.');
+    }
+    if (staleAutoFixedItems.length > 0) {
+      console.warn('[Batch Status] Auto-Fixed items must not remain Safe Auto Fix.');
+    }
+  }, [items, needsReviewCount, scannedCount]);
 
   function applyIntake(files: File[]) {
     const previousCount = items.length;
@@ -481,12 +497,18 @@ export default function BatchFileQueue({ items, onItemsChange }: BatchFileQueueP
     cancelScanRef.current = false;
     setIsScanning(true);
     setMessage('');
+    setFixSummary(null);
     setScanProgress({ current: 0, total: items.length });
 
     let workingItems: BatchQueueItem[] = items.map((item) => ({
       ...item,
       status: 'waiting' as BatchScanStatus,
       scanResult: null,
+      fixedBlob: undefined,
+      wasAutoFixed: false,
+      fixesApplied: undefined,
+      preFixResult: undefined,
+      postFixResult: undefined,
     }));
     onItemsChange(workingItems);
 
@@ -546,7 +568,9 @@ export default function BatchFileQueue({ items, onItemsChange }: BatchFileQueueP
 
   async function handleAutoFixSafeFiles() {
     const targetIndexes = items
-      .map((item, index) => (item.status === 'safe-auto-fix' ? index : -1))
+      .map((item, index) =>
+        item.status === 'safe-auto-fix' && item.wasAutoFixed !== true ? index : -1,
+      )
       .filter((index) => index >= 0);
 
     if (targetIndexes.length === 0 || isScanning || isFixing) return;
@@ -583,15 +607,19 @@ export default function BatchFileQueue({ items, onItemsChange }: BatchFileQueueP
         const fixedName = `${item.filename.replace(/\.[^.]+$/, '')}-fixed.png`;
         const fixedFile = new File([fixOutput.blob], fixedName, { type: 'image/png' });
         const recheck = await scanBatchFile(fixedFile);
-        const finalStatus = resolvePostAutoFixStatus(
-          recheck.status,
+        const finalStatus = resolvePostAutoFixStatus(recheck.status);
+        const resolvedPostFixResult = resolvePostAutoFixScanResult(
           recheck.scanResult,
-          preFixResult,
-        );
-        const finalScanResult = applyStatusConfidenceCap(
-          resolvePostAutoFixScanResult(recheck.scanResult, finalStatus),
           finalStatus,
         );
+        const currentPostFixResult =
+          finalStatus === 'needs-review' && resolvedPostFixResult.nextAction === 'Run Auto Fix'
+            ? {
+                ...resolvedPostFixResult,
+                nextAction: 'Review the remaining layout issue manually.',
+              }
+            : resolvedPostFixResult;
+        const finalScanResult = applyStatusConfidenceCap(currentPostFixResult, finalStatus);
 
         fixedCount += 1;
         if (finalStatus === 'ready') becameReady += 1;
@@ -650,7 +678,7 @@ export default function BatchFileQueue({ items, onItemsChange }: BatchFileQueueP
     }
 
     setIsFixing(false);
-    if (fixedCount > 0) {
+    if (fixedCount > 0 || failedFix > 0) {
       setFixSummary({
         fixed: fixedCount,
         becameReady,
