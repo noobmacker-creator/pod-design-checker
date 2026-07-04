@@ -595,6 +595,7 @@ export default function ScanResultsPanel({
         background: 'rgba(255,255,255,0.04)',
         boxShadow: '0 8px 24px rgba(0,0,0,0.18)',
         display: 'grid',
+        gridTemplateColumns: 'minmax(0, 1fr)',
         gridAutoRows: 'max-content',
         alignContent: 'start',
         gap: 10,
@@ -616,6 +617,11 @@ export default function ScanResultsPanel({
       <style>{`
         .scan-results-panel {
           overflow-x: hidden;
+        }
+        .scan-results-panel > * {
+          min-width: 0;
+          max-width: 100%;
+          box-sizing: border-box;
         }
         .scan-results-panel button {
           max-width: 100%;
