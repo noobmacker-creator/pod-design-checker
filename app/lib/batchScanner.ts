@@ -8,7 +8,7 @@ import {
   getImageDpi,
 } from './podCheckerUtils';
 import {
-  detectStraySpecks,
+  analyzeStructuralArtwork,
   getCompressionArtifactRiskCheck,
   getCutOffEdgeRiskCheck,
   getEmptyPaddingRiskCheck,
@@ -400,8 +400,17 @@ export async function scanBatchFile(file: File): Promise<BatchFileScanOutput> {
     const imageData = ctx.getImageData(0, 0, imgW, imgH);
 
     const boundsResult = detectBoundsAndCoverage(imageData, 10);
-    const originalBounds = boundsResult.bounds;
-    const specks = detectStraySpecks(imageData);
+    // Single connected-component pass: stray-speck count plus structural artwork bounds
+    // (union of components larger than the speck limit). Tiny specks are excluded from
+    // the structural bounds so layout checks are not thrown off by them.
+    const structural = analyzeStructuralArtwork(imageData);
+    const specks = structural.speckCount;
+    const structuralBounds = structural.structuralBounds;
+    // Use structural bounds for layout; fall back to detected bounds only when no
+    // structural component was found.
+    const originalBounds = structuralBounds
+      ? { x: structuralBounds.x, y: structuralBounds.y, w: structuralBounds.w, h: structuralBounds.h }
+      : boundsResult.bounds;
     const thinLinePercent = estimateThinLines(imageData);
     const fakeTransparency = detectFakeTransparencyBackground(imageData);
     const fakeTransparencyDetected = fakeTransparency.detected;
@@ -434,12 +443,12 @@ export async function scanBatchFile(file: File): Promise<BatchFileScanOutput> {
     const whiteBackgroundCheck = getWhiteBackgroundCheck(imageData);
     const whiteEdgeCheck = getWhiteEdgeHaloCheck(imageData);
     const semiTransparencyCheck = getSemiTransparencyRiskCheck(imageData);
-    const cutOffEdgeCheck = getCutOffEdgeRiskCheck(imageData);
+    const cutOffEdgeCheck = getCutOffEdgeRiskCheck(imageData, structuralBounds);
     const lowContrastCheck = getLowContrastRiskCheck(imageData);
     const compressionArtifactCheck = getCompressionArtifactRiskCheck(imageData);
-    const emptyPaddingCheck = getEmptyPaddingRiskCheck(imageData);
-    const unevenPaddingCheck = getUnevenPaddingRiskCheck(imageData);
-    const oversizedArtworkCheck = getOversizedArtworkRiskCheck(imageData);
+    const emptyPaddingCheck = getEmptyPaddingRiskCheck(imageData, structuralBounds);
+    const unevenPaddingCheck = getUnevenPaddingRiskCheck(imageData, structuralBounds);
+    const oversizedArtworkCheck = getOversizedArtworkRiskCheck(imageData, structuralBounds);
     const solidBackgroundBoxCheck = getSolidBackgroundBoxRiskCheck(imageData);
 
     const exactSize = imgW === targetCanvasW && imgH === targetCanvasH;

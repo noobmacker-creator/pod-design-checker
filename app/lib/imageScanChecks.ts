@@ -96,7 +96,23 @@ export function getSemiTransparencyRiskCheck(imageData: ImageData): CheckItem {
   };
 }
 
-export function detectStraySpecks(imageData: ImageData, thresholdAlpha = 40, maxSpeckPixels = 12): number {
+// Bounds of the real artwork (in image pixels), excluding tiny stray specks.
+export type ArtworkBounds = { x: number; y: number; w: number; h: number };
+
+export type StructuralArtworkAnalysis = {
+  speckCount: number;
+  structuralBounds: ArtworkBounds | null;
+};
+
+// Shared connected-component analysis. Runs one flood-fill pass over the image and
+// returns both the stray-speck count and the union bounds of every structural artwork
+// component (any connected blob larger than maxSpeckPixels). Layout checks can use the
+// structural bounds so a few tiny stray specks do not enlarge the measured artwork area.
+export function analyzeStructuralArtwork(
+  imageData: ImageData,
+  thresholdAlpha = 40,
+  maxSpeckPixels = 12,
+): StructuralArtworkAnalysis {
   const { width, height, data } = imageData;
   const pixelCount = width * height;
   const visited = new Uint8Array(pixelCount);
@@ -191,7 +207,14 @@ export function detectStraySpecks(imageData: ImageData, thresholdAlpha = 40, max
     }
   }
 
-  if (!hasStructural) return 0;
+  if (!hasStructural) return { speckCount: 0, structuralBounds: null };
+
+  const structuralBounds: ArtworkBounds = {
+    x: mainMinX,
+    y: mainMinY,
+    w: mainMaxX - mainMinX + 1,
+    h: mainMaxY - mainMinY + 1,
+  };
 
   const padding = Math.max(40, Math.round(width * 0.02), Math.round(height * 0.02));
   const safeMinX = Math.max(0, mainMinX - padding);
@@ -219,14 +242,53 @@ export function detectStraySpecks(imageData: ImageData, thresholdAlpha = 40, max
     }
   }
 
-  return specks;
+  return { speckCount: specks, structuralBounds };
+}
+
+// Backwards-compatible wrapper: returns only the stray-speck count.
+export function detectStraySpecks(imageData: ImageData, thresholdAlpha = 40, maxSpeckPixels = 12): number {
+  return analyzeStructuralArtwork(imageData, thresholdAlpha, maxSpeckPixels).speckCount;
 }
 
 // Cut-Off Edge Risk: looks for visible artwork sitting in a small band around the
 // outside of the uploaded file. That often means the design is cropped too tight.
-export function getCutOffEdgeRiskCheck(imageData: ImageData): CheckItem {
+export function getCutOffEdgeRiskCheck(
+  imageData: ImageData,
+  structuralBounds: ArtworkBounds | null = null,
+): CheckItem {
   const { data, width, height } = imageData;
   const band = 8;
+
+  // When structural bounds are supplied, decide only from the real artwork bounds so
+  // tiny stray specks in an edge band cannot trigger a false Cut-Off Edge Risk.
+  if (structuralBounds) {
+    const bMinX = structuralBounds.x;
+    const bMinY = structuralBounds.y;
+    const bMaxX = structuralBounds.x + structuralBounds.w - 1;
+    const bMaxY = structuralBounds.y + structuralBounds.h - 1;
+    const touchedSides =
+      (bMinY < band ? 1 : 0) +
+      (bMaxY >= height - band ? 1 : 0) +
+      (bMinX < band ? 1 : 0) +
+      (bMaxX >= width - band ? 1 : 0);
+
+    let status: CheckStatus = 'pass';
+    let message = 'No obvious cut-off edge detected.';
+    if (touchedSides >= 3) {
+      status = 'fail';
+      message = 'Cut-off edge likely detected. The design may be cropped too tight before upload.';
+    } else if (touchedSides >= 1) {
+      status = 'warn';
+      message = 'Possible cut-off edge detected. Artwork touches the edge of the uploaded file.';
+    }
+
+    return {
+      label: 'Cut-Off Edge Risk',
+      status,
+      message,
+    };
+  }
+
   let visiblePixels = 0;
   let edgeVisiblePixels = 0;
   let topTouched = false;
@@ -453,22 +515,33 @@ export function getCompressionArtifactRiskCheck(imageData: ImageData): CheckItem
 // Empty Padding Risk: finds the visible artwork bounds (alpha > 40) and compares them to
 // the full image size. If the artwork only fills a small part of the file, there is a lot
 // of empty transparent space, which can make the design print too small or hard to place.
-export function getEmptyPaddingRiskCheck(imageData: ImageData): CheckItem {
+export function getEmptyPaddingRiskCheck(
+  imageData: ImageData,
+  structuralBounds: ArtworkBounds | null = null,
+): CheckItem {
   const { data, width, height } = imageData;
   let minX = width;
   let minY = height;
   let maxX = -1;
   let maxY = -1;
 
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      const a = data[(y * width + x) * 4 + 3];
-      // Treat pixels with alpha > 40 as visible artwork.
-      if (a <= 40) continue;
-      if (x < minX) minX = x;
-      if (y < minY) minY = y;
-      if (x > maxX) maxX = x;
-      if (y > maxY) maxY = y;
+  if (structuralBounds) {
+    // Measure only the real artwork bounds, ignoring tiny stray specks.
+    minX = structuralBounds.x;
+    minY = structuralBounds.y;
+    maxX = structuralBounds.x + structuralBounds.w - 1;
+    maxY = structuralBounds.y + structuralBounds.h - 1;
+  } else {
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const a = data[(y * width + x) * 4 + 3];
+        // Treat pixels with alpha > 40 as visible artwork.
+        if (a <= 40) continue;
+        if (x < minX) minX = x;
+        if (y < minY) minY = y;
+        if (x > maxX) maxX = x;
+        if (y > maxY) maxY = y;
+      }
     }
   }
 
@@ -582,22 +655,33 @@ export function getPixelationRiskCheck(imageData: ImageData): CheckItem {
 // Uneven Padding Risk: finds the visible artwork bounds (alpha > 40) and measures the
 // empty space on each side. If one side has a lot more space than the opposite side,
 // the artwork may be badly cropped or off balance.
-export function getUnevenPaddingRiskCheck(imageData: ImageData): CheckItem {
+export function getUnevenPaddingRiskCheck(
+  imageData: ImageData,
+  structuralBounds: ArtworkBounds | null = null,
+): CheckItem {
   const { data, width, height } = imageData;
   let minX = width;
   let minY = height;
   let maxX = -1;
   let maxY = -1;
 
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      const a = data[(y * width + x) * 4 + 3];
-      // Treat pixels with alpha > 40 as visible artwork.
-      if (a <= 40) continue;
-      if (x < minX) minX = x;
-      if (y < minY) minY = y;
-      if (x > maxX) maxX = x;
-      if (y > maxY) maxY = y;
+  if (structuralBounds) {
+    // Measure only the real artwork bounds, ignoring tiny stray specks.
+    minX = structuralBounds.x;
+    minY = structuralBounds.y;
+    maxX = structuralBounds.x + structuralBounds.w - 1;
+    maxY = structuralBounds.y + structuralBounds.h - 1;
+  } else {
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const a = data[(y * width + x) * 4 + 3];
+        // Treat pixels with alpha > 40 as visible artwork.
+        if (a <= 40) continue;
+        if (x < minX) minX = x;
+        if (y < minY) minY = y;
+        if (x > maxX) maxX = x;
+        if (y > maxY) maxY = y;
+      }
     }
   }
 
@@ -643,22 +727,33 @@ export function getUnevenPaddingRiskCheck(imageData: ImageData): CheckItem {
 // Oversized Artwork Risk: finds the visible artwork bounds (alpha > 40) and compares them
 // to the full image size. If the artwork fills almost the whole file, it may print too
 // large, feel cramped, or leave too little breathing room.
-export function getOversizedArtworkRiskCheck(imageData: ImageData): CheckItem {
+export function getOversizedArtworkRiskCheck(
+  imageData: ImageData,
+  structuralBounds: ArtworkBounds | null = null,
+): CheckItem {
   const { data, width, height } = imageData;
   let minX = width;
   let minY = height;
   let maxX = -1;
   let maxY = -1;
 
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      const a = data[(y * width + x) * 4 + 3];
-      // Treat pixels with alpha > 40 as visible artwork.
-      if (a <= 40) continue;
-      if (x < minX) minX = x;
-      if (y < minY) minY = y;
-      if (x > maxX) maxX = x;
-      if (y > maxY) maxY = y;
+  if (structuralBounds) {
+    // Measure only the real artwork bounds, ignoring tiny stray specks.
+    minX = structuralBounds.x;
+    minY = structuralBounds.y;
+    maxX = structuralBounds.x + structuralBounds.w - 1;
+    maxY = structuralBounds.y + structuralBounds.h - 1;
+  } else {
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const a = data[(y * width + x) * 4 + 3];
+        // Treat pixels with alpha > 40 as visible artwork.
+        if (a <= 40) continue;
+        if (x < minX) minX = x;
+        if (y < minY) minY = y;
+        if (x > maxX) maxX = x;
+        if (y > maxY) maxY = y;
+      }
     }
   }
 
