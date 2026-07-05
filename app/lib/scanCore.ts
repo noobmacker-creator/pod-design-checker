@@ -24,6 +24,37 @@ const CANVAS_W = 4200;
 const CANVAS_H = 4800;
 const SAFE_BORDER = 6;
 
+export type ScanCoreOptions = {
+  targetCanvasW?: number;
+  targetCanvasH?: number;
+  safeBorder?: number;
+};
+
+export type ScanCoreInput = {
+  file: File;
+  imageData: ImageData;
+  imgW: number;
+  imgH: number;
+  dpiMetadata: number | null;
+  scanTimeMs: number;
+  options?: ScanCoreOptions;
+};
+
+export type ScanCoreOutput = {
+  status: BatchScanStatus;
+  scanResult: BatchScanResult;
+};
+
+export type BatchScanAnalysisInput = Omit<ScanCoreInput, 'options'>;
+
+export type BatchFileScanOutput = ScanCoreOutput;
+
+const DEFAULT_SCAN_CORE_OPTIONS: Required<ScanCoreOptions> = {
+  targetCanvasW: CANVAS_W,
+  targetCanvasH: CANVAS_H,
+  safeBorder: SAFE_BORDER,
+};
+
 export const AUTO_FIXABLE_LABELS = new Set([
   'Design Too Small',
   'Print Safety Border',
@@ -122,16 +153,21 @@ function getWhiteBackgroundCheck(imageData: ImageData): CheckItem {
   return { label: 'White Background Risk', status, message };
 }
 
-function getDefaultTransform(imgW: number, imgH: number) {
-  const scaleX = CANVAS_W / imgW;
-  const scaleY = CANVAS_H / imgH;
+function getDefaultTransform(
+  imgW: number,
+  imgH: number,
+  targetCanvasW: number,
+  targetCanvasH: number,
+) {
+  const scaleX = targetCanvasW / imgW;
+  const scaleY = targetCanvasH / imgH;
   const scale = Math.min(scaleX, scaleY);
   const scaledW = imgW * scale;
   const scaledH = imgH * scale;
   return {
     scale,
-    offsetX: Math.round((CANVAS_W - scaledW) / 2),
-    offsetY: Math.round((CANVAS_H - scaledH) / 2),
+    offsetX: Math.round((targetCanvasW - scaledW) / 2),
+    offsetY: Math.round((targetCanvasH - scaledH) / 2),
   };
 }
 
@@ -181,15 +217,19 @@ function getDesignTooSmallStatus(
   };
 }
 
-function getOffCenterStatus(effectiveBounds: Bounds | null): { status: CheckStatus; message: string } {
+function getOffCenterStatus(
+  effectiveBounds: Bounds | null,
+  targetCanvasW: number,
+  targetCanvasH: number,
+): { status: CheckStatus; message: string } {
   if (!effectiveBounds) {
     return { status: 'warn', message: 'Could not measure artwork position clearly.' };
   }
 
   const artCenterX = effectiveBounds.x + effectiveBounds.w / 2;
   const artCenterY = effectiveBounds.y + effectiveBounds.h / 2;
-  const deltaX = artCenterX - CANVAS_W / 2;
-  const deltaY = artCenterY - CANVAS_H / 2;
+  const deltaX = artCenterX - targetCanvasW / 2;
+  const deltaY = artCenterY - targetCanvasH / 2;
   const absX = Math.abs(deltaX);
   const absY = Math.abs(deltaY);
 
@@ -202,27 +242,32 @@ function getOffCenterStatus(effectiveBounds: Bounds | null): { status: CheckStat
   return { status: 'fail', message: 'Artwork is noticeably off-center. Auto Fix can help.' };
 }
 
-function getSafetyBorderStatus(effectiveBounds: Bounds | null): { status: CheckStatus; message: string } {
+function getSafetyBorderStatus(
+  effectiveBounds: Bounds | null,
+  targetCanvasW: number,
+  targetCanvasH: number,
+  safeBorder: number,
+): { status: CheckStatus; message: string } {
   if (!effectiveBounds) {
     return {
       status: 'warn',
-      message: `Could not measure artwork against the ${SAFE_BORDER}px safety border.`,
+      message: `Could not measure artwork against the ${safeBorder}px safety border.`,
     };
   }
 
   const left = effectiveBounds.x;
   const top = effectiveBounds.y;
-  const right = CANVAS_W - (effectiveBounds.x + effectiveBounds.w);
-  const bottom = CANVAS_H - (effectiveBounds.y + effectiveBounds.h);
+  const right = targetCanvasW - (effectiveBounds.x + effectiveBounds.w);
+  const bottom = targetCanvasH - (effectiveBounds.y + effectiveBounds.h);
   const minEdge = Math.min(left, top, right, bottom);
 
-  if (minEdge >= SAFE_BORDER + 20) {
+  if (minEdge >= safeBorder + 20) {
     return {
       status: 'pass',
-      message: `Artwork appears safely inside the ${SAFE_BORDER}px safety border.`,
+      message: `Artwork appears safely inside the ${safeBorder}px safety border.`,
     };
   }
-  if (minEdge >= SAFE_BORDER) {
+  if (minEdge >= safeBorder) {
     return {
       status: 'warn',
       message: 'Safe but close to edge. Auto Fix can add more breathing room.',
@@ -354,22 +399,12 @@ function classifyBatchStatus(blockingChecks: CheckItem[]): BatchScanStatus {
   return 'needs-review';
 }
 
-export type BatchScanAnalysisInput = {
-  file: File;
-  imageData: ImageData;
-  imgW: number;
-  imgH: number;
-  dpiMetadata: number | null;
-  scanTimeMs: number;
-};
-
-export type BatchFileScanOutput = {
-  status: BatchScanStatus;
-  scanResult: BatchScanResult;
-};
-
-export function analyzeBatchScan(input: BatchScanAnalysisInput): BatchFileScanOutput {
+function analyzeScanCoreImpl(
+  input: ScanCoreInput,
+  options: Required<ScanCoreOptions>,
+): ScanCoreOutput {
   const { file, imageData, imgW, imgH, dpiMetadata, scanTimeMs } = input;
+  const { targetCanvasW, targetCanvasH, safeBorder } = options;
 
   const boundsResult = detectBoundsAndCoverage(imageData, 10);
   // Single connected-component pass: stray-speck count plus structural artwork bounds
@@ -395,10 +430,8 @@ export function analyzeBatchScan(input: BatchScanAnalysisInput): BatchFileScanOu
     }
   }
 
-  const transform = getDefaultTransform(imgW, imgH);
+  const transform = getDefaultTransform(imgW, imgH, targetCanvasW, targetCanvasH);
   const effectiveBounds = getEffectiveArtBounds(originalBounds, transform);
-  const targetCanvasW = CANVAS_W;
-  const targetCanvasH = CANVAS_H;
   const targetCanvasAspect = targetCanvasW / targetCanvasH;
 
   const designTooSmallStatus = getDesignTooSmallStatus(
@@ -409,8 +442,13 @@ export function analyzeBatchScan(input: BatchScanAnalysisInput): BatchFileScanOu
     targetCanvasW,
     targetCanvasH,
   );
-  const offCenterStatus = getOffCenterStatus(effectiveBounds);
-  const safetyBorderStatus = getSafetyBorderStatus(effectiveBounds);
+  const offCenterStatus = getOffCenterStatus(effectiveBounds, targetCanvasW, targetCanvasH);
+  const safetyBorderStatus = getSafetyBorderStatus(
+    effectiveBounds,
+    targetCanvasW,
+    targetCanvasH,
+    safeBorder,
+  );
 
   const whiteBackgroundCheck = getWhiteBackgroundCheck(imageData);
   const whiteEdgeCheck = getWhiteEdgeHaloCheck(imageData);
@@ -587,4 +625,15 @@ export function analyzeBatchScan(input: BatchScanAnalysisInput): BatchFileScanOu
       scanTimeMs,
     },
   };
+}
+
+export function analyzeScanCore(input: ScanCoreInput): ScanCoreOutput {
+  return analyzeScanCoreImpl(input, {
+    ...DEFAULT_SCAN_CORE_OPTIONS,
+    ...input.options,
+  });
+}
+
+export function analyzeBatchScan(input: BatchScanAnalysisInput): BatchFileScanOutput {
+  return analyzeScanCore(input);
 }

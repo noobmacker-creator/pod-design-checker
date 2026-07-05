@@ -5,6 +5,7 @@ const jiti = createJiti(__filename);
 
 const { analyzeStructuralArtwork } = jiti('../app/lib/imageScanChecks.ts');
 const { computeQuickFixTransform, createBatchFixedPngBlob } = jiti('../app/lib/batchAutoFix.ts');
+const { analyzeBatchScan, analyzeScanCore } = jiti('../app/lib/scanCore.ts');
 const { resolvePostAutoFixScanResult, scanBatchFile } = jiti('../app/lib/batchScanner.ts');
 
 const CANVAS_W = 4200;
@@ -57,6 +58,18 @@ function makeFile(name, type, fixture) {
   const file = new File([new Uint8Array([1, 2, 3])], name, { type });
   blobFixtureMap.set(file, fixture);
   return file;
+}
+
+function makeCoreScanInput(name, type, fixture, scanTimeMs = 12) {
+  const file = makeFile(name, type, fixture);
+  return {
+    file,
+    imageData: makeImageDataFromFixture(fixture),
+    imgW: fixture.width,
+    imgH: fixture.height,
+    dpiMetadata: null,
+    scanTimeMs,
+  };
 }
 
 function fillRect(data, width, height, rect, colour) {
@@ -247,6 +260,55 @@ testCase('structural artwork bounds ignore tiny stray specks', () => {
 
   assert.equal(result.speckCount, 1);
   assert.deepEqual(result.structuralBounds, { x: 20, y: 20, w: 20, h: 20 });
+});
+
+testCase('default core options match the current Batch scan result', () => {
+  const input = makeCoreScanInput(
+    'core-default.png',
+    'image/png',
+    makeGradientFixture(1000, 1000, { x: 200, y: 200, w: 600, h: 600 }),
+  );
+
+  const coreResult = analyzeScanCore(input);
+  const batchResult = analyzeBatchScan(input);
+
+  assert.deepEqual(coreResult, batchResult);
+});
+
+testCase('neutral core accepts custom target dimensions', () => {
+  const input = makeCoreScanInput(
+    'core-custom-target.png',
+    'image/png',
+    makeGradientFixture(1000, 1000, { x: 200, y: 200, w: 600, h: 600 }),
+  );
+
+  const defaultResult = analyzeScanCore(input);
+  const customResult = analyzeScanCore({
+    ...input,
+    options: { targetCanvasW: 1000, targetCanvasH: 1000, safeBorder: 6 },
+  });
+
+  assert.equal(defaultResult.status, 'safe-auto-fix');
+  assert.equal(customResult.status, 'ready');
+  assert.equal(customResult.scanResult.mainIssue, 'No major issue found.');
+  assert.notDeepEqual(customResult, defaultResult);
+});
+
+testCase('Batch defaults stay on the 4200x4800 canvas with a 6px border', () => {
+  const input = makeCoreScanInput(
+    'core-batch-defaults.png',
+    'image/png',
+    makeGradientFixture(1000, 1000, { x: 2, y: 2, w: 600, h: 600 }),
+  );
+
+  const batchResult = analyzeBatchScan(input);
+  const widenedBorderResult = analyzeScanCore({
+    ...input,
+    options: { targetCanvasW: 4200, targetCanvasH: 4800, safeBorder: 12 },
+  });
+
+  assert.equal(batchResult.status, 'safe-auto-fix');
+  assert.ok(widenedBorderResult.scanResult.printConfidence < batchResult.scanResult.printConfidence);
 });
 
 testCase('Ready classification stays ready for a clean design', async () => {
