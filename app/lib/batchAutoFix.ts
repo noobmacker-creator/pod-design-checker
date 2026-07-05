@@ -4,6 +4,7 @@ import type { BatchScanResult } from './batchQueueUtils';
 const CANVAS_W = 4200;
 const CANVAS_H = 4800;
 const SAFE_BOX = 180;
+const MAX_ARTWORK_FILL = 0.8;
 
 type Bounds = { x: number; y: number; w: number; h: number };
 type Transform = { scale: number; offsetX: number; offsetY: number };
@@ -35,8 +36,12 @@ export function computeQuickFixTransform(originalBounds: Bounds): Transform {
 
   const scaleX = targetW / originalBounds.w;
   const scaleY = targetH / originalBounds.h;
+  const maxFillScale = Math.min(
+    (CANVAS_W * MAX_ARTWORK_FILL) / originalBounds.w,
+    (CANVAS_H * MAX_ARTWORK_FILL) / originalBounds.h,
+  );
 
-  let nextScale = Math.min(scaleX, scaleY);
+  let nextScale = Math.min(scaleX, scaleY, maxFillScale);
 
   if (nextScale > 1) {
     nextScale = Math.min(nextScale, 1.25);
