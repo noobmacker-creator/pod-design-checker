@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node tests/batch-regression.test.cjs"
+    "test": "node tests/batch-regression.test.cjs && node tests/single-scan-adapter.test.cjs"
   },
   "dependencies": {
     "jszip": "^3.10.1",
