@@ -1,4 +1,5 @@
 import type { CheckItem } from './podCheckerTypes';
+import type { ScanCoreOptions } from './scanCore';
 import { analyzeSingleScan, type SingleScanAdapterInput, type SingleScanAdapterOutput } from './singleScanAdapter';
 
 export type SingleScanVisibleScanFn = (input: SingleScanAdapterInput) => SingleScanAdapterOutput;
@@ -44,5 +45,59 @@ export function mergeSingleScanDisplayChecks(
       }
       return item;
     }),
+  );
+}
+
+export type SingleScanFixedOutputRenderInput = {
+  width: number;
+  height: number;
+  transform: { scale: number; offsetX: number; offsetY: number };
+};
+
+export type SingleScanFixedOutputRenderer = (
+  input: SingleScanFixedOutputRenderInput,
+) => ImageData | null;
+
+export type SingleScanFixedOutputInput = {
+  file: File;
+  img: HTMLImageElement;
+  dpiMetadata: number | null;
+  scanTimeMs: number;
+  options: ScanCoreOptions;
+  outputWidth: number;
+  outputHeight: number;
+  transform: { scale: number; offsetX: number; offsetY: number };
+  renderImageData: SingleScanFixedOutputRenderer;
+};
+
+export function runSingleScanVisibleSummaryFromFixedOutput(
+  input: SingleScanFixedOutputInput,
+  scanFn: SingleScanVisibleScanFn = analyzeSingleScan,
+): SingleScanAdapterOutput | null {
+  const imageData = input.renderImageData({
+    width: input.outputWidth,
+    height: input.outputHeight,
+    transform: input.transform,
+  });
+
+  if (!imageData) {
+    return null;
+  }
+
+  return runSingleScanVisibleSummary(
+    {
+      file: input.file,
+      imageData,
+      imgW: input.outputWidth,
+      imgH: input.outputHeight,
+      dpiMetadata: input.dpiMetadata,
+      scanTimeMs: input.scanTimeMs,
+      options: {
+        ...input.options,
+        targetCanvasW: input.outputWidth,
+        targetCanvasH: input.outputHeight,
+      },
+    },
+    scanFn,
   );
 }

@@ -16,7 +16,11 @@ import { redbubblePresets } from './lib/redbubblePresets';
 import type { RedbubblePresetId } from './lib/redbubblePresets';
 import { printfulPresets } from './lib/printfulPresets';
 import type { PrintfulPresetId } from './lib/printfulPresets';
-import { mergeSingleScanDisplayChecks, runSingleScanVisibleSummary } from './lib/singleScanDisplay';
+import {
+  mergeSingleScanDisplayChecks,
+  runSingleScanVisibleSummary,
+  runSingleScanVisibleSummaryFromFixedOutput,
+} from './lib/singleScanDisplay';
 
 import DesignPreviewPanel, { type PreviewBackground } from './components/DesignPreviewPanel';
 
@@ -1942,7 +1946,7 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
   }
 
   function handleQuickFix() {
-    if (!originalBounds) return;
+    if (!originalBounds || !file || !img) return;
 
     setViewMode('pod');
   
@@ -1970,13 +1974,39 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
     const targetY = (CANVAS_H - targetH) / 2;
     const x = targetX + (targetW - scaledW) / 2 - originalBounds.x * nextScale;
     const y = targetY + (targetH - scaledH) / 2 - originalBounds.y * nextScale;
-  
-    setTransform({
+    const nextTransform = {
       scale: Math.round(nextScale * 1000) / 1000,
       offsetX: Math.round(x),
       offsetY: Math.round(y),
+    };
+
+    setTransform(nextTransform);
+
+    const fixedSummary = runSingleScanVisibleSummaryFromFixedOutput({
+      file,
+      img,
+      dpiMetadata,
+      scanTimeMs: 0,
+      options: {
+        targetCanvasW,
+        targetCanvasH,
+        safeBorder: SAFE_BORDER,
+      },
+      outputWidth: targetCanvasW,
+      outputHeight: targetCanvasH,
+      transform: nextTransform,
+      renderImageData: ({ width, height, transform: renderTransform }) => {
+        const canvas = createExportCanvas(width, height, renderTransform);
+        if (!canvas) return null;
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        return ctx ? ctx.getImageData(0, 0, width, height) : null;
+      },
     });
-  
+
+    if (fixedSummary) {
+      setSingleScanSummary(fixedSummary);
+    }
+
     setActionMessage('Auto Fix applied.');
     setHasAutoFixApplied(true);
   }
@@ -2055,7 +2085,11 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
       .replace(/^-+|-+$/g, '');
   }
   
-  function createExportCanvas(width: number, height: number): HTMLCanvasElement | null {
+  function createExportCanvas(
+    width: number,
+    height: number,
+    renderTransform = transform,
+  ): HTMLCanvasElement | null {
     if (!img) return null;
 
     const exportCanvas = document.createElement('canvas');
@@ -2071,10 +2105,10 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
     const padX = (exportCanvas.width - CANVAS_W * fitScale) / 2;
     const padY = (exportCanvas.height - CANVAS_H * fitScale) / 2;
 
-    const drawW = img.naturalWidth * transform.scale * fitScale;
-    const drawH = img.naturalHeight * transform.scale * fitScale;
-    const drawX = transform.offsetX * fitScale + padX;
-    const drawY = transform.offsetY * fitScale + padY;
+    const drawW = img.naturalWidth * renderTransform.scale * fitScale;
+    const drawH = img.naturalHeight * renderTransform.scale * fitScale;
+    const drawX = renderTransform.offsetX * fitScale + padX;
+    const drawY = renderTransform.offsetY * fitScale + padY;
 
     ctx.drawImage(img, drawX, drawY, drawW, drawH);
     return exportCanvas;

@@ -6,6 +6,7 @@ const jiti = createJiti(__filename);
 const {
   dedupeSingleScanChecks,
   mergeSingleScanDisplayChecks,
+  runSingleScanVisibleSummaryFromFixedOutput,
   runSingleScanVisibleSummary,
 } = jiti('../app/lib/singleScanDisplay.ts');
 
@@ -72,6 +73,105 @@ testCase('shared warnings and failures override overlapping labels once', () => 
     { label: 'Tiny Text Risk', status: 'pass', message: 'single-only pass' },
     { label: 'Design Too Small', status: 'fail', message: 'legacy warn' },
   ]);
+});
+
+testCase('fixed output helper rescans once and replaces stale confidence', () => {
+  let renderCount = 0;
+  let scanCount = 0;
+
+  const fixedSummary = runSingleScanVisibleSummaryFromFixedOutput(
+    {
+      file: new File([new Uint8Array([1, 2, 3])], 'auto-fix.png', { type: 'image/png' }),
+      img: {},
+      dpiMetadata: null,
+      scanTimeMs: 0,
+      options: {},
+      outputWidth: 4200,
+      outputHeight: 4800,
+      transform: { scale: 1.25, offsetX: 18, offsetY: 22 },
+      renderImageData: ({ width, height, transform }) => {
+        renderCount++;
+        assert.equal(width, 4200);
+        assert.equal(height, 4800);
+        assert.deepEqual(transform, { scale: 1.25, offsetX: 18, offsetY: 22 });
+        return {
+          width,
+          height,
+          data: new Uint8ClampedArray(width * height * 4),
+        };
+      },
+    },
+    (input) => {
+      scanCount++;
+      assert.equal(input.imgW, 4200);
+      assert.equal(input.imgH, 4800);
+      return {
+        ...baseSummary,
+        printConfidence: 97,
+        mainIssue: 'No major issue found.',
+        nextAction: 'Download and upload.',
+        warnings: [],
+        failures: [],
+        scanResult: {
+          ...baseSummary.scanResult,
+          printConfidence: 97,
+          mainIssue: 'No major issue found.',
+          nextAction: 'Download and upload.',
+          warnings: [],
+          failures: [],
+        },
+      };
+    },
+  );
+
+  assert.equal(renderCount, 1);
+  assert.equal(scanCount, 1);
+  assert.equal(fixedSummary.printConfidence, 97);
+  assert.equal(fixedSummary.mainIssue, 'No major issue found.');
+});
+
+testCase('fixed output helper preserves remaining warnings and failures', () => {
+  const fixedSummary = runSingleScanVisibleSummaryFromFixedOutput(
+    {
+      file: new File([new Uint8Array([1, 2, 3])], 'auto-fix-warning.png', { type: 'image/png' }),
+      img: {},
+      dpiMetadata: null,
+      scanTimeMs: 0,
+      options: {},
+      outputWidth: 4200,
+      outputHeight: 4800,
+      transform: { scale: 1.1, offsetX: 0, offsetY: 0 },
+      renderImageData: ({ width, height }) => ({
+        width,
+        height,
+        data: new Uint8ClampedArray(width * height * 4),
+      }),
+    },
+    () => ({
+      ...baseSummary,
+      scanStatus: 'warning',
+      riskLabel: 'NEEDS REVIEW',
+      printConfidence: 84,
+      mainIssue: 'Tiny Text Risk',
+      nextAction: 'Review scan results',
+      warnings: ['Tiny Text Risk'],
+      failures: ['White Background Risk'],
+      scanResult: {
+        ...baseSummary.scanResult,
+        printConfidence: 84,
+        mainIssue: 'Tiny Text Risk',
+        nextAction: 'Review scan results',
+        warnings: ['Tiny Text Risk'],
+        failures: ['White Background Risk'],
+      },
+    }),
+  );
+
+  assert.equal(fixedSummary.printConfidence, 84);
+  assert.equal(fixedSummary.scanStatus, 'warning');
+  assert.equal(fixedSummary.riskLabel, 'NEEDS REVIEW');
+  assert.deepEqual(fixedSummary.warnings, ['Tiny Text Risk']);
+  assert.deepEqual(fixedSummary.failures, ['White Background Risk']);
 });
 
 testCase('duplicate labels are removed while single-only labels stay in order', () => {
