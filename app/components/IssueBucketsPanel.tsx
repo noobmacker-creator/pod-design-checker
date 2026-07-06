@@ -308,6 +308,50 @@ function preflightStatusColor(status: PrintfulOverallStatus): string {
   return '#fca5a5';
 }
 
+const EXPORT_BANNER_IGNORED_LABELS = new Set(['Soft Transparency', 'Export Size Note']);
+
+function getExportBannerState(checks: CheckItem[] | undefined, hasImage: boolean) {
+  if (!hasImage) {
+    return {
+      text: 'Upload a design to enable downloads.',
+      color: '#facc15',
+      background: 'rgba(250, 204, 21, 0.12)',
+      border: '1px solid rgba(250, 204, 21, 0.25)',
+    };
+  }
+
+  const activeChecks = (checks ?? []).filter(
+    (check) =>
+      !EXPORT_BANNER_IGNORED_LABELS.has(check.label) &&
+      (check.status === 'fail' || check.status === 'warn'),
+  );
+
+  if (activeChecks.some((check) => check.status === 'fail')) {
+    return {
+      text: 'High risk — fix the main issue before exporting.',
+      color: '#fca5a5',
+      background: 'rgba(127, 29, 29, 0.45)',
+      border: '1px solid rgba(248, 113, 113, 0.35)',
+    };
+  }
+
+  if (activeChecks.length > 0) {
+    return {
+      text: 'Export available, but review warnings first.',
+      color: '#fde68a',
+      background: 'rgba(120, 53, 15, 0.45)',
+      border: '1px solid rgba(251, 191, 36, 0.35)',
+    };
+  }
+
+  return {
+    text: 'Ready to export. Choose a size, then press the blue download button.',
+    color: '#86efac',
+    background: 'rgba(22, 163, 74, 0.12)',
+    border: '1px solid rgba(134, 239, 172, 0.25)',
+  };
+}
+
 export default function IssueBucketsPanel({
   img,
   checks = [],
@@ -365,6 +409,7 @@ export default function IssueBucketsPanel({
   const customWidthInputRef = useRef<HTMLInputElement>(null);
   const productPresetsRef = useRef<HTMLDivElement>(null);
   const exportPackZipRef = useRef<HTMLDivElement>(null);
+  const exportBannerState = getExportBannerState(checks, Boolean(img));
 
   useEffect(() => {
     if (customSizeFocusToken === 0) return;
@@ -1249,20 +1294,16 @@ export default function IssueBucketsPanel({
         style={{
           ...directChildStyle,
           fontSize: 12,
-          color: img ? '#86efac' : '#facc15',
+          color: exportBannerState.color,
           fontWeight: 800,
           lineHeight: 1.4,
           padding: '8px 10px',
           borderRadius: 10,
-          background: img ? 'rgba(22, 163, 74, 0.12)' : 'rgba(250, 204, 21, 0.12)',
-          border: img
-            ? '1px solid rgba(134, 239, 172, 0.25)'
-            : '1px solid rgba(250, 204, 21, 0.25)',
+          background: exportBannerState.background,
+          border: exportBannerState.border,
         }}
       >
-        {img
-          ? 'Ready to export. Choose a size, then press the blue download button.'
-          : 'Upload a design to enable downloads.'}
+        {exportBannerState.text}
       </div>
       <div style={{ ...directChildStyle, display: 'grid', gap: 10 }}>
         <div style={modeSectionStyle}>
