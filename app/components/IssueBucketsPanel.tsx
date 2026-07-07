@@ -7,6 +7,10 @@ import type { RedbubblePresetId } from '../lib/redbubblePresets';
 import { redbubblePresets } from '../lib/redbubblePresets';
 import type { PrintfulPresetId } from '../lib/printfulPresets';
 import { printfulPresets } from '../lib/printfulPresets';
+import {
+  SPRING_STANDARD_APPAREL_PRESET,
+  ZAZZLE_APPAREL_HIGH_RESOLUTION_PRESET,
+} from '../lib/additionalPlatformPresets';
 
 type PreflightMark = 'pass' | 'warn' | 'fail' | 'info';
 
@@ -41,15 +45,39 @@ type IssueBucketsPanelProps = {
   setActivePresetSystem: React.Dispatch<
     React.SetStateAction<'redbubble' | 'printful' | 'teepublic'>
   >;
-  uploadTarget: 'standard' | 'redbubble' | 'printful' | 'teepublic' | 'custom' | 'presets';
+  uploadTarget:
+    | 'standard'
+    | 'redbubble'
+    | 'printful'
+    | 'teepublic'
+    | 'spring'
+    | 'zazzle'
+    | 'gelato'
+    | 'custom'
+    | 'presets';
   setUploadTarget: React.Dispatch<
-    React.SetStateAction<'standard' | 'redbubble' | 'printful' | 'teepublic' | 'custom' | 'presets'>
+    React.SetStateAction<
+      | 'standard'
+      | 'redbubble'
+      | 'printful'
+      | 'teepublic'
+      | 'spring'
+      | 'zazzle'
+      | 'gelato'
+      | 'custom'
+      | 'presets'
+    >
   >;
   handleDownloadApparelPng: () => void;
   handleDownloadRedbubblePng: () => void;
   handleDownloadPrintfulPng: () => void;
   handleDownloadTeePublicPng: () => void;
-  handleDownloadCustomPng: (width: number, height: number, presetName?: string) => void;
+  handleDownloadCustomPng: (
+    width: number,
+    height: number,
+    presetName?: string,
+    filenameLabelOverride?: string
+  ) => void;
   handleDownloadExportPackZip: (
     items: { label: string; width: number; height: number; filenameSlug: string }[]
   ) => void | Promise<void>;
@@ -161,7 +189,16 @@ function getPrintfulPreflight(
   colourProfileStatus: ColourProfileStatus,
   hasTransparency: boolean | null,
   practicalPrintDpi: number,
-  uploadTarget: 'standard' | 'redbubble' | 'printful' | 'teepublic' | 'custom' | 'presets'
+  uploadTarget:
+    | 'standard'
+    | 'redbubble'
+    | 'printful'
+    | 'teepublic'
+    | 'spring'
+    | 'zazzle'
+    | 'gelato'
+    | 'custom'
+    | 'presets'
 ): { overall: PrintfulOverallStatus; items: PreflightItem[] } {
   const findCheck = (label: string) => checks?.find((c) => c.label === label);
 
@@ -451,6 +488,8 @@ export default function IssueBucketsPanel({
   const redbubbleFileName = `${toSafeSlug(selectedRedbubblePresetData.label) || 'pod-checker-export'}-${selectedRedbubblePresetData.width}x${selectedRedbubblePresetData.height}.png`;
   const printfulFileName = `${toSafeSlug(selectedPrintfulPresetData.label) || 'pod-checker-export'}-${selectedPrintfulPresetData.width}x${selectedPrintfulPresetData.height}.png`;
   const teePublicFileName = 'teepublic-5000x5500.png';
+  const springFileName = SPRING_STANDARD_APPAREL_PRESET.filename;
+  const zazzleFileName = ZAZZLE_APPAREL_HIGH_RESOLUTION_PRESET.filename;
 
   const fileNameLineStyle: React.CSSProperties = {
     fontSize: 11,
@@ -505,13 +544,25 @@ export default function IssueBucketsPanel({
     embedded?: boolean;
   };
 
-  type UploadTarget = 'standard' | 'redbubble' | 'printful' | 'teepublic' | 'custom' | 'presets';
+  type UploadTarget =
+    | 'standard'
+    | 'redbubble'
+    | 'printful'
+    | 'teepublic'
+    | 'spring'
+    | 'zazzle'
+    | 'gelato'
+    | 'custom'
+    | 'presets';
 
   const uploadTargetOptions: { id: UploadTarget; label: string }[] = [
     { id: 'standard', label: 'Standard POD' },
     { id: 'redbubble', label: 'Redbubble' },
     { id: 'printful', label: 'Printful' },
     { id: 'teepublic', label: 'TeePublic' },
+    { id: 'spring', label: 'Spring' },
+    { id: 'zazzle', label: 'Zazzle' },
+    { id: 'gelato', label: 'Gelato' },
     { id: 'custom', label: 'Custom Size' },
     { id: 'presets', label: 'Product Presets' },
   ];
@@ -521,6 +572,10 @@ export default function IssueBucketsPanel({
     redbubble: 'Use this export when uploading apparel designs to Redbubble.',
     printful: 'Use this export when uploading DTG/DTF apparel designs to Printful.',
     teepublic: 'Use this export for TeePublic all-products upload.',
+    spring: 'Use this high-quality Spring apparel export for transparent POD artwork.',
+    zazzle:
+      'Use this high-resolution Zazzle export and confirm final placement with the chosen product guide file.',
+    gelato: 'Enter the exact Gelato product dimensions and export a transparent PNG.',
     custom: 'Enter a custom width and height for mugs, stickers, posters, and other POD products.',
     presets: 'Choose a quick generic POD export size for common product shapes.',
   };
@@ -530,6 +585,9 @@ export default function IssueBucketsPanel({
     { id: 'redbubble', title: 'Redbubble', description: 'Platform apparel presets' },
     { id: 'printful', title: 'Printful', description: 'DTG and DTF presets' },
     { id: 'teepublic', title: 'TeePublic', description: 'All-products export' },
+    { id: 'spring', title: 'Spring', description: 'Standard apparel preset' },
+    { id: 'zazzle', title: 'Zazzle', description: 'High-resolution apparel export' },
+    { id: 'gelato', title: 'Gelato', description: 'Enter exact dimensions' },
     { id: 'custom', title: 'Custom Size', description: 'Enter exact dimensions' },
     { id: 'presets', title: 'Product Presets', description: 'Ready-made product sizes' },
   ];
@@ -579,10 +637,12 @@ export default function IssueBucketsPanel({
     background: 'rgba(37, 99, 235, 0.10)',
   };
 
-  const getBoxStyle = (target: Exclude<UploadTarget, 'custom' | 'presets'>): React.CSSProperties =>
+  const getBoxStyle = (
+    target: Exclude<UploadTarget, 'custom' | 'presets' | 'gelato'>
+  ): React.CSSProperties =>
     uploadTarget === target ? { ...baseBoxStyle, ...selectedBoxStyle } : baseBoxStyle;
 
-  const getExtraPanelStyle = (target: 'custom' | 'presets'): React.CSSProperties => ({
+  const getExtraPanelStyle = (target: 'custom' | 'presets' | 'gelato'): React.CSSProperties => ({
     ...baseBoxStyle,
     ...(uploadTarget === target ? selectedBoxStyle : {}),
   });
@@ -885,6 +945,92 @@ export default function IssueBucketsPanel({
         {teePublicDownloadLabel}
       </button>
       <div style={fileNameLineStyle}>File name: {teePublicFileName}</div>
+    </div>
+  );
+
+  const renderSpringExportBox = (opts?: ExportBoxOptions) => (
+    <div key="spring" style={opts?.embedded ? embeddedBoxStyle : getBoxStyle('spring')}>
+      <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 800 }}>Spring Export</div>
+      {uploadTarget === 'spring' && !opts?.compact && !opts?.embedded && (
+        <div style={recommendedLineStyle}>Recommended for your selected platform</div>
+      )}
+      <div style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.4 }}>
+        Recommended standard POD artwork size published by Spring.
+        <br />
+        Use a high-quality PNG with genuine transparency where required.
+      </div>
+      <div style={{ fontSize: 12, color: '#bae6fd', fontWeight: 800 }}>
+        Target: {SPRING_STANDARD_APPAREL_PRESET.width} × {SPRING_STANDARD_APPAREL_PRESET.height} px
+      </div>
+      <div style={stepLabelStyle}>Download PNG</div>
+      <button
+        type="button"
+        onClick={() => {
+          if (!img) return;
+          handleDownloadCustomPng(
+            SPRING_STANDARD_APPAREL_PRESET.width,
+            SPRING_STANDARD_APPAREL_PRESET.height,
+            SPRING_STANDARD_APPAREL_PRESET.label,
+            'spring-standard-apparel'
+          );
+        }}
+        aria-disabled={!img}
+        style={presetDownloadButtonStyle}
+      >
+        Download Spring PNG
+      </button>
+      <div style={fileNameLineStyle}>File name: {springFileName}</div>
+    </div>
+  );
+
+  const renderZazzleExportBox = (opts?: ExportBoxOptions) => (
+    <div key="zazzle" style={opts?.embedded ? embeddedBoxStyle : getBoxStyle('zazzle')}>
+      <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 800 }}>Zazzle Export</div>
+      {uploadTarget === 'zazzle' && !opts?.compact && !opts?.embedded && (
+        <div style={recommendedLineStyle}>Recommended for your selected platform</div>
+      )}
+      <div style={{ fontSize: 12, color: '#bae6fd', fontWeight: 800 }}>
+        {ZAZZLE_APPAREL_HIGH_RESOLUTION_PRESET.label}
+      </div>
+      <div style={{ fontSize: 12, color: '#bae6fd', fontWeight: 800 }}>
+        Target: {ZAZZLE_APPAREL_HIGH_RESOLUTION_PRESET.width} × {ZAZZLE_APPAREL_HIGH_RESOLUTION_PRESET.height} px
+      </div>
+      <div style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.4 }}>
+        High-resolution 300 PPI export based on Zazzle&apos;s 14 × 12 inch light-apparel design area.
+        Zazzle&apos;s general apparel recommendation is 150 PPI.
+        Confirm final placement using the selected product&apos;s Zazzle Guide File.
+      </div>
+      <div style={{ fontSize: 11, color: '#94a3b8', lineHeight: 1.45 }}>
+        • Apparel, bags, hats and mousepads: general target 150 PPI
+        <br />
+        • Mugs, cards, magnets and stickers: general target 200 PPI
+        <br />
+        • Posters and photo prints: general target 300 PPI
+        <br />
+        • Exact dimensions vary by product
+      </div>
+      <div style={{ fontSize: 11, color: '#fca5a5', lineHeight: 1.4 }}>
+        Use a genuinely transparent PNG for dark apparel. Partly transparent pixels may print
+        opaque.
+      </div>
+      <div style={stepLabelStyle}>Download PNG</div>
+      <button
+        type="button"
+        onClick={() => {
+          if (!img) return;
+          handleDownloadCustomPng(
+            ZAZZLE_APPAREL_HIGH_RESOLUTION_PRESET.width,
+            ZAZZLE_APPAREL_HIGH_RESOLUTION_PRESET.height,
+            ZAZZLE_APPAREL_HIGH_RESOLUTION_PRESET.label,
+            'zazzle-apparel-high-resolution'
+          );
+        }}
+        aria-disabled={!img}
+        style={presetDownloadButtonStyle}
+      >
+        Download Zazzle PNG
+      </button>
+      <div style={fileNameLineStyle}>File name: {zazzleFileName}</div>
     </div>
   );
 
@@ -1207,14 +1353,69 @@ export default function IssueBucketsPanel({
     </div>
   );
 
+  const renderGelatoExportBox = (opts?: ExportBoxOptions) => {
+    const gelatoParsed = parseCustomExportSize(customWidth, customHeight);
+    const gelatoFileName = gelatoParsed.valid
+      ? `gelato-apparel-${gelatoParsed.width}x${gelatoParsed.height}.png`
+      : 'gelato-apparel-[width]x[height].png';
+
+    return (
+      <div key="gelato" style={opts?.embedded ? embeddedBoxStyle : getExtraPanelStyle('gelato')}>
+        <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 800 }}>Gelato Apparel Readiness</div>
+        <div style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.4 }}>
+          Gelato dimensions vary by product and print area.
+          <br />
+          Enter the exact pixel dimensions supplied for the selected Gelato product.
+          <br />
+          Aim for 300 DPI at final print size and avoid images below 150 DPI.
+          <br />
+          Use PNG when transparency is required.
+        </div>
+        {renderCustomSizeInputs()}
+        {gelatoParsed.valid && (
+          <div style={{ fontSize: 12, color: '#bae6fd', fontWeight: 800 }}>
+            Target: {gelatoParsed.width} × {gelatoParsed.height} px
+          </div>
+        )}
+        {customSizeError && (
+          <div style={{ fontSize: 12, color: '#fbbf24', lineHeight: 1.4 }}>{customSizeError}</div>
+        )}
+        <button
+          type="button"
+          onClick={() => {
+            if (!img) return;
+            if (!gelatoParsed.valid) {
+              setCustomSizeError(gelatoParsed.error);
+              return;
+            }
+            setCustomSizeError('');
+            handleDownloadCustomPng(
+              gelatoParsed.width,
+              gelatoParsed.height,
+              'Gelato Apparel',
+              'gelato-apparel'
+            );
+          }}
+          aria-disabled={!img}
+          style={presetDownloadButtonStyle}
+        >
+          Download Gelato PNG
+        </button>
+        <div style={fileNameLineStyle}>File name: {gelatoFileName}</div>
+      </div>
+    );
+  };
+
   const exportBoxRenderers: Record<
-    Exclude<UploadTarget, 'custom' | 'presets'>,
+    Exclude<UploadTarget, 'custom' | 'presets' | 'gelato'>,
     (opts?: ExportBoxOptions) => React.JSX.Element
   > = {
     standard: renderStandardExportBox,
     redbubble: renderRedbubbleExportBox,
     printful: renderPrintfulExportBox,
     teepublic: renderTeePublicExportBox,
+    spring: renderSpringExportBox,
+    zazzle: renderZazzleExportBox,
   };
 
   const selectedExportBoxOptions: ExportBoxOptions = {
@@ -1224,7 +1425,9 @@ export default function IssueBucketsPanel({
       uploadTarget === 'standard' ||
       uploadTarget === 'redbubble' ||
       uploadTarget === 'printful' ||
-      uploadTarget === 'teepublic',
+      uploadTarget === 'teepublic' ||
+      uploadTarget === 'spring' ||
+      uploadTarget === 'zazzle',
   };
 
   const exportDownloadSectionStyle: React.CSSProperties = {
@@ -1236,20 +1439,24 @@ export default function IssueBucketsPanel({
     gap: 10,
   };
 
-  const platformExportTargets: Exclude<UploadTarget, 'custom' | 'presets'>[] = [
+  const platformExportTargets: Exclude<UploadTarget, 'custom' | 'presets' | 'gelato'>[] = [
     'standard',
     'redbubble',
     'printful',
     'teepublic',
+    'spring',
+    'zazzle',
   ];
 
   const isPlatformTarget = (
     target: UploadTarget
-  ): target is Exclude<UploadTarget, 'custom' | 'presets'> =>
+  ): target is Exclude<UploadTarget, 'custom' | 'presets' | 'gelato'> =>
     target === 'standard' ||
     target === 'redbubble' ||
     target === 'printful' ||
-    target === 'teepublic';
+    target === 'teepublic' ||
+    target === 'spring' ||
+    target === 'zazzle';
 
   const moreDownloadTargets = platformExportTargets.filter(
     (id) => !isPlatformTarget(uploadTarget) || id !== uploadTarget
@@ -1359,6 +1566,7 @@ export default function IssueBucketsPanel({
           </div>
           {uploadTarget === 'presets' && renderProductPresetsPanel(selectedExportBoxOptions)}
           {uploadTarget === 'custom' && renderCustomSizeExportBox(selectedExportBoxOptions)}
+          {uploadTarget === 'gelato' && renderGelatoExportBox(selectedExportBoxOptions)}
           {isPlatformTarget(uploadTarget) &&
             exportBoxRenderers[uploadTarget](selectedExportBoxOptions)}
         </div>
