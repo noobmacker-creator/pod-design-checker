@@ -7,10 +7,15 @@ import type { RedbubblePresetId } from '../lib/redbubblePresets';
 import { redbubblePresets } from '../lib/redbubblePresets';
 import type { PrintfulPresetId } from '../lib/printfulPresets';
 import { printfulPresets } from '../lib/printfulPresets';
+import { SPRING_STANDARD_APPAREL_PRESET } from '../lib/additionalPlatformPresets';
 import {
-  SPRING_STANDARD_APPAREL_PRESET,
-  ZAZZLE_APPAREL_HIGH_RESOLUTION_PRESET,
-} from '../lib/additionalPlatformPresets';
+  ZAZZLE_DEFAULT_PRESET_ID,
+  ZAZZLE_PRESET_CATEGORIES,
+  ZAZZLE_PRESET_TYPE_LABELS,
+  getZazzlePresetById,
+  zazzleProductPresets,
+  type ZazzlePresetId,
+} from '../lib/zazzleProductPresets';
 
 type PreflightMark = 'pass' | 'warn' | 'fail' | 'info';
 
@@ -84,6 +89,7 @@ type IssueBucketsPanelProps = {
   customSizeFocusToken?: number;
   productPresetsFocusToken?: number;
   exportPackZipFocusToken?: number;
+  autoFixApplied?: boolean;
 };
 
 const PRINTFUL_MAX_BYTES = 200 * 1024 * 1024;
@@ -347,7 +353,21 @@ function preflightStatusColor(status: PrintfulOverallStatus): string {
 
 const EXPORT_BANNER_IGNORED_LABELS = new Set(['Soft Transparency', 'Export Size Note']);
 
-function getExportBannerState(checks: CheckItem[] | undefined, hasImage: boolean) {
+const AUTO_FIXABLE_EXPORT_LABELS = new Set([
+  'Design Too Small',
+  'Print Safety Border',
+  'Off-Center Design',
+  'Empty Padding Risk',
+  'Uneven Padding Risk',
+  'Artwork Near Canvas Edge',
+  'Cut-Off Edge Risk',
+]);
+
+function getExportBannerState(
+  checks: CheckItem[] | undefined,
+  hasImage: boolean,
+  autoFixApplied: boolean,
+) {
   if (!hasImage) {
     return {
       text: 'Upload a design to enable downloads.',
@@ -357,9 +377,14 @@ function getExportBannerState(checks: CheckItem[] | undefined, hasImage: boolean
     };
   }
 
-  const activeChecks = (checks ?? []).filter(
+  const visibleChecks = autoFixApplied
+    ? (checks ?? []).filter((check) => !AUTO_FIXABLE_EXPORT_LABELS.has(check.label))
+    : checks ?? [];
+
+  const activeChecks = visibleChecks.filter(
     (check) =>
       !EXPORT_BANNER_IGNORED_LABELS.has(check.label) &&
+      check.status !== 'info' &&
       (check.status === 'fail' || check.status === 'warn'),
   );
 
@@ -421,6 +446,7 @@ export default function IssueBucketsPanel({
   customSizeFocusToken = 0,
   productPresetsFocusToken = 0,
   exportPackZipFocusToken = 0,
+  autoFixApplied = false,
 }: IssueBucketsPanelProps) {
   const [customWidth, setCustomWidth] = useState('3000');
   const [customHeight, setCustomHeight] = useState('3000');
@@ -442,11 +468,13 @@ export default function IssueBucketsPanel({
   const [moreDownloadOpen, setMoreDownloadOpen] = useState(false);
   const [exportPackOpen, setExportPackOpen] = useState(false);
   const [selectedProductPresetId, setSelectedProductPresetId] = useState('square');
+  const [selectedZazzlePresetId, setSelectedZazzlePresetId] =
+    useState<ZazzlePresetId>(ZAZZLE_DEFAULT_PRESET_ID);
   const customSizeRef = useRef<HTMLDivElement>(null);
   const customWidthInputRef = useRef<HTMLInputElement>(null);
   const productPresetsRef = useRef<HTMLDivElement>(null);
   const exportPackZipRef = useRef<HTMLDivElement>(null);
-  const exportBannerState = getExportBannerState(checks, Boolean(img));
+  const exportBannerState = getExportBannerState(checks, Boolean(img), autoFixApplied);
 
   useEffect(() => {
     if (customSizeFocusToken === 0) return;
@@ -489,7 +517,8 @@ export default function IssueBucketsPanel({
   const printfulFileName = `${toSafeSlug(selectedPrintfulPresetData.label) || 'pod-checker-export'}-${selectedPrintfulPresetData.width}x${selectedPrintfulPresetData.height}.png`;
   const teePublicFileName = 'teepublic-5000x5500.png';
   const springFileName = SPRING_STANDARD_APPAREL_PRESET.filename;
-  const zazzleFileName = ZAZZLE_APPAREL_HIGH_RESOLUTION_PRESET.filename;
+  const selectedZazzlePreset = getZazzlePresetById(selectedZazzlePresetId);
+  const zazzleFileName = selectedZazzlePreset.filename;
 
   const fileNameLineStyle: React.CSSProperties = {
     fontSize: 11,
@@ -989,40 +1018,67 @@ export default function IssueBucketsPanel({
       {uploadTarget === 'zazzle' && !opts?.compact && !opts?.embedded && (
         <div style={recommendedLineStyle}>Recommended for your selected platform</div>
       )}
-      <div style={{ fontSize: 12, color: '#bae6fd', fontWeight: 800 }}>
-        {ZAZZLE_APPAREL_HIGH_RESOLUTION_PRESET.label}
+      <label style={{ display: 'grid', gap: 4 }}>
+        <span style={{ fontSize: 11, fontWeight: 800, color: '#93c5fd' }}>Product</span>
+        <select
+          value={selectedZazzlePresetId}
+          onChange={(e) => setSelectedZazzlePresetId(e.target.value as ZazzlePresetId)}
+          style={printAreaSelectStyle}
+        >
+          {ZAZZLE_PRESET_CATEGORIES.map((category) => (
+            <optgroup key={category} label={category}>
+              {zazzleProductPresets
+                .filter((preset) => preset.category === category)
+                .map((preset) => (
+                  <option key={preset.id} value={preset.id}>
+                    {preset.label}
+                  </option>
+                ))}
+            </optgroup>
+          ))}
+        </select>
+      </label>
+      <div style={{ fontSize: 11, color: '#93c5fd', fontWeight: 700 }}>
+        {ZAZZLE_PRESET_TYPE_LABELS[selectedZazzlePreset.presetType]}
       </div>
-      <div style={{ fontSize: 12, color: '#bae6fd', fontWeight: 800 }}>
-        Target: {ZAZZLE_APPAREL_HIGH_RESOLUTION_PRESET.width} × {ZAZZLE_APPAREL_HIGH_RESOLUTION_PRESET.height} px
-      </div>
+      <div style={{ fontSize: 12, color: '#bae6fd', fontWeight: 800 }}>{selectedZazzlePreset.label}</div>
       <div style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.4 }}>
-        High-resolution 300 PPI export based on Zazzle&apos;s 14 × 12 inch light-apparel design area.
-        Zazzle&apos;s general apparel recommendation is 150 PPI.
-        Confirm final placement using the selected product&apos;s Zazzle Guide File.
+        {selectedZazzlePreset.physicalSize} · {selectedZazzlePreset.ppi} PPI
       </div>
-      <div style={{ fontSize: 11, color: '#94a3b8', lineHeight: 1.45 }}>
-        • Apparel, bags, hats and mousepads: general target 150 PPI
-        <br />
-        • Mugs, cards, magnets and stickers: general target 200 PPI
-        <br />
-        • Posters and photo prints: general target 300 PPI
-        <br />
-        • Exact dimensions vary by product
+      <div style={{ fontSize: 12, color: '#bae6fd', fontWeight: 800 }}>
+        Target: {selectedZazzlePreset.width} × {selectedZazzlePreset.height} px
       </div>
-      <div style={{ fontSize: 11, color: '#fca5a5', lineHeight: 1.4 }}>
-        Use a genuinely transparent PNG for dark apparel. Partly transparent pixels may print
-        opaque.
-      </div>
+      <div style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.4 }}>{selectedZazzlePreset.helperText}</div>
+      {selectedZazzlePreset.bleedNote && (
+        <div style={{ fontSize: 11, color: '#fbbf24', lineHeight: 1.4 }}>{selectedZazzlePreset.bleedNote}</div>
+      )}
+      {selectedZazzlePreset.category === 'Apparel' && (
+        <div style={{ fontSize: 11, color: '#94a3b8', lineHeight: 1.45 }}>
+          • Apparel, bags, hats and mousepads: general target 150 PPI
+          <br />
+          • Mugs, cards, magnets and stickers: general target 200 PPI
+          <br />
+          • Posters and photo prints: general target 300 PPI
+          <br />
+          • Exact dimensions vary by product
+        </div>
+      )}
+      {selectedZazzlePreset.category === 'Apparel' && (
+        <div style={{ fontSize: 11, color: '#fca5a5', lineHeight: 1.4 }}>
+          Use a genuinely transparent PNG for dark apparel. Partly transparent pixels may print
+          opaque.
+        </div>
+      )}
       <div style={stepLabelStyle}>Download PNG</div>
       <button
         type="button"
         onClick={() => {
           if (!img) return;
           handleDownloadCustomPng(
-            ZAZZLE_APPAREL_HIGH_RESOLUTION_PRESET.width,
-            ZAZZLE_APPAREL_HIGH_RESOLUTION_PRESET.height,
-            ZAZZLE_APPAREL_HIGH_RESOLUTION_PRESET.label,
-            'zazzle-apparel-high-resolution'
+            selectedZazzlePreset.width,
+            selectedZazzlePreset.height,
+            selectedZazzlePreset.label,
+            selectedZazzlePreset.filenameSlug
           );
         }}
         aria-disabled={!img}
