@@ -59,7 +59,16 @@ type ScanResultsPanelProps = {
     sizes: { label: string; width: number; height: number; folderSlug: string }[],
     onProgress: (message: string) => void,
   ) => Promise<void>;
-  uploadTarget?: 'standard' | 'redbubble' | 'printful' | 'teepublic' | 'custom' | 'presets';
+  uploadTarget?:
+    | 'standard'
+    | 'redbubble'
+    | 'printful'
+    | 'teepublic'
+    | 'spring'
+    | 'zazzle'
+    | 'gelato'
+    | 'custom'
+    | 'presets';
 };
 
 function getPostAutoFixDownloadText(): string {

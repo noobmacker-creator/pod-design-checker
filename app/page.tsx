@@ -1064,7 +1064,15 @@ export default function Page() {
   const [selectedPrintfulPreset, setSelectedPrintfulPreset] = useState<PrintfulPresetId>('dtg-dtf-apparel');
   const [activePresetSystem, setActivePresetSystem] = useState<'redbubble' | 'printful' | 'teepublic'>('redbubble');
   const [uploadTarget, setUploadTarget] = useState<
-    'standard' | 'redbubble' | 'printful' | 'teepublic' | 'custom' | 'presets'
+    | 'standard'
+    | 'redbubble'
+    | 'printful'
+    | 'teepublic'
+    | 'spring'
+    | 'zazzle'
+    | 'gelato'
+    | 'custom'
+    | 'presets'
   >('standard');
   const [customSizeFocusToken, setCustomSizeFocusToken] = useState(0);
   const [productPresetsFocusToken, setProductPresetsFocusToken] = useState(0);
@@ -2190,11 +2198,16 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
     setDownloadMessage('Download ready: TeePublic PNG exported.');
   }
 
-  function handleDownloadCustomPng(width: number, height: number, presetName?: string) {
+  function handleDownloadCustomPng(
+    width: number,
+    height: number,
+    presetName?: string,
+    filenameLabelOverride?: string
+  ) {
     const label = presetName ?? 'Custom';
-    const filenameSlug = presetName
-      ? `pod-checker-${toSafeSlug(presetName)}`
-      : 'pod-checker-custom';
+    const filenameSlug =
+      filenameLabelOverride ??
+      (presetName ? `pod-checker-${toSafeSlug(presetName)}` : 'pod-checker-custom');
     downloadPngForSize(
       width,
       height,

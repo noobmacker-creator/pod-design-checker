@@ -2,7 +2,16 @@
 
 import React, { useState } from 'react';
 
-type UploadTarget = 'standard' | 'redbubble' | 'printful' | 'teepublic' | 'custom' | 'presets';
+type UploadTarget =
+  | 'standard'
+  | 'redbubble'
+  | 'printful'
+  | 'teepublic'
+  | 'spring'
+  | 'zazzle'
+  | 'gelato'
+  | 'custom'
+  | 'presets';
 
 type PODUploadNotesProps = {
   file: File | null;
