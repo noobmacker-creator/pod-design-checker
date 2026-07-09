@@ -12,7 +12,7 @@ export const PREVIEW_BACKGROUND_COLORS: Record<Exclude<PreviewBackground, 'check
   pink: '#f472b6',
 };
 
-function getPreviewBackgroundStyle(
+export function getPreviewBackgroundStyle(
   previewBg: PreviewBackground,
   customColor?: string,
 ): React.CSSProperties {
@@ -41,7 +41,7 @@ function getPreviewBackgroundStyle(
   };
 }
 
-const PREVIEW_BACKGROUND_OPTIONS: { id: PreviewBackground; label: string }[] = [
+export const PREVIEW_BACKGROUND_OPTIONS: { id: PreviewBackground; label: string }[] = [
   { id: 'checker', label: 'Transparent' },
   { id: 'white', label: 'White' },
   { id: 'black', label: 'Black' },

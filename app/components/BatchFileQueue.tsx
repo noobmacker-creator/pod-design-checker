@@ -920,50 +920,27 @@ export default function BatchFileQueue({ items, onItemsChange }: BatchFileQueueP
             background: 'rgba(15, 23, 42, 0.55)',
           }}
         >
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 44px) minmax(0, 56px) minmax(0, 44px) minmax(0, 44px)',
-              gap: 8,
-              padding: '8px 10px',
-              fontSize: 10,
-              fontWeight: 900,
-              color: '#93c5fd',
-              textTransform: 'uppercase',
-              letterSpacing: '0.04em',
-              borderBottom: '1px solid rgba(148, 163, 184, 0.18)',
-              position: 'sticky',
-              top: 0,
-              background: 'rgba(15, 23, 42, 0.92)',
-              zIndex: 1,
-            }}
-          >
-            <span>File</span>
-            <span>Size</span>
-            <span>Status</span>
-            <span>Review</span>
-            <span>Remove</span>
-          </div>
           {items.map((item) => (
             <div
               key={item.id}
               style={{
                 display: 'grid',
-                gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 44px) minmax(0, 56px) minmax(0, 44px) minmax(0, 44px)',
-                gap: 8,
+                gap: 6,
                 padding: '8px 10px',
-                alignItems: 'start',
                 borderBottom: '1px solid rgba(148, 163, 184, 0.12)',
                 minWidth: 0,
+                maxWidth: '100%',
+                boxSizing: 'border-box',
               }}
             >
-              <div style={{ minWidth: 0 }}>
+              <div style={{ minWidth: 0, maxWidth: '100%' }}>
                 <div
                   style={{
                     fontSize: 12,
                     fontWeight: 700,
                     color: '#e2e8f0',
-                    wordBreak: 'break-all',
+                    wordBreak: 'break-word',
+                    overflowWrap: 'anywhere',
                     lineHeight: 1.35,
                   }}
                 >
@@ -993,45 +970,54 @@ export default function BatchFileQueue({ items, onItemsChange }: BatchFileQueueP
                   </div>
                 ) : null}
               </div>
-              <div style={{ fontSize: 11, color: '#cbd5e1' }}>{formatBatchFileSize(item.size)}</div>
-              <StatusBadge status={item.status} />
-              {item.status === 'needs-review' ? (
+              <div
+                style={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  alignItems: 'center',
+                  gap: 6,
+                  minWidth: 0,
+                  maxWidth: '100%',
+                }}
+              >
+                <span style={{ fontSize: 11, color: '#cbd5e1' }}>{formatBatchFileSize(item.size)}</span>
+                <StatusBadge status={item.status} />
+                {item.status === 'needs-review' ? (
+                  <button
+                    type="button"
+                    onClick={() => openReviewAt(item.id)}
+                    style={{
+                      ...secondaryButtonStyle,
+                      padding: '5px 8px',
+                      fontSize: 10,
+                      background: 'rgba(234, 88, 12, 0.18)',
+                      color: '#fdba74',
+                      border: '1px solid rgba(251, 146, 60, 0.35)',
+                    }}
+                    aria-label={`Review ${item.filename}`}
+                  >
+                    Review
+                  </button>
+                ) : null}
                 <button
                   type="button"
-                  onClick={() => openReviewAt(item.id)}
+                  onClick={() => removeItem(item.id)}
+                  disabled={(isScanning && item.status === 'scanning') || isFixing}
                   style={{
                     ...secondaryButtonStyle,
                     padding: '5px 8px',
                     fontSize: 10,
-                    background: 'rgba(234, 88, 12, 0.18)',
-                    color: '#fdba74',
-                    border: '1px solid rgba(251, 146, 60, 0.35)',
+                    opacity: (isScanning && item.status === 'scanning') || isFixing ? 0.55 : 1,
+                    cursor:
+                      (isScanning && item.status === 'scanning') || isFixing
+                        ? 'not-allowed'
+                        : 'pointer',
                   }}
-                  aria-label={`Review ${item.filename}`}
+                  aria-label={`Remove ${item.filename} from batch queue`}
                 >
-                  Review
+                  Remove
                 </button>
-              ) : (
-                <span />
-              )}
-              <button
-                type="button"
-                onClick={() => removeItem(item.id)}
-                disabled={(isScanning && item.status === 'scanning') || isFixing}
-                style={{
-                  ...secondaryButtonStyle,
-                  padding: '5px 8px',
-                  fontSize: 10,
-                  opacity: (isScanning && item.status === 'scanning') || isFixing ? 0.55 : 1,
-                  cursor:
-                    (isScanning && item.status === 'scanning') || isFixing
-                      ? 'not-allowed'
-                      : 'pointer',
-                }}
-                aria-label={`Remove ${item.filename} from batch queue`}
-              >
-                Remove
-              </button>
+              </div>
             </div>
           ))}
         </div>

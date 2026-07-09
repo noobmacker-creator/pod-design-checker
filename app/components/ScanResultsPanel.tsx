@@ -69,6 +69,8 @@ type ScanResultsPanelProps = {
     | 'gelato'
     | 'custom'
     | 'presets';
+  toolsTab?: 'export' | 'batch' | 'converter';
+  onToolsTabChange?: (tab: 'export' | 'batch' | 'converter') => void;
 };
 
 function getPostAutoFixDownloadText(): string {
@@ -223,21 +225,32 @@ export default function ScanResultsPanel({
   batchExportOpen = false,
   onDownloadBatchExportZip,
   uploadTarget = 'standard',
+  toolsTab: toolsTabProp = 'export',
+  onToolsTabChange,
 }: ScanResultsPanelProps) {
-  const [toolsTab, setToolsTab] = useState<'export' | 'batch'>('export');
+  const [toolsTabInternal, setToolsTabInternal] = useState<'export' | 'batch' | 'converter'>('export');
+  const toolsTab = onToolsTabChange ? toolsTabProp : toolsTabInternal;
+  const setToolsTab = (tab: 'export' | 'batch' | 'converter') => {
+    if (onToolsTabChange) {
+      onToolsTabChange(tab);
+    } else {
+      setToolsTabInternal(tab);
+    }
+  };
   const [batchSubTab, setBatchSubTab] = useState<'check' | 'export'>('check');
   const [whatsNewOpen, setWhatsNewOpen] = useState(false);
   const [batchQueue, setBatchQueue] = useState<BatchQueueItem[]>([]);
 
   const toolsTabButtonStyle = (active: boolean): React.CSSProperties => ({
-    flex: '1 1 0',
+    width: '100%',
     minWidth: 0,
-    padding: '7px 6px',
+    maxWidth: '100%',
+    padding: '7px 4px',
     borderRadius: 8,
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: 800,
     textTransform: 'uppercase',
-    letterSpacing: '0.02em',
+    letterSpacing: '0.01em',
     background: active ? '#2563eb' : 'rgba(37, 99, 235, 0.14)',
     color: active ? '#ffffff' : '#bfdbfe',
     border: active ? '1px solid rgba(96, 165, 250, 0.85)' : '1px solid rgba(147, 197, 253, 0.35)',
@@ -695,7 +708,16 @@ export default function ScanResultsPanel({
                   Tutorial
                 </button>
               </div>
-              <div style={{ display: 'flex', gap: 8, minWidth: 0, maxWidth: '100%' }}>
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+                  gap: 6,
+                  minWidth: 0,
+                  maxWidth: '100%',
+                  width: '100%',
+                }}
+              >
                 <button
                   type="button"
                   onClick={() => setToolsTab('export')}
@@ -712,6 +734,13 @@ export default function ScanResultsPanel({
                   style={toolsTabButtonStyle(toolsTab === 'batch')}
                 >
                   Batch
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setToolsTab('converter')}
+                  style={toolsTabButtonStyle(toolsTab === 'converter')}
+                >
+                  Converter
                 </button>
               </div>
               <button
@@ -764,8 +793,24 @@ export default function ScanResultsPanel({
                   {uploadNotesPanel}
                 </div>
               ) : null}
+              {toolsTab === 'converter' ? (
+                <div
+                  style={{
+                    padding: '8px 10px',
+                    borderRadius: 10,
+                    background: 'rgba(37, 99, 235, 0.10)',
+                    border: '1px solid rgba(147, 197, 253, 0.25)',
+                    color: '#cbd5e1',
+                    fontSize: 11,
+                    lineHeight: 1.45,
+                  }}
+                >
+                  Use the Product Converter in the centre panel to resize and export your design for any platform.
+                </div>
+              ) : null}
             </div>
 
+            {toolsTab !== 'converter' ? (
             <div
             style={{
               display: 'grid',
@@ -780,12 +825,13 @@ export default function ScanResultsPanel({
             </span>
             <div
               style={{
-                display: 'flex',
-                flexWrap: 'nowrap',
+                display: 'grid',
+                gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
                 gap: 4,
                 alignItems: 'center',
                 minWidth: 0,
                 maxWidth: '100%',
+                width: '100%',
               }}
             >
               {[1, 2, 4, 8].map((z) => (
@@ -798,7 +844,8 @@ export default function ScanResultsPanel({
                   style={{
                     padding: '6px 2px',
                     minWidth: 0,
-                    flex: '1 1 0',
+                    width: '100%',
+                    maxWidth: '100%',
                     fontSize: 10,
                     fontWeight: inspectZoom === z ? 800 : 600,
                     outline: inspectZoom === z ? '2px solid #38bdf8' : undefined,
@@ -810,10 +857,13 @@ export default function ScanResultsPanel({
               ))}
             </div>
             </div>
+            ) : null}
           </div>
         </div>
       </div>
 
+      {toolsTab === 'export' ? (
+      <>
       <div style={{ ...directChildStyle, display: 'grid', gap: 10 }} data-tour="upload">
         <label
           htmlFor="design-upload"
@@ -1339,6 +1389,8 @@ export default function ScanResultsPanel({
           </div>
         </details>
       </div>
+      ) : null}
+      </>
       ) : null}
     </div>
   );
