@@ -194,7 +194,7 @@ export const zazzleProductPresets: ZazzleProductPreset[] = [
     presetType: 'verified-design-area',
     helperText: 'Verified Zazzle custom-cut vinyl sticker design area.',
     bleedNote:
-      'Zazzle adds a 0.125-inch protective border around the sticker. Confirm cut placement in the Zazzle editor.',
+      'Zazzle adds a small 1/8-inch border around custom-cut stickers. Check the Zazzle preview to make sure the cut line looks right.',
   },
   {
     id: 'zazzle-business-card-standard',

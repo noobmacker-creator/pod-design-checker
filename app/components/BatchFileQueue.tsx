@@ -912,6 +912,9 @@ export default function BatchFileQueue({ items, onItemsChange }: BatchFileQueueP
             gap: 0,
             maxHeight: 320,
             overflowY: 'auto',
+            overflowX: 'hidden',
+            maxWidth: '100%',
+            minWidth: 0,
             borderRadius: 10,
             border: '1px solid rgba(148, 163, 184, 0.22)',
             background: 'rgba(15, 23, 42, 0.55)',
@@ -920,7 +923,7 @@ export default function BatchFileQueue({ items, onItemsChange }: BatchFileQueueP
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'minmax(0, 1fr) 54px 72px 58px 60px',
+              gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 44px) minmax(0, 56px) minmax(0, 44px) minmax(0, 44px)',
               gap: 8,
               padding: '8px 10px',
               fontSize: 10,
@@ -946,7 +949,7 @@ export default function BatchFileQueue({ items, onItemsChange }: BatchFileQueueP
               key={item.id}
               style={{
                 display: 'grid',
-                gridTemplateColumns: 'minmax(0, 1fr) 54px 72px 58px 60px',
+                gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 44px) minmax(0, 56px) minmax(0, 44px) minmax(0, 44px)',
                 gap: 8,
                 padding: '8px 10px',
                 alignItems: 'start',

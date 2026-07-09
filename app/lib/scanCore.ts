@@ -70,7 +70,23 @@ export const OPTIONAL_NOTE_LABELS = new Set([
   'Export Size Note',
   'Artwork Size',
   'DPI Metadata',
+  'Aspect Ratio',
 ]);
+
+export function getVisibleBlockingScanChecks(
+  checks: CheckItem[],
+  autoFixApplied: boolean,
+): CheckItem[] {
+  const visibleChecks = autoFixApplied
+    ? checks.filter((item) => !AUTO_FIXABLE_LABELS.has(item.label))
+    : checks;
+
+  return visibleChecks.filter(
+    (item) =>
+      (item.status === 'fail' || item.status === 'warn') &&
+      !OPTIONAL_NOTE_LABELS.has(item.label),
+  );
+}
 
 export const ISSUE_PRIORITY = [
   'Solid Background Box Risk',

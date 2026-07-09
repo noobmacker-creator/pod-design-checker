@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import type { CheckItem } from '../lib/podCheckerTypes';
 import type { ColourProfileStatus } from '../lib/podCheckerUtils';
+import { getVisibleBlockingScanChecks } from '../lib/scanCore';
 import type { RedbubblePresetId } from '../lib/redbubblePresets';
 import { redbubblePresets } from '../lib/redbubblePresets';
 import type { PrintfulPresetId } from '../lib/printfulPresets';
@@ -351,18 +352,6 @@ function preflightStatusColor(status: PrintfulOverallStatus): string {
   return '#fca5a5';
 }
 
-const EXPORT_BANNER_IGNORED_LABELS = new Set(['Soft Transparency', 'Export Size Note']);
-
-const AUTO_FIXABLE_EXPORT_LABELS = new Set([
-  'Design Too Small',
-  'Print Safety Border',
-  'Off-Center Design',
-  'Empty Padding Risk',
-  'Uneven Padding Risk',
-  'Artwork Near Canvas Edge',
-  'Cut-Off Edge Risk',
-]);
-
 function getExportBannerState(
   checks: CheckItem[] | undefined,
   hasImage: boolean,
@@ -377,16 +366,7 @@ function getExportBannerState(
     };
   }
 
-  const visibleChecks = autoFixApplied
-    ? (checks ?? []).filter((check) => !AUTO_FIXABLE_EXPORT_LABELS.has(check.label))
-    : checks ?? [];
-
-  const activeChecks = visibleChecks.filter(
-    (check) =>
-      !EXPORT_BANNER_IGNORED_LABELS.has(check.label) &&
-      check.status !== 'info' &&
-      (check.status === 'fail' || check.status === 'warn'),
-  );
+  const activeChecks = getVisibleBlockingScanChecks(checks ?? [], autoFixApplied);
 
   if (activeChecks.some((check) => check.status === 'fail')) {
     return {

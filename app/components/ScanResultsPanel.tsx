@@ -615,7 +615,7 @@ export default function ScanResultsPanel({
         maxHeight: '100%',
         minHeight: 0,
         boxSizing: 'border-box',
-        overflowX: 'hidden',
+        overflowX: 'clip',
         overflowY: 'auto',
         scrollbarGutter: 'stable',
         wordBreak: 'break-word',
