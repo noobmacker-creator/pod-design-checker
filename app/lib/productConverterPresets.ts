@@ -256,3 +256,32 @@ export function getZazzleCategoriesForPlatform(): string[] {
   }
   return Array.from(categories);
 }
+
+const FIXED_SIZE_PLATFORM_IDS: ConverterPlatformId[] = [
+  'standard',
+  'printful',
+  'redbubble',
+  'teepublic',
+  'spring',
+  'zazzle',
+  'generic',
+];
+
+export type PresetPlatformGroup = {
+  platformId: ConverterPlatformId;
+  platformLabel: string;
+  presets: ProductConverterPreset[];
+};
+
+/** Fixed-size presets grouped by platform for Multi-Product Export Pack. */
+export function getFixedSizePresetsGrouped(): PresetPlatformGroup[] {
+  return FIXED_SIZE_PLATFORM_IDS.map((platformId) => {
+    const platformLabel =
+      CONVERTER_PLATFORMS.find((item) => item.id === platformId)?.label ?? platformId;
+    return {
+      platformId,
+      platformLabel,
+      presets: getPresetsForPlatform(platformId),
+    };
+  }).filter((group) => group.presets.length > 0);
+}

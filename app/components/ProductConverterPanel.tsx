@@ -19,6 +19,7 @@ import {
   PREVIEW_BACKGROUND_OPTIONS,
   type PreviewBackground,
 } from './DesignPreviewPanel';
+import ProductConverterExportPack from './ProductConverterExportPack';
 
 const SOURCE_CANVAS_W = 4200;
 const SOURCE_CANVAS_H = 4800;
@@ -230,162 +231,213 @@ export default function ProductConverterPanel({ onDownloadConverted }: ProductCo
         boxShadow: '0 25px 70px rgba(0,0,0,0.35)',
         height: '100%',
         minHeight: 0,
+        width: '100%',
+        maxWidth: '100%',
+        minWidth: 0,
         display: 'grid',
-        gridTemplateRows: 'auto 1fr auto',
+        gridTemplateRows: 'auto auto 1fr auto',
         gap: 12,
         boxSizing: 'border-box',
         overflow: 'hidden',
       }}
     >
-      <div style={{ display: 'grid', gap: 6 }}>
+      <div style={{ display: 'grid', gap: 6, width: '100%', maxWidth: '100%', minWidth: 0, boxSizing: 'border-box' }}>
         <div style={{ fontSize: 18, fontWeight: 800, color: '#f8fafc' }}>POD Product Converter</div>
         <div style={{ ...mutedStyle, fontSize: 13 }}>
           Upload a design, choose a platform and product size, then download a converted transparent PNG.
         </div>
       </div>
 
+      <div style={{ display: 'grid', gap: 6, width: '100%', maxWidth: '100%', minWidth: 0, boxSizing: 'border-box' }}>
+        <div style={labelStyle}>Step 1 — Upload Design</div>
+        <input
+          key={uploadInputKey}
+          ref={fileInputRef}
+          type="file"
+          accept="image/png,image/jpeg,image/jpg,image/webp"
+          onChange={handleFileChange}
+          aria-label="Upload design for conversion"
+          style={{ display: 'none' }}
+        />
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            alignItems: 'center',
+            gap: 6,
+            width: '100%',
+            maxWidth: '100%',
+            minWidth: 0,
+            boxSizing: 'border-box',
+          }}
+        >
+          <button
+            type="button"
+            onClick={handleUploadButtonClick}
+            style={{
+              padding: '8px 12px',
+              borderRadius: 10,
+              border: '1px solid rgba(147, 197, 253, 0.35)',
+              background: '#2563eb',
+              color: '#ffffff',
+              fontWeight: 800,
+              fontSize: 12,
+              cursor: 'pointer',
+            }}
+          >
+            {img ? 'Replace Design' : 'Upload Design'}
+          </button>
+          {img ? (
+            <button
+              type="button"
+              onClick={handleClearDesign}
+              style={{
+                padding: '8px 12px',
+                borderRadius: 10,
+                border: '1px solid rgba(148, 163, 184, 0.35)',
+                background: 'rgba(15, 23, 42, 0.85)',
+                color: '#e2e8f0',
+                fontWeight: 700,
+                fontSize: 12,
+                cursor: 'pointer',
+              }}
+            >
+              Clear Design
+            </button>
+          ) : null}
+          {file ? (
+            <span style={{ fontSize: 12, color: '#86efac', fontWeight: 700 }}>{file.name}</span>
+          ) : (
+            <span style={{ ...mutedStyle, fontSize: 12 }}>PNG, JPG, or WEBP</span>
+          )}
+        </div>
+        <div style={{ display: 'grid', gap: 4, width: '100%', maxWidth: '100%', minWidth: 0, boxSizing: 'border-box' }}>
+          <span style={{ fontWeight: 700, color: '#bae6fd', fontSize: 13 }}>
+            Preview Background Colour
+          </span>
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              alignItems: 'center',
+              gap: 6,
+              width: '100%',
+              maxWidth: '100%',
+              minWidth: 0,
+              boxSizing: 'border-box',
+              padding: '4px 0',
+            }}
+          >
+            {PREVIEW_BACKGROUND_OPTIONS.map((option) => (
+              <button
+                key={option.id}
+                type="button"
+                onClick={() => setPreviewBackground(option.id)}
+                style={{
+                  padding: '5px 8px',
+                  fontSize: 12,
+                  fontWeight: previewBackground === option.id ? 800 : 600,
+                  border:
+                    previewBackground === option.id
+                      ? '2px solid #38bdf8'
+                      : '2px solid transparent',
+                  boxSizing: 'border-box',
+                  flexShrink: 0,
+                }}
+              >
+                {option.label}
+              </button>
+            ))}
+            <label
+              style={{
+                position: 'relative',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 8,
+                fontSize: 12,
+                fontWeight: previewBackground === 'custom' ? 800 : 600,
+                borderRadius: 999,
+                padding: '5px 10px 5px 12px',
+                cursor: 'pointer',
+                background: 'rgba(15, 23, 42, 0.72)',
+                border:
+                  previewBackground === 'custom'
+                    ? '1px solid rgba(56, 189, 248, 0.55)'
+                    : '1px solid rgba(148, 163, 184, 0.35)',
+                boxShadow:
+                  previewBackground === 'custom'
+                    ? '0 0 0 1px rgba(56, 189, 248, 0.15)'
+                    : 'none',
+              }}
+            >
+              <span
+                aria-hidden
+                style={{
+                  display: 'inline-block',
+                  width: 18,
+                  height: 18,
+                  borderRadius: 4,
+                  flexShrink: 0,
+                  border: '1px solid rgba(148, 163, 184, 0.45)',
+                  background:
+                    'conic-gradient(red, orange, yellow, green, cyan, blue, purple, red)',
+                }}
+              />
+              <span style={{ color: '#bae6fd', whiteSpace: 'nowrap' }}>Custom Colour</span>
+              <input
+                type="color"
+                value={customPreviewColor}
+                onChange={(event) => {
+                  setCustomPreviewColor(event.target.value);
+                  setPreviewBackground('custom');
+                }}
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  width: '100%',
+                  height: '100%',
+                  padding: 0,
+                  margin: 0,
+                  border: 'none',
+                  cursor: 'pointer',
+                  opacity: 0,
+                }}
+              />
+            </label>
+          </div>
+          <div style={{ fontSize: 11, color: '#94a3b8', lineHeight: 1.35 }}>
+            Preview colour only — not included in the downloaded PNG.
+          </div>
+        </div>
+      </div>
+
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'minmax(220px, 280px) minmax(0, 1fr)',
+          gridTemplateColumns: 'minmax(0, 280px) minmax(0, 1fr)',
           gap: 12,
           minHeight: 0,
+          minWidth: 0,
+          width: '100%',
+          maxWidth: '100%',
+          boxSizing: 'border-box',
           overflow: 'hidden',
         }}
       >
-        <div style={{ display: 'grid', gap: 10, alignContent: 'start', overflowY: 'auto', minHeight: 0 }}>
-          <div style={{ display: 'grid', gap: 6 }}>
-            <div style={labelStyle}>Step 1 — Upload Design</div>
-            <input
-              key={uploadInputKey}
-              ref={fileInputRef}
-              type="file"
-              accept="image/png,image/jpeg,image/jpg,image/webp"
-              onChange={handleFileChange}
-              aria-label="Upload design for conversion"
-              style={{ display: 'none' }}
-            />
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-              <button
-                type="button"
-                onClick={handleUploadButtonClick}
-                style={{
-                  padding: '8px 12px',
-                  borderRadius: 10,
-                  border: '1px solid rgba(147, 197, 253, 0.35)',
-                  background: '#2563eb',
-                  color: '#ffffff',
-                  fontWeight: 800,
-                  fontSize: 12,
-                  cursor: 'pointer',
-                }}
-              >
-                {img ? 'Replace Design' : 'Upload Design'}
-              </button>
-              {img ? (
-                <button
-                  type="button"
-                  onClick={handleClearDesign}
-                  style={{
-                    padding: '8px 12px',
-                    borderRadius: 10,
-                    border: '1px solid rgba(148, 163, 184, 0.35)',
-                    background: 'rgba(15, 23, 42, 0.85)',
-                    color: '#e2e8f0',
-                    fontWeight: 700,
-                    fontSize: 12,
-                    cursor: 'pointer',
-                  }}
-                >
-                  Clear Design
-                </button>
-              ) : null}
-            </div>
-            {file ? (
-              <div style={{ fontSize: 12, color: '#86efac', fontWeight: 700 }}>{file.name}</div>
-            ) : (
-              <div style={mutedStyle}>PNG, JPG, or WEBP</div>
-            )}
-          </div>
-
-          <div style={{ display: 'grid', gap: 4 }}>
-            <span style={{ fontWeight: 700, color: '#bae6fd', fontSize: 13 }}>Preview Background Colour</span>
-            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6 }}>
-              {PREVIEW_BACKGROUND_OPTIONS.map((option) => (
-                <button
-                  key={option.id}
-                  type="button"
-                  onClick={() => setPreviewBackground(option.id)}
-                  style={{
-                    fontWeight: previewBackground === option.id ? 800 : 600,
-                    outline: previewBackground === option.id ? '2px solid #38bdf8' : undefined,
-                  }}
-                >
-                  {option.label}
-                </button>
-              ))}
-              <label
-                style={{
-                  position: 'relative',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  fontSize: 12,
-                  fontWeight: previewBackground === 'custom' ? 800 : 600,
-                  borderRadius: 999,
-                  padding: '5px 10px 5px 12px',
-                  cursor: 'pointer',
-                  background: 'rgba(15, 23, 42, 0.72)',
-                  border:
-                    previewBackground === 'custom'
-                      ? '1px solid rgba(56, 189, 248, 0.55)'
-                      : '1px solid rgba(148, 163, 184, 0.35)',
-                  boxShadow:
-                    previewBackground === 'custom'
-                      ? '0 0 0 1px rgba(56, 189, 248, 0.15)'
-                      : 'none',
-                }}
-              >
-                <span
-                  aria-hidden
-                  style={{
-                    display: 'inline-block',
-                    width: 18,
-                    height: 18,
-                    borderRadius: 4,
-                    flexShrink: 0,
-                    border: '1px solid rgba(148, 163, 184, 0.45)',
-                    background:
-                      'conic-gradient(red, orange, yellow, green, cyan, blue, purple, red)',
-                  }}
-                />
-                <span style={{ color: '#bae6fd', whiteSpace: 'nowrap' }}>Custom Colour</span>
-                <input
-                  type="color"
-                  value={customPreviewColor}
-                  onChange={(event) => {
-                    setCustomPreviewColor(event.target.value);
-                    setPreviewBackground('custom');
-                  }}
-                  style={{
-                    position: 'absolute',
-                    inset: 0,
-                    width: '100%',
-                    height: '100%',
-                    padding: 0,
-                    margin: 0,
-                    border: 'none',
-                    cursor: 'pointer',
-                    opacity: 0,
-                  }}
-                />
-              </label>
-            </div>
-            <div style={{ fontSize: 11, color: '#94a3b8', lineHeight: 1.35 }}>
-              Preview colour only — not included in the downloaded PNG.
-            </div>
-          </div>
-
+        <div
+          style={{
+            display: 'grid',
+            gap: 10,
+            alignContent: 'start',
+            overflowY: 'auto',
+            overflowX: 'hidden',
+            minHeight: 0,
+            minWidth: 0,
+            width: '100%',
+            maxWidth: '100%',
+            boxSizing: 'border-box',
+          }}
+        >
           <div style={{ display: 'grid', gap: 6 }}>
             <div style={labelStyle}>Step 2 — Choose Export</div>
             <div style={{ display: 'grid', gap: 4 }}>
@@ -522,12 +574,18 @@ export default function ProductConverterPanel({ onDownloadConverted }: ProductCo
             >
               Download Converted PNG
             </button>
+
+            <ProductConverterExportPack img={img} file={file} />
           </div>
         </div>
 
         <div
           style={{
             minHeight: 0,
+            minWidth: 0,
+            width: '100%',
+            maxWidth: '100%',
+            boxSizing: 'border-box',
             borderRadius: 14,
             border: '1px solid rgba(56, 189, 248, 0.35)',
             ...getPreviewBackgroundStyle(previewBackground, customPreviewColor),
@@ -556,7 +614,17 @@ export default function ProductConverterPanel({ onDownloadConverted }: ProductCo
         </div>
       </div>
 
-      <div style={{ fontSize: 11, color: '#64748b', lineHeight: 1.35 }}>
+      <div
+        style={{
+          fontSize: 11,
+          color: '#64748b',
+          lineHeight: 1.35,
+          width: '100%',
+          maxWidth: '100%',
+          minWidth: 0,
+          boxSizing: 'border-box',
+        }}
+      >
         Resizes and centres your artwork on the selected canvas. Exports stay transparent — preview checkerboard is
         display only.
       </div>
