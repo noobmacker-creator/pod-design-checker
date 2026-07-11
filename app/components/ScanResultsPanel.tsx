@@ -848,7 +848,8 @@ export default function ScanResultsPanel({
                     maxWidth: '100%',
                     fontSize: 10,
                     fontWeight: inspectZoom === z ? 800 : 600,
-                    outline: inspectZoom === z ? '2px solid #38bdf8' : undefined,
+                    boxShadow: inspectZoom === z ? 'inset 0 0 0 2px #38bdf8' : undefined,
+                    boxSizing: 'border-box',
                   }}
                   disabled={!img}
                 >

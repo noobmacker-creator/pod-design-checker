@@ -414,7 +414,7 @@ export default function ProductConverterPanel({ onDownloadConverted }: ProductCo
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'minmax(0, 280px) minmax(0, 1fr)',
+          gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.15fr)',
           gap: 12,
           minHeight: 0,
           minWidth: 0,

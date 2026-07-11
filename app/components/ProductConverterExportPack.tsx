@@ -7,7 +7,11 @@ import {
 } from '../lib/productConverterExport';
 import {
   getFixedSizePresetsGrouped,
+  getQuickExportPackPresetIds,
+  QUICK_EXPORT_CATEGORY_PACKS,
+  QUICK_EXPORT_PLATFORM_PACKS,
   type ProductConverterPreset,
+  type QuickExportPackId,
 } from '../lib/productConverterPresets';
 
 type ProductConverterExportPackProps = {
@@ -52,6 +56,7 @@ export default function ProductConverterExportPack({ img, file }: ProductConvert
   const [exportBusy, setExportBusy] = useState(false);
   const [progressText, setProgressText] = useState('');
   const [resultMessage, setResultMessage] = useState('');
+  const [packMessage, setPackMessage] = useState('');
 
   const selectedCount = selectedIds.size;
   const canDownload = img !== null && selectedCount > 0 && !exportBusy;
@@ -67,16 +72,54 @@ export default function ProductConverterExportPack({ img, file }: ProductConvert
       return next;
     });
     setResultMessage('');
+    setPackMessage('');
+  }
+
+  function handleQuickPack(packId: QuickExportPackId, packLabel: string) {
+    const presetIds = getQuickExportPackPresetIds(packId);
+    if (presetIds.length === 0) return;
+    setSelectedIds(new Set(presetIds));
+    setResultMessage('');
+    const count = presetIds.length;
+    setPackMessage(
+      `${packLabel} selected — ${count} product${count === 1 ? '' : 's'}.`,
+    );
+  }
+
+  function renderQuickPackButtons(
+    packs: { id: QuickExportPackId; label: string }[],
+  ) {
+    return (
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+        {packs.map((pack) => {
+          const presetCount = getQuickExportPackPresetIds(pack.id).length;
+          if (presetCount === 0) return null;
+          return (
+            <button
+              key={pack.id}
+              type="button"
+              onClick={() => handleQuickPack(pack.id, pack.label)}
+              disabled={exportBusy}
+              style={secondaryButtonStyle}
+            >
+              {pack.label}
+            </button>
+          );
+        })}
+      </div>
+    );
   }
 
   function handleSelectAll() {
     setSelectedIds(new Set(allPresetIds));
     setResultMessage('');
+    setPackMessage('');
   }
 
   function handleClearAll() {
     setSelectedIds(new Set());
     setResultMessage('');
+    setPackMessage('');
   }
 
   async function handleDownloadPack() {
@@ -179,6 +222,23 @@ export default function ProductConverterExportPack({ img, file }: ProductConvert
       <div style={labelStyle}>Multi-Product Export Pack</div>
       <div style={mutedStyle}>
         Select several products and download every converted PNG in one ZIP.
+      </div>
+
+      <div style={{ display: 'grid', gap: 6 }}>
+        <div style={labelStyle}>Quick Packs</div>
+        <div style={{ fontSize: 10, fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+          Category Packs
+        </div>
+        {renderQuickPackButtons(QUICK_EXPORT_CATEGORY_PACKS)}
+        <div style={{ fontSize: 10, fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+          Platform Packs
+        </div>
+        {renderQuickPackButtons(QUICK_EXPORT_PLATFORM_PACKS)}
+        {packMessage ? (
+          <div style={{ fontSize: 11, color: '#86efac', fontWeight: 700, lineHeight: 1.35 }}>
+            {packMessage}
+          </div>
+        ) : null}
       </div>
 
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'center' }}>
