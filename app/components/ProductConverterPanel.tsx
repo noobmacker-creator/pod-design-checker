@@ -325,7 +325,7 @@ export default function ProductConverterPanel({ onDownloadConverted }: ProductCo
               maxWidth: '100%',
               minWidth: 0,
               boxSizing: 'border-box',
-              padding: '4px 0',
+              padding: '4px 4px',
             }}
           >
             {PREVIEW_BACKGROUND_OPTIONS.map((option) => (
@@ -431,6 +431,8 @@ export default function ProductConverterPanel({ onDownloadConverted }: ProductCo
             alignContent: 'start',
             overflowY: 'auto',
             overflowX: 'hidden',
+            scrollbarGutter: 'stable',
+            paddingRight: 6,
             minHeight: 0,
             minWidth: 0,
             width: '100%',
