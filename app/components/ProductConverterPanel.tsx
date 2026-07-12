@@ -576,6 +576,20 @@ export default function ProductConverterPanel({ onDownloadConverted }: ProductCo
             >
               Download Converted PNG
             </button>
+            <div
+              style={{
+                fontSize: 12,
+                color: '#93c5fd',
+                fontWeight: 700,
+                lineHeight: 1.4,
+                padding: '8px 10px',
+                borderRadius: 10,
+                background: 'rgba(37, 99, 235, 0.10)',
+                border: '1px solid rgba(147, 197, 253, 0.18)',
+              }}
+            >
+              Automatically fitted and centred for each selected product size.
+            </div>
 
             <ProductConverterExportPack img={img} file={file} />
           </div>

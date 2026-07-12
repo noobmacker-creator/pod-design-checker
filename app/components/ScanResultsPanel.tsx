@@ -625,15 +625,11 @@ export default function ScanResultsPanel({
         maxWidth: '100%',
         minWidth: 0,
         height: '100%',
-        maxHeight: '100%',
-        minHeight: 0,
+        minHeight: '100%',
         boxSizing: 'border-box',
-        overflowX: 'clip',
-        overflowY: 'auto',
-        scrollbarGutter: 'stable',
+        overflowX: 'hidden',
         wordBreak: 'break-word',
         overflowWrap: 'anywhere',
-        contain: 'inline-size',
       }}
     >
       <style>{`
@@ -711,7 +707,7 @@ export default function ScanResultsPanel({
               <div
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+                  gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
                   gap: 6,
                   minWidth: 0,
                   maxWidth: '100%',
@@ -721,7 +717,11 @@ export default function ScanResultsPanel({
                 <button
                   type="button"
                   onClick={() => setToolsTab('export')}
-                  style={toolsTabButtonStyle(toolsTab === 'export')}
+                  style={{
+                    ...toolsTabButtonStyle(toolsTab === 'export'),
+                    lineHeight: 1.25,
+                    whiteSpace: 'normal',
+                  }}
                 >
                   Single Design
                 </button>
@@ -731,14 +731,21 @@ export default function ScanResultsPanel({
                     setToolsTab('batch');
                     setBatchSubTab('check');
                   }}
-                  style={toolsTabButtonStyle(toolsTab === 'batch')}
+                  style={{
+                    ...toolsTabButtonStyle(toolsTab === 'batch'),
+                    whiteSpace: 'nowrap',
+                  }}
                 >
                   Batch
                 </button>
                 <button
                   type="button"
                   onClick={() => setToolsTab('converter')}
-                  style={toolsTabButtonStyle(toolsTab === 'converter')}
+                  style={{
+                    ...toolsTabButtonStyle(toolsTab === 'converter'),
+                    gridColumn: '1 / -1',
+                    whiteSpace: 'nowrap',
+                  }}
                 >
                   Converter
                 </button>
@@ -754,7 +761,7 @@ export default function ScanResultsPanel({
               {toolsTab === 'batch' ? (
                 <div style={{ display: 'grid', gap: 8, minWidth: 0 }}>
                   <BatchFileQueue items={batchQueue} onItemsChange={setBatchQueue} />
-                  <div style={{ display: 'flex', flexWrap: 'nowrap', gap: 6, minWidth: 0, maxWidth: '100%' }}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, minWidth: 0, maxWidth: '100%' }}>
                     <button
                       type="button"
                       onClick={() => setBatchSubTab('check')}
@@ -798,10 +805,11 @@ export default function ScanResultsPanel({
                   style={{
                     padding: '8px 10px',
                     borderRadius: 10,
-                    background: 'rgba(37, 99, 235, 0.10)',
-                    border: '1px solid rgba(147, 197, 253, 0.25)',
-                    color: '#cbd5e1',
+                    background: 'rgba(37, 99, 235, 0.12)',
+                    border: '1px solid rgba(147, 197, 253, 0.28)',
+                    color: '#93c5fd',
                     fontSize: 11,
+                    fontWeight: 600,
                     lineHeight: 1.45,
                   }}
                 >
@@ -1076,7 +1084,21 @@ export default function ScanResultsPanel({
             <div style={{ fontWeight: 800, color: '#93c5fd', marginBottom: 2 }}>Next Action</div>
             <div style={{ color: '#e5e7eb' }}>{currentAction}</div>
             {currentActionHelper ? (
-              <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 4 }}>{currentActionHelper}</div>
+              <div
+                style={{
+                  fontSize: 11,
+                  color: '#93c5fd',
+                  fontWeight: 600,
+                  lineHeight: 1.35,
+                  marginTop: 4,
+                  padding: '6px 8px',
+                  borderRadius: 8,
+                  background: 'rgba(37, 99, 235, 0.10)',
+                  border: '1px solid rgba(147, 197, 253, 0.25)',
+                }}
+              >
+                {currentActionHelper}
+              </div>
             ) : null}
           </div>
 

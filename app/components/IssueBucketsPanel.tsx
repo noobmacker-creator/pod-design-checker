@@ -352,6 +352,12 @@ function preflightStatusColor(status: PrintfulOverallStatus): string {
   return '#fca5a5';
 }
 
+const exportInfoBannerStyle = {
+  color: '#93c5fd',
+  background: 'rgba(37, 99, 235, 0.10)',
+  border: '1px solid rgba(147, 197, 253, 0.25)',
+};
+
 function getExportBannerState(
   checks: CheckItem[] | undefined,
   hasImage: boolean,
@@ -360,9 +366,7 @@ function getExportBannerState(
   if (!hasImage) {
     return {
       text: 'Upload a design to enable downloads.',
-      color: '#facc15',
-      background: 'rgba(250, 204, 21, 0.12)',
-      border: '1px solid rgba(250, 204, 21, 0.25)',
+      ...exportInfoBannerStyle,
     };
   }
 
@@ -371,26 +375,20 @@ function getExportBannerState(
   if (activeChecks.some((check) => check.status === 'fail')) {
     return {
       text: 'High risk — fix the main issue before exporting.',
-      color: '#fca5a5',
-      background: 'rgba(127, 29, 29, 0.45)',
-      border: '1px solid rgba(248, 113, 113, 0.35)',
+      ...exportInfoBannerStyle,
     };
   }
 
   if (activeChecks.length > 0) {
     return {
       text: 'Export available, but review warnings first.',
-      color: '#fde68a',
-      background: 'rgba(120, 53, 15, 0.45)',
-      border: '1px solid rgba(251, 191, 36, 0.35)',
+      ...exportInfoBannerStyle,
     };
   }
 
   return {
     text: 'Ready to export. Choose a size, then press the blue download button.',
-    color: '#86efac',
-    background: 'rgba(22, 163, 74, 0.12)',
-    border: '1px solid rgba(134, 239, 172, 0.25)',
+    ...exportInfoBannerStyle,
   };
 }
 
@@ -1538,7 +1536,7 @@ export default function IssueBucketsPanel({
           ...directChildStyle,
           fontSize: 12,
           color: exportBannerState.color,
-          fontWeight: 800,
+          fontWeight: 700,
           lineHeight: 1.4,
           padding: '8px 10px',
           borderRadius: 10,
