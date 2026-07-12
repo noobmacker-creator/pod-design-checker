@@ -730,11 +730,16 @@ export default function BatchFileQueue({ items, onItemsChange }: BatchFileQueueP
         style={{ display: 'none' }}
       />
 
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'stretch' }}>
         <button
           type="button"
           onClick={() => filesInputRef.current?.click()}
-          style={controlButtonStyle}
+          style={{
+            ...controlButtonStyle,
+            flex: '0 0 auto',
+            minWidth: 'auto',
+            whiteSpace: 'nowrap',
+          }}
           aria-label="Add multiple image files to the batch queue"
         >
           Add Files
@@ -742,7 +747,12 @@ export default function BatchFileQueue({ items, onItemsChange }: BatchFileQueueP
         <button
           type="button"
           onClick={() => folderInputRef.current?.click()}
-          style={controlButtonStyle}
+          style={{
+            ...controlButtonStyle,
+            flex: '0 0 auto',
+            minWidth: 'auto',
+            whiteSpace: 'nowrap',
+          }}
           aria-label="Add a folder of image files to the batch queue"
         >
           Add Folder
@@ -753,6 +763,9 @@ export default function BatchFileQueue({ items, onItemsChange }: BatchFileQueueP
           disabled={items.length === 0 || isScanning || isFixing}
           style={{
             ...secondaryButtonStyle,
+            flex: '1 1 auto',
+            minWidth: 'fit-content',
+            whiteSpace: 'nowrap',
             opacity: items.length === 0 || isScanning || isFixing ? 0.55 : 1,
             cursor: items.length === 0 || isScanning || isFixing ? 'not-allowed' : 'pointer',
           }}
