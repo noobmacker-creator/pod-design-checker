@@ -64,8 +64,8 @@ type ScanResultsPanelProps = {
     | 'gelato'
     | 'custom'
     | 'presets';
-  toolsTab?: 'export' | 'batch' | 'converter';
-  onToolsTabChange?: (tab: 'export' | 'batch' | 'converter') => void;
+  toolsTab?: 'export' | 'batch' | 'converter' | 'colorcheck';
+  onToolsTabChange?: (tab: 'export' | 'batch' | 'converter' | 'colorcheck') => void;
 };
 
 function getPostAutoFixDownloadText(): string {
@@ -223,9 +223,9 @@ export default function ScanResultsPanel({
   toolsTab: toolsTabProp = 'export',
   onToolsTabChange,
 }: ScanResultsPanelProps) {
-  const [toolsTabInternal, setToolsTabInternal] = useState<'export' | 'batch' | 'converter'>('export');
+  const [toolsTabInternal, setToolsTabInternal] = useState<'export' | 'batch' | 'converter' | 'colorcheck'>('export');
   const toolsTab = onToolsTabChange ? toolsTabProp : toolsTabInternal;
-  const setToolsTab = (tab: 'export' | 'batch' | 'converter') => {
+  const setToolsTab = (tab: 'export' | 'batch' | 'converter' | 'colorcheck') => {
     if (onToolsTabChange) {
       onToolsTabChange(tab);
     } else {
@@ -715,11 +715,20 @@ export default function ScanResultsPanel({
                   onClick={() => setToolsTab('converter')}
                   style={{
                     ...toolsTabButtonStyle(toolsTab === 'converter'),
-                    gridColumn: '1 / -1',
                     whiteSpace: 'nowrap',
                   }}
                 >
                   Converter
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setToolsTab('colorcheck')}
+                  style={{
+                    ...toolsTabButtonStyle(toolsTab === 'colorcheck'),
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  Color Check
                 </button>
               </div>
               <button
@@ -761,6 +770,23 @@ export default function ScanResultsPanel({
                   }}
                 >
                   Use the Product Converter in the centre panel to resize and export your design for any platform.
+                </div>
+              ) : null}
+              {toolsTab === 'colorcheck' ? (
+                <div
+                  style={{
+                    padding: '8px 10px',
+                    borderRadius: 10,
+                    background: 'rgba(37, 99, 235, 0.12)',
+                    border: '1px solid rgba(147, 197, 253, 0.28)',
+                    color: '#93c5fd',
+                    fontSize: 11,
+                    fontWeight: 600,
+                    lineHeight: 1.45,
+                  }}
+                >
+                  <div style={{ fontWeight: 800, marginBottom: 4 }}>Color Check</div>
+                  Preview one design on different background colours.
                 </div>
               ) : null}
             </div>
