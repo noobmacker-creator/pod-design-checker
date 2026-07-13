@@ -4,11 +4,6 @@ import React, { useState } from 'react';
 import type { CheckItem } from '../lib/podCheckerTypes';
 import { statusColor, statusIcon } from '../lib/podCheckerUtils';
 import { podCheckerV4Notes } from '../content/podCheckerV4Notes';
-import BatchPODChecker from './BatchPODChecker';
-import BatchExportQueue from './BatchExportQueue';
-import BatchFileQueue from './BatchFileQueue';
-import PODUploadNotes from './PODUploadNotes';
-import type { BatchQueueItem } from '../lib/batchQueueUtils';
 
 type Bounds = {
   x: number;
@@ -237,9 +232,7 @@ export default function ScanResultsPanel({
       setToolsTabInternal(tab);
     }
   };
-  const [batchSubTab, setBatchSubTab] = useState<'check' | 'export'>('check');
   const [whatsNewOpen, setWhatsNewOpen] = useState(false);
-  const [batchQueue, setBatchQueue] = useState<BatchQueueItem[]>([]);
 
   const toolsTabButtonStyle = (active: boolean): React.CSSProperties => ({
     width: '100%',
@@ -481,24 +474,6 @@ export default function ScanResultsPanel({
     displayScore = score;
   }
 
-  const uploadNotesPanel = (
-    <PODUploadNotes
-      file={file}
-      img={img}
-      imgW={imgW}
-      imgH={imgH}
-      uploadTarget={uploadTarget}
-      targetCanvasW={targetCanvasW}
-      targetCanvasH={targetCanvasH}
-      hasTransparency={hasTransparency}
-      practicalPrintDpi={practicalPrintDpi}
-      autoFixApplied={autoFixApplied}
-      downloadMessage={downloadMessage}
-      displayScore={displayScore ?? 0}
-      scanStatus={riskLabel}
-    />
-  );
-
   const fixedDownloaded = downloadMessage.includes('Download ready');
   const scanCompleted = Boolean(img) && checks.length > 0;
   const autoFixNeeded = checks.some(
@@ -727,10 +702,7 @@ export default function ScanResultsPanel({
                 </button>
                 <button
                   type="button"
-                  onClick={() => {
-                    setToolsTab('batch');
-                    setBatchSubTab('check');
-                  }}
+                  onClick={() => setToolsTab('batch')}
                   style={{
                     ...toolsTabButtonStyle(toolsTab === 'batch'),
                     whiteSpace: 'nowrap',
@@ -759,45 +731,20 @@ export default function ScanResultsPanel({
               </button>
 
               {toolsTab === 'batch' ? (
-                <div style={{ display: 'grid', gap: 8, minWidth: 0 }}>
-                  <BatchFileQueue items={batchQueue} onItemsChange={setBatchQueue} />
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, minWidth: 0, maxWidth: '100%' }}>
-                    <button
-                      type="button"
-                      onClick={() => setBatchSubTab('check')}
-                      style={{
-                        ...toolsTabButtonStyle(batchSubTab === 'check'),
-                        flex: '1 1 0',
-                        minWidth: 0,
-                      }}
-                    >
-                      Batch Check
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setBatchSubTab('export')}
-                      style={{
-                        ...toolsTabButtonStyle(batchSubTab === 'export'),
-                        flex: '1 1 0',
-                        minWidth: 0,
-                      }}
-                    >
-                      Batch Export
-                    </button>
-                  </div>
-                  {batchSubTab === 'check' && onLoadFileFromBatch ? (
-                    <BatchPODChecker
-                      queueItems={batchQueue}
-                      onOpenInChecker={onLoadFileFromBatch}
-                    />
-                  ) : null}
-                  {batchSubTab === 'export' && onDownloadBatchExportZip ? (
-                    <BatchExportQueue
-                      queueItems={batchQueue}
-                      onDownloadBatchZip={onDownloadBatchExportZip}
-                    />
-                  ) : null}
-                  {uploadNotesPanel}
+                <div
+                  style={{
+                    padding: '8px 10px',
+                    borderRadius: 10,
+                    background: 'rgba(37, 99, 235, 0.12)',
+                    border: '1px solid rgba(147, 197, 253, 0.28)',
+                    color: '#93c5fd',
+                    fontSize: 11,
+                    fontWeight: 600,
+                    lineHeight: 1.45,
+                  }}
+                >
+                  <div style={{ fontWeight: 800, marginBottom: 4 }}>Batch Check</div>
+                  Check many designs at once.
                 </div>
               ) : null}
               {toolsTab === 'converter' ? (

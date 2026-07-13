@@ -13,7 +13,7 @@ type UploadTarget =
   | 'custom'
   | 'presets';
 
-type PODUploadNotesProps = {
+export type PODUploadNotesProps = {
   file: File | null;
   img: HTMLImageElement | null;
   imgW: number;

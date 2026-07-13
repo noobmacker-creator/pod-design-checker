@@ -96,7 +96,7 @@ type BatchNeedsReviewModalProps = {
   onClose: () => void;
 };
 
-function BatchNeedsReviewModal({ items, startIndex, onClose }: BatchNeedsReviewModalProps) {
+export function BatchNeedsReviewModal({ items, startIndex, onClose }: BatchNeedsReviewModalProps) {
   const [index, setIndex] = useState(startIndex);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const previewUrlRef = useRef<string | null>(null);
@@ -387,7 +387,7 @@ function StatusBadge({ status }: { status: BatchScanStatus }) {
   );
 }
 
-export default function BatchFileQueue({ items, onItemsChange }: BatchFileQueueProps) {
+export function useBatchQueueController(items: BatchQueueItem[], onItemsChange: (items: BatchQueueItem[]) => void) {
   const filesInputRef = useRef<HTMLInputElement>(null);
   const folderInputRef = useRef<HTMLInputElement>(null);
   const cancelScanRef = useRef(false);
@@ -690,6 +690,74 @@ export default function BatchFileQueue({ items, onItemsChange }: BatchFileQueueP
       setMessage('Auto Fix cancelled. Completed fixes were kept.');
     }
   }
+
+  const scanningItem = items.find((item) => item.status === 'scanning');
+
+  return {
+    filesInputRef,
+    folderInputRef,
+    message,
+    isScanning,
+    isFixing,
+    scanProgress,
+    fixProgress,
+    fixSummary,
+    reviewOpen,
+    setReviewOpen,
+    reviewStartIndex,
+    needsReviewItems,
+    needsReviewCount,
+    safeAutoFixCount,
+    totalSize,
+    scannedCount,
+    hasScanResults,
+    scanningItem,
+    openReviewAt,
+    openReviewAll,
+    handleFilesSelected,
+    applyIntake,
+    removeItem,
+    clearQueue,
+    handleScanBatch,
+    handleCancelScan,
+    handleAutoFixSafeFiles,
+    handleCancelFix,
+    countReady: countByStatus(items, 'ready'),
+    countNeedReview: countByStatus(items, 'needs-review') + countByStatus(items, 'safe-auto-fix'),
+    countFailed: countByStatus(items, 'failed'),
+  };
+}
+
+export default function BatchFileQueue({ items, onItemsChange }: BatchFileQueueProps) {
+  const {
+    filesInputRef,
+    folderInputRef,
+    message,
+    isScanning,
+    isFixing,
+    scanProgress,
+    fixProgress,
+    fixSummary,
+    reviewOpen,
+    setReviewOpen,
+    reviewStartIndex,
+    needsReviewItems,
+    needsReviewCount,
+    safeAutoFixCount,
+    totalSize,
+    scannedCount,
+    hasScanResults,
+    openReviewAt,
+    openReviewAll,
+    handleFilesSelected,
+    applyIntake,
+    removeItem,
+    clearQueue,
+    handleScanBatch,
+    handleCancelScan,
+    handleAutoFixSafeFiles,
+    handleCancelFix,
+  } = useBatchQueueController(items, onItemsChange);
 
   return (
     <div
