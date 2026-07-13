@@ -8,7 +8,7 @@ import {
   BatchNeedsReviewModal,
   useBatchQueueController,
 } from './BatchFileQueue';
-import BatchExportQueue from './BatchExportQueue';
+import BatchDownloadExports from './BatchDownloadExports';
 import PODUploadNotes from './PODUploadNotes';
 import type { PODUploadNotesProps } from './PODUploadNotes';
 
@@ -18,11 +18,6 @@ type BatchWorkspaceProps = {
   items: BatchQueueItem[];
   onItemsChange: (items: BatchQueueItem[]) => void;
   onOpenInChecker: (file: File) => void;
-  onDownloadBatchZip: (
-    files: File[],
-    sizes: { label: string; width: number; height: number; folderSlug: string }[],
-    onProgress: (message: string) => void,
-  ) => Promise<void>;
   uploadNotesProps: PODUploadNotesProps;
 };
 
@@ -93,7 +88,6 @@ export default function BatchWorkspace({
   items,
   onItemsChange,
   onOpenInChecker,
-  onDownloadBatchZip,
   uploadNotesProps,
 }: BatchWorkspaceProps) {
   const [showAllFiles, setShowAllFiles] = useState(false);
@@ -358,7 +352,7 @@ export default function BatchWorkspace({
               onClick={() => setShowExport(true)}
               style={secondaryButtonStyle}
             >
-              Download Ready Files
+              Download Exports
             </button>
             {safeAutoFixCount > 0 ? (
               <button
@@ -513,7 +507,7 @@ export default function BatchWorkspace({
       {showExport && hasScanResults ? (
         <div style={workspaceCardStyle}>
           <div style={{ fontSize: 16, fontWeight: 900, color: '#f8fafc' }}>DOWNLOAD EXPORTS</div>
-          <BatchExportQueue queueItems={items} onDownloadBatchZip={onDownloadBatchZip} />
+          <BatchDownloadExports queueItems={items} />
         </div>
       ) : null}
 
