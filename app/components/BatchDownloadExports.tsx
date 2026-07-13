@@ -8,6 +8,8 @@ import {
   computeBatchProductOutputCount,
   getEligibleBatchExportItems,
   getPresetsForQuickExportPack,
+  makeCustomSizePreset,
+  parseCustomExportSize,
   triggerZipDownload,
 } from '../lib/batchProductExport';
 import {
@@ -66,6 +68,12 @@ export default function BatchDownloadExports({ queueItems }: BatchDownloadExport
   const [selectedPackId, setSelectedPackId] = useState<QuickExportPackId | null>(null);
   const [selectedPresetIds, setSelectedPresetIds] = useState<Set<string>>(() => new Set());
   const [productSearch, setProductSearch] = useState('');
+  const [customWidth, setCustomWidth] = useState('');
+  const [customHeight, setCustomHeight] = useState('');
+  const [customSizeError, setCustomSizeError] = useState('');
+  const [activeCustomSize, setActiveCustomSize] = useState<{ width: number; height: number } | null>(
+    null,
+  );
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const [progressMessage, setProgressMessage] = useState('');
@@ -90,10 +98,17 @@ export default function BatchDownloadExports({ queueItems }: BatchDownloadExport
   const activePresets = useMemo((): ProductConverterPreset[] => {
     if (exportChoice === 'quick-pack') return selectedPackPresets;
     if (exportChoice === 'choose-products') {
-      return allPresets.filter((preset) => selectedPresetIds.has(preset.id));
+      const presets = allPresets.filter((preset) => selectedPresetIds.has(preset.id));
+      if (activeCustomSize) {
+        return [
+          ...presets,
+          makeCustomSizePreset(activeCustomSize.width, activeCustomSize.height),
+        ];
+      }
+      return presets;
     }
     return [];
-  }, [exportChoice, selectedPackPresets, allPresets, selectedPresetIds]);
+  }, [exportChoice, selectedPackPresets, allPresets, selectedPresetIds, activeCustomSize]);
 
   const designCount = eligibleItems.length;
   const productCount = exportChoice === 'ready' ? 1 : activePresets.length;
@@ -141,6 +156,23 @@ export default function BatchDownloadExports({ queueItems }: BatchDownloadExport
 
   function handleClearAllProducts() {
     setSelectedPresetIds(new Set());
+    setMessage('');
+  }
+
+  function handleUseCustomSize() {
+    const parsed = parseCustomExportSize(customWidth, customHeight);
+    if (!parsed.valid) {
+      setCustomSizeError(parsed.error);
+      return;
+    }
+    setActiveCustomSize({ width: parsed.width, height: parsed.height });
+    setCustomSizeError('');
+    setMessage('');
+  }
+
+  function handleRemoveCustomSize() {
+    setActiveCustomSize(null);
+    setCustomSizeError('');
     setMessage('');
   }
 
@@ -261,6 +293,133 @@ export default function BatchDownloadExports({ queueItems }: BatchDownloadExport
     );
   }
 
+  function renderCustomSizeSection() {
+    return (
+      <div style={{ display: 'grid', gap: 8 }}>
+        <details
+          style={{
+            border: '1px solid rgba(148, 163, 184, 0.22)',
+            borderRadius: 10,
+            padding: '8px 10px',
+            background: 'rgba(15, 23, 42, 0.45)',
+          }}
+        >
+          <summary
+            style={{
+              cursor: 'pointer',
+              fontSize: 12,
+              fontWeight: 800,
+              color: '#cbd5e1',
+              listStyle: 'none',
+            }}
+          >
+            ▸ Add a Custom Size
+          </summary>
+          <div style={{ display: 'grid', gap: 8, marginTop: 8 }}>
+            <div style={{ fontSize: 11, fontWeight: 900, color: '#93c5fd', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              Custom Batch Size
+            </div>
+            <div style={{ display: 'grid', gap: 6 }}>
+              <label style={{ display: 'grid', gap: 4, fontSize: 12, color: '#e2e8f0' }}>
+                Width
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={customWidth}
+                    onChange={(e) => {
+                      setCustomWidth(e.target.value);
+                      setCustomSizeError('');
+                    }}
+                    disabled={busy}
+                    placeholder="4200"
+                    style={{
+                      flex: 1,
+                      padding: '7px 10px',
+                      borderRadius: 8,
+                      border: '1px solid rgba(148, 163, 184, 0.35)',
+                      background: 'rgba(15, 23, 42, 0.85)',
+                      color: '#e2e8f0',
+                      fontSize: 12,
+                    }}
+                  />
+                  <span style={{ fontSize: 11, color: '#94a3b8' }}>px</span>
+                </div>
+              </label>
+              <label style={{ display: 'grid', gap: 4, fontSize: 12, color: '#e2e8f0' }}>
+                Height
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={customHeight}
+                    onChange={(e) => {
+                      setCustomHeight(e.target.value);
+                      setCustomSizeError('');
+                    }}
+                    disabled={busy}
+                    placeholder="4800"
+                    style={{
+                      flex: 1,
+                      padding: '7px 10px',
+                      borderRadius: 8,
+                      border: '1px solid rgba(148, 163, 184, 0.35)',
+                      background: 'rgba(15, 23, 42, 0.85)',
+                      color: '#e2e8f0',
+                      fontSize: 12,
+                    }}
+                  />
+                  <span style={{ fontSize: 11, color: '#94a3b8' }}>px</span>
+                </div>
+              </label>
+            </div>
+            <div style={{ fontSize: 11, color: '#94a3b8', lineHeight: 1.4 }}>
+              Apply this size to all ready designs.
+            </div>
+            {customSizeError ? (
+              <div style={{ fontSize: 12, color: '#fbbf24', lineHeight: 1.4 }}>{customSizeError}</div>
+            ) : null}
+            <button
+              type="button"
+              onClick={handleUseCustomSize}
+              disabled={busy}
+              style={secondaryButtonStyle}
+            >
+              Use Custom Size
+            </button>
+          </div>
+        </details>
+
+        {activeCustomSize ? (
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              alignItems: 'center',
+              gap: 8,
+              padding: '8px 10px',
+              borderRadius: 10,
+              background: 'rgba(37, 99, 235, 0.10)',
+              border: '1px solid rgba(147, 197, 253, 0.25)',
+            }}
+          >
+            <span style={{ fontSize: 12, fontWeight: 800, color: '#e2e8f0' }}>
+              Custom Size — {activeCustomSize.width} × {activeCustomSize.height} px
+            </span>
+            <button
+              type="button"
+              onClick={handleRemoveCustomSize}
+              disabled={busy}
+              style={{ ...secondaryButtonStyle, marginLeft: 'auto' }}
+            >
+              Remove
+            </button>
+          </div>
+        ) : null}
+      </div>
+    );
+  }
+
   function renderPresetChecklist() {
     return (
       <div style={{ display: 'grid', gap: 8 }}>
@@ -354,10 +513,6 @@ export default function BatchDownloadExports({ queueItems }: BatchDownloadExport
         boxSizing: 'border-box',
       }}
     >
-      <div style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.45 }}>
-        Create correctly sized PNG files for every ready design.
-      </div>
-
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
         <button
           type="button"
@@ -395,11 +550,7 @@ export default function BatchDownloadExports({ queueItems }: BatchDownloadExport
         <div style={{ fontSize: 12, color: '#fbbf24', lineHeight: 1.4 }}>
           No ready designs to export. Only Ready designs are included — Need Review and Failed designs are skipped.
         </div>
-      ) : (
-        <div style={{ fontSize: 11, color: '#93c5fd', lineHeight: 1.4, fontWeight: 700 }}>
-          {designCount} ready design{designCount === 1 ? '' : 's'} available for export
-        </div>
-      )}
+      ) : null}
 
       {exportChoice === 'ready' ? (
         <div style={{ display: 'grid', gap: 8 }}>
@@ -473,7 +624,12 @@ export default function BatchDownloadExports({ queueItems }: BatchDownloadExport
         </div>
       ) : null}
 
-      {exportChoice === 'choose-products' ? renderPresetChecklist() : null}
+      {exportChoice === 'choose-products' ? (
+        <>
+          {renderPresetChecklist()}
+          {designCount > 0 ? renderCustomSizeSection() : null}
+        </>
+      ) : null}
 
       {exportChoice !== 'ready' && designCount > 0 && activePresets.length > 0 ? (
         <div
@@ -487,8 +643,10 @@ export default function BatchDownloadExports({ queueItems }: BatchDownloadExport
           }}
         >
           <div style={{ fontSize: 13, fontWeight: 800, color: '#e2e8f0' }}>
-            {designCount} ready design{designCount === 1 ? '' : 's'} × {activePresets.length} product size
-            {activePresets.length === 1 ? '' : 's'}
+            {designCount} ready design{designCount === 1 ? '' : 's'}
+          </div>
+          <div style={{ fontSize: 13, fontWeight: 800, color: '#e2e8f0' }}>
+            × {activePresets.length} export size{activePresets.length === 1 ? '' : 's'}
           </div>
           <div style={{ fontSize: 14, fontWeight: 900, color: '#bfdbfe' }}>
             = {totalOutputCount} PNG file{totalOutputCount === 1 ? '' : 's'}

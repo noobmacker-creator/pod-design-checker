@@ -5,9 +5,13 @@ const jiti = createJiti(__filename);
 
 const {
   computeBatchProductOutputCount,
+  computeBatchExportSizeCount,
   getEligibleBatchExportItems,
   getPresetsForQuickExportPack,
+  getCustomSizeFilename,
+  makeCustomSizePreset,
   makeUniqueDesignFolderNames,
+  parseCustomExportSize,
 } = jiti('../app/lib/batchProductExport.ts');
 
 const {
@@ -105,5 +109,50 @@ const teepublicPreset = ALL_CONVERTER_PRESETS.find((p) => p.id === 'teepublic-al
 assert.ok(teepublicPreset);
 assert.equal(teepublicPreset.width, 5000);
 assert.equal(teepublicPreset.height, 5500);
+
+// valid custom width and height
+const validCustom = parseCustomExportSize('4200', '4800');
+assert.equal(validCustom.valid, true);
+if (validCustom.valid) {
+  assert.equal(validCustom.width, 4200);
+  assert.equal(validCustom.height, 4800);
+}
+
+// zero or negative values rejected
+assert.equal(parseCustomExportSize('0', '4800').valid, false);
+assert.equal(parseCustomExportSize('4200', '-100').valid, false);
+
+// decimal values rejected
+assert.equal(parseCustomExportSize('4200.5', '4800').valid, false);
+assert.equal(parseCustomExportSize('4200', '4800.9').valid, false);
+
+// custom size counts as one export size
+assert.equal(computeBatchExportSizeCount(3, true), 4);
+assert.equal(computeBatchExportSizeCount(0, true), 1);
+assert.equal(computeBatchExportSizeCount(3, false), 3);
+
+// custom-only Batch export output count
+assert.equal(computeBatchProductOutputCount(13, 1), 13);
+
+// presets plus custom-size export output count
+assert.equal(computeBatchProductOutputCount(13, 4), 52);
+
+// correct custom filename
+assert.equal(getCustomSizeFilename(4200, 4800), 'custom-4200x4800.png');
+assert.equal(getCustomSizeFilename(5000, 6000), 'custom-5000x6000.png');
+
+// custom preset uses correct dimensions and filename
+const customPreset = makeCustomSizePreset(4200, 4800);
+assert.equal(customPreset.width, 4200);
+assert.equal(customPreset.height, 4800);
+assert.equal(customPreset.filename, 'custom-4200x4800.png');
+assert.match(customPreset.label, /Custom Size/);
+
+// removing custom size updates the output total (logic-only)
+assert.equal(computeBatchProductOutputCount(13, computeBatchExportSizeCount(3, false)), 39);
+assert.equal(computeBatchProductOutputCount(13, computeBatchExportSizeCount(3, true)), 52);
+
+// zero eligible designs cannot export a custom size (UI guard — eligible list empty)
+assert.equal(getEligibleBatchExportItems([]).length, 0);
 
 console.log('batch-product-export.test.cjs: all tests passed');

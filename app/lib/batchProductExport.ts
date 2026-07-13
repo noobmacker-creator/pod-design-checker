@@ -10,6 +10,61 @@ import {
   type QuickExportPackId,
 } from './productConverterPresets';
 
+export const CUSTOM_EXPORT_MIN = 500;
+export const CUSTOM_EXPORT_MAX = 12000;
+
+export function parseCustomExportSize(
+  widthStr: string,
+  heightStr: string,
+): { valid: true; width: number; height: number } | { valid: false; error: string } {
+  const trimmedWidth = widthStr.trim();
+  const trimmedHeight = heightStr.trim();
+
+  if (!/^\d+$/.test(trimmedWidth) || !/^\d+$/.test(trimmedHeight)) {
+    return {
+      valid: false,
+      error: 'Enter a width and height between 500 and 12000 px.',
+    };
+  }
+
+  const width = Number.parseInt(trimmedWidth, 10);
+  const height = Number.parseInt(trimmedHeight, 10);
+
+  if (
+    width < CUSTOM_EXPORT_MIN ||
+    width > CUSTOM_EXPORT_MAX ||
+    height < CUSTOM_EXPORT_MIN ||
+    height > CUSTOM_EXPORT_MAX
+  ) {
+    return {
+      valid: false,
+      error: 'Enter a width and height between 500 and 12000 px.',
+    };
+  }
+
+  return { valid: true, width, height };
+}
+
+export function getCustomSizeFilename(width: number, height: number): string {
+  return `custom-${width}x${height}.png`;
+}
+
+export function makeCustomSizePreset(width: number, height: number): ProductConverterPreset {
+  return {
+    id: `custom-${width}x${height}`,
+    platform: 'custom',
+    category: 'Custom',
+    label: `Custom Size — ${width} × ${height}`,
+    width,
+    height,
+    filename: getCustomSizeFilename(width, height),
+  };
+}
+
+export function computeBatchExportSizeCount(presetCount: number, hasCustomSize: boolean): number {
+  return presetCount + (hasCustomSize ? 1 : 0);
+}
+
 export type BatchProductExportProgress = {
   current: number;
   total: number;

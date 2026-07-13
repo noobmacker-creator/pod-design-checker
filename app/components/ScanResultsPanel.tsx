@@ -765,7 +765,7 @@ export default function ScanResultsPanel({
               ) : null}
             </div>
 
-            {toolsTab !== 'converter' ? (
+            {toolsTab === 'export' ? (
             <div
             style={{
               display: 'grid',

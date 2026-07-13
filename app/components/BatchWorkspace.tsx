@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import type { BatchQueueItem } from '../lib/batchQueueUtils';
 import { formatBatchFileSize } from '../lib/batchQueueUtils';
 import { getBatchStatusColors, getBatchStatusLabel } from '../lib/batchScanner';
@@ -8,7 +8,6 @@ import {
   BatchNeedsReviewModal,
   useBatchQueueController,
 } from './BatchFileQueue';
-import BatchDownloadExports from './BatchDownloadExports';
 import PODUploadNotes from './PODUploadNotes';
 import type { PODUploadNotesProps } from './PODUploadNotes';
 
@@ -19,6 +18,8 @@ type BatchWorkspaceProps = {
   onItemsChange: (items: BatchQueueItem[]) => void;
   onOpenInChecker: (file: File) => void;
   uploadNotesProps: PODUploadNotesProps;
+  onOpenDownloads?: () => void;
+  reviewRequestToken?: number;
 };
 
 const primaryButtonStyle: React.CSSProperties = {
@@ -89,9 +90,10 @@ export default function BatchWorkspace({
   onItemsChange,
   onOpenInChecker,
   uploadNotesProps,
+  onOpenDownloads,
+  reviewRequestToken = 0,
 }: BatchWorkspaceProps) {
   const [showAllFiles, setShowAllFiles] = useState(false);
-  const [showExport, setShowExport] = useState(false);
   const [resultFilter, setResultFilter] = useState<ResultFilter>('all');
   const [dragActive, setDragActive] = useState(false);
 
@@ -124,6 +126,22 @@ export default function BatchWorkspace({
     countNeedReview,
     countFailed,
   } = useBatchQueueController(items, onItemsChange);
+
+  useEffect(() => {
+    if (reviewRequestToken <= 0 || needsReviewCount <= 0) return;
+    openReviewAll();
+  }, [reviewRequestToken, needsReviewCount]);
+
+  const [isNarrowLayout, setIsNarrowLayout] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const media = window.matchMedia('(max-width: 900px)');
+    const updateLayout = () => setIsNarrowLayout(media.matches);
+    updateLayout();
+    media.addEventListener('change', updateLayout);
+    return () => media.removeEventListener('change', updateLayout);
+  }, []);
 
   const visibleFileItems = showAllFiles ? items : items.slice(0, INITIAL_FILE_PREVIEW);
   const hasMoreFiles = items.length > INITIAL_FILE_PREVIEW;
@@ -347,13 +365,15 @@ export default function BatchWorkspace({
                 Review Results
               </button>
             ) : null}
-            <button
-              type="button"
-              onClick={() => setShowExport(true)}
-              style={secondaryButtonStyle}
-            >
-              Download Exports
-            </button>
+            {isNarrowLayout && countReady > 0 ? (
+              <button
+                type="button"
+                onClick={() => onOpenDownloads?.()}
+                style={secondaryButtonStyle}
+              >
+                Go to Downloads
+              </button>
+            ) : null}
             {safeAutoFixCount > 0 ? (
               <button
                 type="button"
@@ -500,14 +520,6 @@ export default function BatchWorkspace({
               Scan {items.length} Design{items.length === 1 ? '' : 's'}
             </button>
           </div>
-        </div>
-      ) : null}
-
-      {/* EXPORT FLOW */}
-      {showExport && hasScanResults ? (
-        <div style={workspaceCardStyle}>
-          <div style={{ fontSize: 16, fontWeight: 900, color: '#f8fafc' }}>DOWNLOAD EXPORTS</div>
-          <BatchDownloadExports queueItems={items} />
         </div>
       ) : null}
 
