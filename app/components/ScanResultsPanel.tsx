@@ -64,11 +64,11 @@ type ScanResultsPanelProps = {
     | 'gelato'
     | 'custom'
     | 'presets';
-  toolsTab?: 'export' | 'batch' | 'converter' | 'colorcheck' | 'printsize';
-  onToolsTabChange?: (tab: 'export' | 'batch' | 'converter' | 'colorcheck' | 'printsize') => void;
+  toolsTab?: 'export' | 'batch' | 'converter' | 'colorcheck' | 'printsize' | 'fileinspector';
+  onToolsTabChange?: (tab: 'export' | 'batch' | 'converter' | 'colorcheck' | 'printsize' | 'fileinspector') => void;
 };
 
-type ToolsTab = 'export' | 'batch' | 'converter' | 'colorcheck' | 'printsize';
+type ToolsTab = 'export' | 'batch' | 'converter' | 'colorcheck' | 'printsize' | 'fileinspector';
 
 function getPostAutoFixDownloadText(): string {
   return 'Download Fixed PNG';
@@ -737,11 +737,20 @@ export default function ScanResultsPanel({
                   onClick={() => setToolsTab('printsize')}
                   style={{
                     ...toolsTabButtonStyle(toolsTab === 'printsize'),
-                    gridColumn: '1 / -1',
                     whiteSpace: 'nowrap',
                   }}
                 >
                   Print Size
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setToolsTab('fileinspector')}
+                  style={{
+                    ...toolsTabButtonStyle(toolsTab === 'fileinspector'),
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  File Info
                 </button>
               </div>
               <button
@@ -817,6 +826,23 @@ export default function ScanResultsPanel({
                 >
                   <div style={{ fontWeight: 800, marginBottom: 4 }}>Print Size</div>
                   See how large your design can print at different PPI values.
+                </div>
+              ) : null}
+              {toolsTab === 'fileinspector' ? (
+                <div
+                  style={{
+                    padding: '8px 10px',
+                    borderRadius: 10,
+                    background: 'rgba(37, 99, 235, 0.12)',
+                    border: '1px solid rgba(147, 197, 253, 0.28)',
+                    color: '#93c5fd',
+                    fontSize: 11,
+                    fontWeight: 600,
+                    lineHeight: 1.45,
+                  }}
+                >
+                  <div style={{ fontWeight: 800, marginBottom: 4 }}>File Inspector</div>
+                  See file type, size, transparency and image details.
                 </div>
               ) : null}
             </div>
