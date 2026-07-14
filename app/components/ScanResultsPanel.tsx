@@ -64,9 +64,11 @@ type ScanResultsPanelProps = {
     | 'gelato'
     | 'custom'
     | 'presets';
-  toolsTab?: 'export' | 'batch' | 'converter' | 'colorcheck';
-  onToolsTabChange?: (tab: 'export' | 'batch' | 'converter' | 'colorcheck') => void;
+  toolsTab?: 'export' | 'batch' | 'converter' | 'colorcheck' | 'printsize';
+  onToolsTabChange?: (tab: 'export' | 'batch' | 'converter' | 'colorcheck' | 'printsize') => void;
 };
+
+type ToolsTab = 'export' | 'batch' | 'converter' | 'colorcheck' | 'printsize';
 
 function getPostAutoFixDownloadText(): string {
   return 'Download Fixed PNG';
@@ -223,9 +225,9 @@ export default function ScanResultsPanel({
   toolsTab: toolsTabProp = 'export',
   onToolsTabChange,
 }: ScanResultsPanelProps) {
-  const [toolsTabInternal, setToolsTabInternal] = useState<'export' | 'batch' | 'converter' | 'colorcheck'>('export');
+  const [toolsTabInternal, setToolsTabInternal] = useState<ToolsTab>('export');
   const toolsTab = onToolsTabChange ? toolsTabProp : toolsTabInternal;
-  const setToolsTab = (tab: 'export' | 'batch' | 'converter' | 'colorcheck') => {
+  const setToolsTab = (tab: ToolsTab) => {
     if (onToolsTabChange) {
       onToolsTabChange(tab);
     } else {
@@ -730,6 +732,17 @@ export default function ScanResultsPanel({
                 >
                   Color Check
                 </button>
+                <button
+                  type="button"
+                  onClick={() => setToolsTab('printsize')}
+                  style={{
+                    ...toolsTabButtonStyle(toolsTab === 'printsize'),
+                    gridColumn: '1 / -1',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  Print Size
+                </button>
               </div>
               <button
                 type="button"
@@ -787,6 +800,23 @@ export default function ScanResultsPanel({
                 >
                   <div style={{ fontWeight: 800, marginBottom: 4 }}>Color Check</div>
                   Preview one design on different background colours.
+                </div>
+              ) : null}
+              {toolsTab === 'printsize' ? (
+                <div
+                  style={{
+                    padding: '8px 10px',
+                    borderRadius: 10,
+                    background: 'rgba(37, 99, 235, 0.12)',
+                    border: '1px solid rgba(147, 197, 253, 0.28)',
+                    color: '#93c5fd',
+                    fontSize: 11,
+                    fontWeight: 600,
+                    lineHeight: 1.45,
+                  }}
+                >
+                  <div style={{ fontWeight: 800, marginBottom: 4 }}>Print Size</div>
+                  See how large your design can print at different PPI values.
                 </div>
               ) : null}
             </div>
