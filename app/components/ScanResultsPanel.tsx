@@ -64,11 +64,11 @@ type ScanResultsPanelProps = {
     | 'gelato'
     | 'custom'
     | 'presets';
-  toolsTab?: 'export' | 'batch' | 'converter' | 'colorcheck' | 'printsize' | 'fileinspector' | 'filenamecleaner';
-  onToolsTabChange?: (tab: 'export' | 'batch' | 'converter' | 'colorcheck' | 'printsize' | 'fileinspector' | 'filenamecleaner') => void;
+  toolsTab?: 'export' | 'batch' | 'converter' | 'colorcheck' | 'printsize' | 'fileinspector' | 'filenamecleaner' | 'listingcheck';
+  onToolsTabChange?: (tab: 'export' | 'batch' | 'converter' | 'colorcheck' | 'printsize' | 'fileinspector' | 'filenamecleaner' | 'listingcheck') => void;
 };
 
-type ToolsTab = 'export' | 'batch' | 'converter' | 'colorcheck' | 'printsize' | 'fileinspector' | 'filenamecleaner';
+type ToolsTab = 'export' | 'batch' | 'converter' | 'colorcheck' | 'printsize' | 'fileinspector' | 'filenamecleaner' | 'listingcheck';
 
 function getPostAutoFixDownloadText(): string {
   return 'Download Fixed PNG';
@@ -763,6 +763,17 @@ export default function ScanResultsPanel({
                 >
                   Filename Cleaner
                 </button>
+                <button
+                  type="button"
+                  onClick={() => setToolsTab('listingcheck')}
+                  style={{
+                    ...toolsTabButtonStyle(toolsTab === 'listingcheck'),
+                    gridColumn: '1 / -1',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  Listing Check
+                </button>
               </div>
               <button
                 type="button"
@@ -871,6 +882,23 @@ export default function ScanResultsPanel({
                 >
                   <div style={{ fontWeight: 800, marginBottom: 4 }}>Filename Cleaner</div>
                   Clean messy POD filenames before uploading.
+                </div>
+              ) : null}
+              {toolsTab === 'listingcheck' ? (
+                <div
+                  style={{
+                    padding: '8px 10px',
+                    borderRadius: 10,
+                    background: 'rgba(37, 99, 235, 0.12)',
+                    border: '1px solid rgba(147, 197, 253, 0.28)',
+                    color: '#93c5fd',
+                    fontSize: 11,
+                    fontWeight: 600,
+                    lineHeight: 1.45,
+                  }}
+                >
+                  <div style={{ fontWeight: 800, marginBottom: 4 }}>Listing Check</div>
+                  Check listing images, mockups and thumbnail crops before upload.
                 </div>
               ) : null}
             </div>
