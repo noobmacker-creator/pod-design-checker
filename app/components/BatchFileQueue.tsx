@@ -798,20 +798,13 @@ export default function BatchFileQueue({ items, onItemsChange }: BatchFileQueueP
         style={{ display: 'none' }}
       />
 
+      <div style={{ fontSize: 12, color: '#93c5fd', lineHeight: 1.45 }}>
+        Fastest option: put your designs in one folder, then use Add Folder of Designs.
+      </div>
+      <div style={{ fontSize: 11, color: '#94a3b8', lineHeight: 1.4 }}>
+        Add Individual Files is for one file or a few selected files.
+      </div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'stretch' }}>
-        <button
-          type="button"
-          onClick={() => filesInputRef.current?.click()}
-          style={{
-            ...controlButtonStyle,
-            flex: '0 0 auto',
-            minWidth: 'auto',
-            whiteSpace: 'nowrap',
-          }}
-          aria-label="Add multiple image files to the batch queue"
-        >
-          Add Files
-        </button>
         <button
           type="button"
           onClick={() => folderInputRef.current?.click()}
@@ -821,9 +814,22 @@ export default function BatchFileQueue({ items, onItemsChange }: BatchFileQueueP
             minWidth: 'auto',
             whiteSpace: 'nowrap',
           }}
-          aria-label="Add a folder of image files to the batch queue"
+          aria-label="Add a folder of design files to the batch queue"
         >
-          Add Folder
+          Add Folder of Designs
+        </button>
+        <button
+          type="button"
+          onClick={() => filesInputRef.current?.click()}
+          style={{
+            ...controlButtonStyle,
+            flex: '0 0 auto',
+            minWidth: 'auto',
+            whiteSpace: 'nowrap',
+          }}
+          aria-label="Add individual image files to the batch queue"
+        >
+          Add Individual Files
         </button>
         <button
           type="button"

@@ -33,6 +33,18 @@ const primaryButtonStyle: React.CSSProperties = {
   cursor: 'pointer',
 };
 
+const multiFilePickerTipStyle: React.CSSProperties = {
+  fontSize: 12,
+  color: '#60a5fa',
+  lineHeight: 1.45,
+  maxWidth: 420,
+  padding: '8px 12px',
+  borderRadius: 999,
+  background: 'rgba(30, 64, 175, 0.28)',
+  border: '1px solid rgba(96, 165, 250, 0.5)',
+  boxShadow: '0 0 14px rgba(59, 130, 246, 0.28)',
+};
+
 const secondaryButtonStyle: React.CSSProperties = {
   padding: '8px 14px',
   borderRadius: 10,
@@ -253,18 +265,28 @@ export default function BatchWorkspace({
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center' }}>
               <button
                 type="button"
-                onClick={() => filesInputRef.current?.click()}
-                style={secondaryButtonStyle}
+                onClick={() => folderInputRef.current?.click()}
+                style={{ ...secondaryButtonStyle, whiteSpace: 'nowrap' }}
               >
-                Add Files
+                Add Folder of Designs
               </button>
               <button
                 type="button"
-                onClick={() => folderInputRef.current?.click()}
-                style={secondaryButtonStyle}
+                onClick={() => filesInputRef.current?.click()}
+                style={{ ...secondaryButtonStyle, whiteSpace: 'nowrap' }}
               >
-                Add Folder
+                Add Individual Files
               </button>
+            </div>
+            <div style={{ fontSize: 12, color: '#93c5fd', lineHeight: 1.5, maxWidth: 420 }}>
+              Fastest option: put your designs in one folder, then use Add Folder of Designs.
+            </div>
+            <div style={{ fontSize: 11, color: '#94a3b8', lineHeight: 1.45 }}>
+              Add Individual Files is for one file or a few selected files.
+            </div>
+            <div style={multiFilePickerTipStyle}>
+              <strong style={{ color: '#93c5fd', fontWeight: 800 }}>Tip:</strong> in the file window,
+              Ctrl-click on Windows or Cmd-click on Mac can select several files.
             </div>
             <div style={{ fontSize: 12, color: '#94a3b8', lineHeight: 1.5 }}>
               PNG, JPG and WEBP
@@ -499,11 +521,19 @@ export default function BatchWorkspace({
         <div style={{ ...workspaceCardStyle, padding: 12 }}>
           <div style={{ fontSize: 13, fontWeight: 800, color: '#93c5fd' }}>Add more designs</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            <button type="button" onClick={() => filesInputRef.current?.click()} style={secondaryButtonStyle}>
-              Add Files
+            <button
+              type="button"
+              onClick={() => folderInputRef.current?.click()}
+              style={{ ...secondaryButtonStyle, whiteSpace: 'nowrap' }}
+            >
+              Add Folder of Designs
             </button>
-            <button type="button" onClick={() => folderInputRef.current?.click()} style={secondaryButtonStyle}>
-              Add Folder
+            <button
+              type="button"
+              onClick={() => filesInputRef.current?.click()}
+              style={{ ...secondaryButtonStyle, whiteSpace: 'nowrap' }}
+            >
+              Add Individual Files
             </button>
             <button
               type="button"
