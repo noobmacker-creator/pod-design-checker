@@ -1,7 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import type { CheckItem } from '../lib/podCheckerTypes';
+import type { CheckItem, CheckStatus } from '../lib/podCheckerTypes';
+import type { PrintMethodCompatibilityResult, CompatibilityRating } from '../lib/printMethodCompatibility';
+import { compatibilityRatingLabel } from '../lib/printMethodCompatibility';
 import { statusColor, statusIcon } from '../lib/podCheckerUtils';
 import { podCheckerV4Notes } from '../content/podCheckerV4Notes';
 
@@ -26,6 +28,7 @@ type ScanResultsPanelProps = {
   img: HTMLImageElement | null;
   checks: CheckItem[];
   printScore: number;
+  printMethodCompatibility?: PrintMethodCompatibilityResult[] | null;
   hasTransparency: boolean | null;
   thinLinePercent: number;
   specks: number;
@@ -69,6 +72,12 @@ type ScanResultsPanelProps = {
 };
 
 type ToolsTab = 'export' | 'batch' | 'converter' | 'colorcheck' | 'printsize' | 'fileinspector' | 'filenamecleaner' | 'listingcheck';
+
+function compatibilityCheckStatus(rating: CompatibilityRating): CheckStatus {
+  if (rating === 'good') return 'pass';
+  if (rating === 'review') return 'warn';
+  return 'fail';
+}
 
 function getPostAutoFixDownloadText(): string {
   return 'Download Fixed PNG';
@@ -197,6 +206,7 @@ export default function ScanResultsPanel({
   img,
   checks,
   printScore,
+  printMethodCompatibility = null,
   hasTransparency,
   thinLinePercent,
   specks,
@@ -1186,6 +1196,78 @@ export default function ScanResultsPanel({
               </div>
             ) : null}
           </div>
+
+          {printMethodCompatibility && printMethodCompatibility.length > 0 ? (
+            <div
+              style={{
+                padding: '10px 11px',
+                borderRadius: 10,
+                background: 'rgba(15,23,42,0.78)',
+                border: '1px solid rgba(148,163,184,0.22)',
+                display: 'grid',
+                gap: 6,
+                minWidth: 0,
+                maxWidth: '100%',
+              }}
+            >
+              <div style={{ display: 'grid', gap: 2 }}>
+                <div style={{ fontWeight: 800, color: '#93c5fd', fontSize: 12 }}>
+                  Print Method Compatibility
+                </div>
+                <div style={{ color: '#94a3b8', fontSize: 11, lineHeight: 1.35 }}>
+                  Estimated from artwork properties
+                </div>
+              </div>
+              <div style={{ display: 'grid', gap: 6 }}>
+                {printMethodCompatibility.map((item) => {
+                  const checkStatus = compatibilityCheckStatus(item.rating);
+                  return (
+                    <div
+                      key={item.method}
+                      style={{
+                        padding: '7px 9px',
+                        borderRadius: 8,
+                        background: 'rgba(2,6,23,0.55)',
+                        border: `1px solid ${statusColor(checkStatus)}44`,
+                        minWidth: 0,
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'baseline',
+                          justifyContent: 'space-between',
+                          gap: 8,
+                          flexWrap: 'wrap',
+                          marginBottom: 3,
+                        }}
+                      >
+                        <span style={{ fontWeight: 800, color: '#e5e7eb', fontSize: 12 }}>
+                          {item.method}
+                        </span>
+                        <span
+                          style={{
+                            fontWeight: 800,
+                            color: statusColor(checkStatus),
+                            fontSize: 11,
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          {compatibilityRatingLabel(item.rating)}
+                        </span>
+                      </div>
+                      <div style={{ color: '#cbd5e1', fontSize: 11, lineHeight: 1.4 }}>
+                        {item.reason}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <div style={{ color: '#64748b', fontSize: 10, lineHeight: 1.4 }}>
+                Sublimation suitability also depends on the selected product and material.
+              </div>
+            </div>
+          ) : null}
 
           {showAutoFixButton ? (
             <button

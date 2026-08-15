@@ -21,6 +21,10 @@ import {
   runSingleScanVisibleSummary,
   runSingleScanVisibleSummaryFromFixedOutput,
 } from './lib/singleScanDisplay';
+import {
+  computePrintMethodCompatibility,
+  type PrintMethodCompatibilityResult,
+} from './lib/printMethodCompatibility';
 
 import DesignPreviewPanel, { type PreviewBackground } from './components/DesignPreviewPanel';
 
@@ -1049,6 +1053,9 @@ export default function Page() {
   const [oversizedArtworkCheck, setOversizedArtworkCheck] = useState<CheckItem | null>(null);
   const [solidBackgroundBoxCheck, setSolidBackgroundBoxCheck] = useState<CheckItem | null>(null);
   const [singleScanSummary, setSingleScanSummary] = useState<ReturnType<typeof runSingleScanVisibleSummary> | null>(null);
+  const [printMethodCompatibility, setPrintMethodCompatibility] = useState<
+    PrintMethodCompatibilityResult[] | null
+  >(null);
 
   const [originalBounds, setOriginalBounds] = useState<Bounds | null>(null);
   const [coverage, setCoverage] = useState(0);
@@ -1322,11 +1329,13 @@ export default function Page() {
     if (devTiming) timingStages['Bounds and coverage'] = performance.now() - stageStart;
 
     stageStart = devTiming ? performance.now() : 0;
-    setSpecks(detectStraySpecks(imageData));
+    const speckCount = detectStraySpecks(imageData);
+    setSpecks(speckCount);
     if (devTiming) timingStages['Speck detection'] = performance.now() - stageStart;
 
     stageStart = devTiming ? performance.now() : 0;
-    setThinLinePercent(estimateThinLines(imageData));
+    const thinLinePct = estimateThinLines(imageData);
+    setThinLinePercent(thinLinePct);
     if (devTiming) timingStages['Thin-line detection'] = performance.now() - stageStart;
 
     stageStart = devTiming ? performance.now() : 0;
@@ -1346,6 +1355,11 @@ export default function Page() {
     // White Background Risk: calculated directly from imageData so it never depends on
     // stale transparency state. Counts visible, near-white, and transparent pixels.
     stageStart = devTiming ? performance.now() : 0;
+    let whiteBackgroundItem: CheckItem = {
+      label: 'White Background Risk',
+      status: 'pass',
+      message: 'No obvious white background detected.',
+    };
     {
       const wbData = imageData.data;
       const totalPixels = wbData.length / 4;
@@ -1383,20 +1397,25 @@ export default function Page() {
         wbMessage = 'Possible white background detected. Check before uploading to dark shirts.';
       }
 
-      setWhiteBackgroundCheck({
+      whiteBackgroundItem = {
         label: 'White Background Risk',
         status: wbStatus,
         message: wbMessage,
-      });
+      };
+      setWhiteBackgroundCheck(whiteBackgroundItem);
     }
     if (devTiming) timingStages['White-background calculation'] = performance.now() - stageStart;
+
+    const semiTransparencyItem = getSemiTransparencyRiskCheck(imageData);
+    const solidBackgroundBoxItem = getSolidBackgroundBoxRiskCheck(imageData);
+    const compressionArtifactItem = getCompressionArtifactRiskCheck(imageData);
 
     stageStart = devTiming ? performance.now() : 0;
     setWhiteEdgeCheck(getWhiteEdgeHaloCheck(imageData));
     if (devTiming) timingStages['White-edge detection'] = performance.now() - stageStart;
 
     stageStart = devTiming ? performance.now() : 0;
-    setSemiTransparencyCheck(getSemiTransparencyRiskCheck(imageData));
+    setSemiTransparencyCheck(semiTransparencyItem);
     if (devTiming) timingStages['Semi-transparency detection'] = performance.now() - stageStart;
 
     stageStart = devTiming ? performance.now() : 0;
@@ -1412,7 +1431,7 @@ export default function Page() {
     if (devTiming) timingStages['Tiny-text detection'] = performance.now() - stageStart;
 
     stageStart = devTiming ? performance.now() : 0;
-    setCompressionArtifactCheck(getCompressionArtifactRiskCheck(imageData));
+    setCompressionArtifactCheck(compressionArtifactItem);
     if (devTiming) timingStages['Compression-artifact detection'] = performance.now() - stageStart;
 
     stageStart = devTiming ? performance.now() : 0;
@@ -1432,8 +1451,28 @@ export default function Page() {
     if (devTiming) timingStages['Oversized-artwork detection'] = performance.now() - stageStart;
 
     stageStart = devTiming ? performance.now() : 0;
-    setSolidBackgroundBoxCheck(getSolidBackgroundBoxRiskCheck(imageData));
+    setSolidBackgroundBoxCheck(solidBackgroundBoxItem);
     if (devTiming) timingStages['Solid-background-box detection'] = performance.now() - stageStart;
+
+    setPrintMethodCompatibility(
+      computePrintMethodCompatibility({
+        imageData,
+        file,
+        hasTransparency: transparentFound,
+        thinLinePercent: thinLinePct,
+        speckCount,
+        imgW: img.naturalWidth,
+        imgH: img.naturalHeight,
+        coveragePercent: res.coverage,
+        checks: [
+          whiteBackgroundItem,
+          semiTransparencyItem,
+          solidBackgroundBoxItem,
+          compressionArtifactItem,
+        ],
+      }),
+    );
+
     if (file) {
       setSingleScanSummary(
         runSingleScanVisibleSummary({
@@ -2046,6 +2085,7 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
 
     setIsScanning(true);
     setHasAutoFixApplied(false);
+    setPrintMethodCompatibility(null);
     setPreviewBackground('checker');
 
     if (fileUrl) URL.revokeObjectURL(fileUrl);
@@ -2168,6 +2208,8 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
 
     setTransform(nextTransform);
 
+    let fixedImageData: ImageData | null = null;
+
     const fixedSummary = runSingleScanVisibleSummaryFromFixedOutput({
       file,
       img,
@@ -2185,12 +2227,46 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
         const canvas = createExportCanvas(width, height, renderTransform);
         if (!canvas) return null;
         const ctx = canvas.getContext('2d', { willReadFrequently: true });
-        return ctx ? ctx.getImageData(0, 0, width, height) : null;
+        if (!ctx) return null;
+        fixedImageData = ctx.getImageData(0, 0, width, height);
+        return fixedImageData;
       },
     });
 
     if (fixedSummary) {
       setSingleScanSummary(fixedSummary);
+    }
+
+    if (fixedImageData) {
+      const fixedSpeckCount = detectStraySpecks(fixedImageData);
+      const fixedThinLinePct = estimateThinLines(fixedImageData);
+      const fixedCoverage = detectBoundsAndCoverage(fixedImageData, 10).coverage;
+      let fixedHasTransparency = false;
+      for (let i = 3; i < fixedImageData.data.length; i += 4) {
+        if (fixedImageData.data[i] < 255) {
+          fixedHasTransparency = true;
+          break;
+        }
+      }
+
+      setPrintMethodCompatibility(
+        computePrintMethodCompatibility({
+          imageData: fixedImageData,
+          file,
+          hasTransparency: fixedHasTransparency,
+          thinLinePercent: fixedThinLinePct,
+          speckCount: fixedSpeckCount,
+          imgW: targetCanvasW,
+          imgH: targetCanvasH,
+          coveragePercent: fixedCoverage,
+          designTooSmallStatus: 'pass',
+          checks: [
+            getSemiTransparencyRiskCheck(fixedImageData),
+            getSolidBackgroundBoxRiskCheck(fixedImageData),
+            getCompressionArtifactRiskCheck(fixedImageData),
+          ],
+        }),
+      );
     }
 
     setActionMessage('Auto Fix applied.');
@@ -2247,6 +2323,7 @@ const drawY = SHIRT_PRINT_Y + transform.offsetY * mapY + mockupOffsetY;
     setOversizedArtworkCheck(null);
     setSolidBackgroundBoxCheck(null);
     setSingleScanSummary(null);
+    setPrintMethodCompatibility(null);
 
     setHasAutoFixApplied(false);
     setIsScanning(false);
@@ -2753,6 +2830,7 @@ Generated by POD Design Checker V5.
   img={img}
   checks={checks}
   printScore={displayPrintScore}
+  printMethodCompatibility={printMethodCompatibility}
   hasTransparency={hasTransparency}
   thinLinePercent={thinLinePercent}
   specks={specks}
